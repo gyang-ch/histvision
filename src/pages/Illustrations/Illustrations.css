@@ -1,0 +1,514 @@
+.illus-page {
+  position: relative;
+}
+
+.illus-header {
+  margin-bottom: 2rem;
+}
+
+.illus-heading {
+  font-family: "EB Garamond", Georgia, serif;
+  font-size: 2rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  margin: 0 0 0.5rem;
+  color: inherit;
+}
+
+.illus-subheading {
+  color: var(--on-dark-6);
+  font-size: 1rem;
+  margin: 0;
+  line-height: 1.6;
+}
+
+@media (prefers-color-scheme: dark) {
+  .illus-subheading { color: var(--on-dark-5); }
+}
+
+/* ── Photo grid ──────────────────────────────────────────── */
+
+.illus-photo-wrapper {
+  cursor: pointer;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Gradient border via pseudo-element */
+.illus-photo-wrapper::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+  padding: 2.5px;
+  background: linear-gradient(135deg, var(--brand) 0%, var(--sky) 50%, #a78bfa 100%);
+  -webkit-mask: linear-gradient(var(--surface) 0 0) content-box, linear-gradient(var(--surface) 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.illus-photo-wrapper:hover {
+  transform: scale(1.04);
+}
+
+.illus-photo-wrapper:hover::after {
+  opacity: 1;
+}
+
+/* Selected state: persistent border + stronger glow */
+.illus-photo-selected {
+  transform: scale(1.04);
+  box-shadow: 0 0 0 0 transparent, 0 8px 24px rgba(52, 211, 153, 0.25);
+}
+
+.illus-photo-selected::after {
+  opacity: 1;
+  background: linear-gradient(135deg, var(--brand) 0%, var(--sky) 50%, #a78bfa 100%);
+  padding: 3px;
+}
+
+.illus-photo-img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ── Popup – fixed bottom-right ──────────────────────────── */
+
+.illus-popup {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  width: 820px;
+  height: 600px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #181f2e;
+  box-shadow:
+    0 32px 80px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.07);
+  /* entrance handled by GSAP in IllustrationPopup */
+}
+
+/* Top row: viewer + metadata */
+.illus-popup-main {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+
+/* ── Left: OSD viewer ────────────────────────────────────── */
+
+.illus-popup-viewer-col {
+  width: 460px;
+  flex-shrink: 0;
+  position: relative;
+  background: var(--ink-950);
+}
+
+.illus-viewer-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: var(--ink-950);
+}
+
+.illus-viewer-canvas {
+  width: 100%;
+  height: 100%;
+}
+
+/* OSD control buttons */
+.illus-viewer-controls {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.illus-viewer-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(15, 23, 42, 0.85);
+  color: var(--on-dark-3);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  backdrop-filter: blur(6px);
+}
+
+.illus-viewer-btn:hover {
+  background: var(--teal-dark);
+  color: var(--surface);
+  border-color: var(--teal-hover);
+}
+
+.illus-viewer-btn:active {
+  background: #0f766e;
+}
+
+/* Bbox SVG overlay */
+.illus-viewer-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* ── Right: metadata column ──────────────────────────────── */
+
+.illus-popup-meta-col {
+  flex: 1;
+  min-width: 0;
+  padding: 1.1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  overflow-y: auto;
+  position: relative;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ink-700) transparent;
+}
+
+.illus-popup-meta-col::-webkit-scrollbar { width: 4px; }
+.illus-popup-meta-col::-webkit-scrollbar-thumb {
+  background: var(--ink-700);
+  border-radius: 4px;
+}
+
+/* Close button */
+.illus-popup-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--on-dark-3);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+  z-index: 2;
+}
+
+.illus-popup-close:hover {
+  background: rgba(252, 129, 129, 0.15);
+  color: #fc8181;
+  border-color: rgba(252, 129, 129, 0.3);
+}
+
+/* Header */
+.illus-popup-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-bottom: 0.2rem;
+  padding-right: 2rem; /* space for close btn */
+}
+
+.illus-popup-institution-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.illus-popup-institution {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--blue-3);
+}
+
+.illus-popup-tag {
+  font-size: 0.6rem;
+  font-weight: 700;
+  border-radius: 4px;
+  padding: 0.1rem 0.35rem;
+}
+
+.illus-popup-tag--verified {
+  color: #68d391;
+  background: rgba(72, 187, 120, 0.1);
+  border: 1px solid rgba(72, 187, 120, 0.25);
+}
+
+.illus-popup-tag--review {
+  color: #f6ad55;
+  background: rgba(246, 173, 85, 0.1);
+  border: 1px solid rgba(246, 173, 85, 0.25);
+}
+
+.illus-popup-title {
+  font-family: "EB Garamond", Georgia, serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #f1f5f9;
+  margin: 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.illus-popup-authors {
+  font-size: 0.75rem;
+  color: var(--on-dark-5);
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Badges */
+.illus-popup-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.1rem;
+}
+
+.illus-popup-badge {
+  font-size: 0.62rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--on-dark-3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.illus-popup-badge--year {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--brand);
+  border-color: rgba(16, 185, 129, 0.3);
+  font-weight: 700;
+}
+
+.illus-popup-badge--cat {
+  background: rgba(139, 92, 246, 0.12);
+  color: #c4b5fd;
+  border-color: rgba(139, 92, 246, 0.25);
+  text-transform: capitalize;
+}
+
+/* Divider & section labels */
+.illus-popup-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.06);
+  margin: 0.35rem 0;
+  flex-shrink: 0;
+}
+
+.illus-popup-section-label {
+  font-size: 0.58rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--on-dark-4);
+  margin-bottom: 0.1rem;
+}
+
+/* Key-value rows */
+.illus-popup-meta-row {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+.illus-popup-meta-label {
+  color: var(--on-dark-4);
+  flex-shrink: 0;
+  min-width: 72px;
+  font-weight: 600;
+}
+
+.illus-popup-meta-value {
+  color: var(--on-dark-3);
+  word-break: break-all;
+}
+
+/* Caption & notes */
+.illus-popup-caption {
+  font-size: 0.72rem;
+  color: var(--on-dark-5);
+  font-style: italic;
+  margin: 0.15rem 0 0;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.illus-popup-notes {
+  font-size: 0.7rem;
+  color: #f6ad55;
+  margin: 0.2rem 0 0;
+  font-style: italic;
+}
+
+/* Footer */
+.illus-popup-footer {
+  margin-top: auto;
+  padding-top: 0.5rem;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  flex-shrink: 0;
+}
+
+.illus-popup-id {
+  font-size: 0.56rem;
+  color: var(--on-dark-4);
+  font-family: monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.illus-popup-manifest-link {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--blue-3);
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+
+.illus-popup-manifest-link:hover {
+  color: #90cdf4;
+}
+
+/* ── Loading / batch / error ─────────────────────────────── */
+
+.illus-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6rem 2rem;
+  color: var(--on-dark-6);
+  gap: 1rem;
+}
+
+.illus-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(16, 185, 129, 0.2);
+  border-top-color: var(--brand-mid);
+  border-radius: 50%;
+  animation: illus-spin 0.8s linear infinite;
+}
+
+@keyframes illus-spin {
+  to { transform: rotate(360deg); }
+}
+
+.illus-batch-loading {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.illus-finished {
+  text-align: center;
+  color: var(--ink-500);
+  font-size: 0.875rem;
+  padding: 2rem;
+  margin: 0;
+}
+
+.illus-error {
+  padding: 4rem 2rem;
+  text-align: center;
+  color: #fc8181;
+  font-size: 1rem;
+}
+
+/* ── Neighbor illustrations strip ────────────────────────── */
+
+.illus-popup-neighbors {
+  flex-shrink: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.25);
+  padding: 0.55rem 0 0.6rem;
+}
+
+.illus-popup-neighbors-label {
+  font-size: 0.58rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--on-dark-4);
+  padding: 0 1rem;
+  margin-bottom: 0.45rem;
+}
+
+.illus-popup-neighbors-strip {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 0 1rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ink-700) transparent;
+}
+
+.illus-popup-neighbors-strip::-webkit-scrollbar { height: 3px; }
+.illus-popup-neighbors-strip::-webkit-scrollbar-thumb {
+  background: var(--ink-700);
+  border-radius: 3px;
+}
+
+.illus-neighbor-thumb {
+  flex-shrink: 0;
+  padding: 0;
+  background: var(--ink-950);
+  cursor: pointer;
+  border-radius: 5px;
+  overflow: hidden;
+  height: 96px;
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.illus-neighbor-thumb:hover {
+  border-color: var(--brand);
+  transform: scale(1.06);
+}
+
+.illus-neighbor-thumb img {
+  height: 96px;
+  width: auto;
+  display: block;
+}

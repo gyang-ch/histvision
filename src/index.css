@@ -1,0 +1,71 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+:root {
+  /* ── Brand greens ──────────────────────────────────────── */
+  --brand:       #34d399;   /* logo "Vision", active tab, highlights */
+  --brand-mid:   #10b981;   /* hover states on brand elements */
+  --brand-deep:  #059669;   /* active / pressed */
+
+  /* ── Teal / Sky (IIIFViewer, viewer glow, hero gradient) ─ */
+  --teal:        #2dd4bf;   /* navigator highlight, glow border */
+  --teal-hover:  #14b8a6;   /* teal hover state */
+  --teal-dark:   #0d9488;   /* teal pressed / OSD btn hover */
+  --sky:         #38bdf8;   /* hero gradient accent, navigator region */
+
+  /* ── Blue (reader interactive: resizer, focus, page input) */
+  --blue:        #3b82f6;
+  --blue-lt:     #60a5fa;   /* text in loading / selected states */
+  --blue-3:      #63b3ed;   /* institution tags, popup links */
+
+  /* ── Dark background scale (darkest → lighter) ─────────── */
+  --ink-950: #0a0e18;   /* illustration viewer bg */
+  --ink-900: #0f172a;   /* deepest reader panels */
+  --ink-800: #1a202c;   /* dark component bg */
+  --ink-750: #1e293b;   /* reader thumb bg; also content text */
+  --ink-700: #2d3748;   /* book reader background */
+  --ink-600: #334155;   /* resizer handle, dark borders */
+  --ink-500: #4a5568;   /* scrollbar thumb, tag borders */
+  --ink-400: #64748b;   /* muted elements */
+
+  /* ── Text on dark backgrounds (lightest → darker) ──────── */
+  --on-dark-1: #f7fafc;   /* primary text on dark */
+  --on-dark-2: #e2e8f0;   /* secondary; also light-content border */
+  --on-dark-3: #cbd5e0;   /* tertiary */
+  --on-dark-4: #a0aec0;   /* quaternary */
+  --on-dark-5: #94a3b8;   /* muted / hint */
+  --on-dark-6: #718096;   /* faintest */
+
+  /* ── Light content zone ────────────────────────────────── */
+  --surface:  #ffffff;    /* white backgrounds */
+  --text-2:   #475569;    /* secondary body text */
+
+  /* ── Typography & rendering ────────────────────────────── */
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  line-height: 1.6;
+  font-weight: 400;
+
+  color-scheme: light;
+  color: #1a1a1a;
+  background-color: #ffffff;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1, h2, h3, h4 {
+  font-family: 'EB Garamond', Georgia, serif;
+  font-weight: 600;
+  line-height: 1.2;
+}

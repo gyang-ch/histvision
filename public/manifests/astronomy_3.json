@@ -1,0 +1,730 @@
+{
+  "@context" : [ "http://iiif.io/api/presentation/3/context.json" ],
+  "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A",
+  "type" : "Manifest",
+  "label" : {
+    "none" : [ "[Der Lauf der Planeten]" ]
+  },
+  "behavior" : [ "paged" ],
+  "metadata" : [ {
+    "label" : {
+      "de" : [ "Titel" ],
+      "en" : [ "Title" ]
+    },
+    "value" : {
+      "none" : [ "[Der Lauf der Planeten]", "So man zellt von anbegin und erster erschaffung der Welt nach der rechnung der Hebreer 5529, Mirandulae 5078, Eusebii 6775, Augustini 6928, Alphonsi 8559 und nach gemeiner Astronomischer Rechnung 5537. warhafftig aber nach Probierter erfahrung 6008 und auf das Jar von der Geburt Christi 1575 etc." ]
+    }
+  }, {
+    "label" : {
+      "de" : [ "Person" ],
+      "en" : [ "Person" ]
+    },
+    "value" : {
+      "none" : [ "<span>Thurneysser zum Thurn, Leonhardt, 1531-1596 -- (GND: <a href=\"https://d-nb.info/gnd/118622447\">118622447</a>)</span>", "<span>Amman, Jost, 1539-1591 [HolzschneiderIn] -- (GND: <a href=\"https://d-nb.info/gnd/118502573\">118502573</a>)</span>" ]
+    }
+  }, {
+    "label" : {
+      "de" : [ "Verlag" ],
+      "en" : [ "Publisher" ]
+    },
+    "value" : {
+      "none" : [ "Druckerei im Grauen Kloster" ]
+    }
+  }, {
+    "label" : {
+      "de" : [ "Erscheinungsort" ],
+      "en" : [ "Place" ]
+    },
+    "value" : {
+      "de" : [ "Berlin" ]
+    }
+  }, {
+    "label" : {
+      "de" : [ "Jahr/Datierung" ],
+      "en" : [ "Year/Date" ]
+    },
+    "value" : {
+      "none" : [ "1575" ]
+    }
+  }, {
+    "label" : {
+      "de" : [ "Medientyp" ],
+      "en" : [ "Mediatype" ]
+    },
+    "value" : {
+      "de" : [ "Karte" ],
+      "en" : [ "Map" ]
+    }
+  }, {
+    "label" : {
+      "de" : [ "Format/Maße" ],
+      "en" : [ "Format/Size" ]
+    },
+    "value" : {
+      "de" : [ "58 x 43 cm" ]
+    }
+  }, {
+    "label" : {
+      "de" : [ "Weitere Informationen" ],
+      "en" : [ "Further Information" ]
+    },
+    "value" : {
+      "de" : [ "Je Bl.: &auml;hnliches Grundbild (Mater) mit Wappen Thurneissers, mit den astrologischen H&auml;usern u.alchemistischen Instrumenten. Darauf mit Faden befestigt drehbare Scheiben (Reten), die Gradeinteilung, Sternenbilder, Tierkreiszeichen etc. darstellen u. Zeiger", "vgl. &quot;Die Welt in H&auml;nden&quot;, Staatsbiblioth. Berlin, 1989 S. 17 und &quot;Kartographische Zimelien&quot;, hrsg. &Ouml;ster. Nationalbibl., 1995, S. 66/67", "7 Planeten: Sonne, Mond, Merkur, Saturn, Jupiter, Venus, Mars und &quot;Lauf&quot; des Menschen von Geburt und Tod", "Auf der R&uuml;ckseite des Astrolabiums &quot;Mensch&quot; befindet sich der handschriftliche Hinweis von Peter Lambeck: &quot;Ex Augustissima Bibliotheca Caesarea Vindobonensi&quot;." ]
+    }
+  }, {
+    "label" : {
+      "de" : [ "Umfang" ],
+      "en" : [ "Range" ]
+    },
+    "value" : {
+      "de" : [ "8 Tafeln mit drehbaren Scheiben" ]
+    }
+  }, {
+    "label" : {
+      "de" : [ "Illustrationen" ],
+      "en" : [ "Illustrations" ]
+    },
+    "value" : {
+      "de" : [ "Holzschnitt, kol. auf Pappe" ]
+    }
+  }, {
+    "label" : {
+      "de" : [ "Schlagworte" ],
+      "en" : [ "Keywords" ]
+    },
+    "value" : {
+      "de" : [ "<span>Astrolabium -- (GND: <a href=\"https://d-nb.info/gnd/4003304-1\">4003304-1</a>)</span>", "Altkarte" ]
+    }
+  }, {
+    "label" : {
+      "de" : [ "Sprachen" ],
+      "en" : [ "Languages" ]
+    },
+    "value" : {
+      "de" : [ "Deutsch" ],
+      "en" : [ "German" ]
+    }
+  }, {
+    "label" : {
+      "de" : [ "Signatur" ],
+      "en" : [ "Shelfmark number" ]
+    },
+    "value" : {
+      "none" : [ "<a href=\"https://data.onb.ac.at/rec/AC03894703\">K I 97080 KAR MAG</a>" ]
+    }
+  }, {
+    "label" : {
+      "de" : [ "Barcode" ],
+      "en" : [ "Barcode" ]
+    },
+    "value" : {
+      "none" : [ "+Z72845507" ]
+    }
+  }, {
+    "label" : {
+      "de" : [ "IDNR" ],
+      "en" : [ "IDNR" ]
+    },
+    "value" : {
+      "none" : [ "AC03894703" ]
+    }
+  } ],
+  "summary" : {
+    "de" : [ "Je Bl.: ähnliches Grundbild (Mater) mit Wappen Thurneissers, mit den astrologischen Häusern u.alchemistischen Instrumenten. Darauf mit Faden befestigt drehbare Scheiben (Reten), die Gradeinteilung, Sternenbilder, Tierkreiszeichen etc. darstellen u. Zeiger", "vgl. \"Die Welt in Händen\", Staatsbiblioth. Berlin, 1989 S. 17 und \"Kartographische Zimelien\", hrsg. Öster. Nationalbibl., 1995, S. 66/67", "7 Planeten: Sonne, Mond, Merkur, Saturn, Jupiter, Venus, Mars und \"Lauf\" des Menschen von Geburt und Tod", "Auf der Rückseite des Astrolabiums \"Mensch\" befindet sich der handschriftliche Hinweis von Peter Lambeck: \"Ex Augustissima Bibliotheca Caesarea Vindobonensi\"." ]
+  },
+  "thumbnail" : [ {
+    "id" : "https://api.onb.ac.at/iiif/image/v3/131EAA3A/uk4nGb4kQHe3msaH/full/max/0/default.jpg",
+    "type" : "Image",
+    "format" : "image/jp2",
+    "width" : 9599,
+    "height" : 12881,
+    "service" : [ {
+      "id" : "https://api.onb.ac.at/iiif/image/v3/131EAA3A/uk4nGb4kQHe3msaH",
+      "type" : "ImageService3",
+      "profile" : "level2"
+    } ]
+  } ],
+  "navDate" : "1575-01-01T00:00:00Z",
+  "requiredStatement" : {
+    "label" : {
+      "de" : [ "Bereitgestellt von" ],
+      "en" : [ "Attribution" ]
+    },
+    "value" : {
+      "de" : [ "Österreichische Nationalbibliothek" ],
+      "en" : [ "Austrian National Library" ]
+    }
+  },
+  "provider" : [ {
+    "id" : "https://www.onb.ac.at/sammlungen/kartensammlung",
+    "type" : "Agent",
+    "label" : {
+      "en" : [ "Map Department" ],
+      "de" : [ "Kartensammlung" ]
+    },
+    "homepage" : [ {
+      "id" : "https://www.onb.ac.at/sammlungen/kartensammlung",
+      "type" : "Text",
+      "label" : {
+        "de" : [ "Kartensammlung" ]
+      },
+      "format" : "text/html",
+      "language" : [ "de" ]
+    }, {
+      "id" : "https://www.onb.ac.at/en/departments/map-department",
+      "type" : "Text",
+      "label" : {
+        "en" : [ "Map Department" ]
+      },
+      "format" : "text/html",
+      "language" : [ "en" ]
+    } ],
+    "logo" : [ {
+      "id" : "https://api.onb.ac.at/logo.png",
+      "type" : "Image",
+      "format" : "image/png",
+      "height" : 200,
+      "width" : 200
+    } ]
+  } ],
+  "seeAlso" : [ {
+    "id" : "https://data.onb.ac.at/rec/AC03894703",
+    "type" : "Catalogue",
+    "label" : {
+      "de" : [ "Zum Katalog" ],
+      "en" : [ "View in catalogue" ]
+    }
+  }, {
+    "id" : "https://pdf-service.onb.ac.at/131EAA3A",
+    "type" : "PdfGenerator",
+    "label" : {
+      "de" : [ "PDF-Service" ],
+      "en" : [ "PDF-Service" ]
+    }
+  } ],
+  "homepage" : [ {
+    "id" : "https://data.onb.ac.at/rep/131EAA3A",
+    "type" : "Text",
+    "label" : {
+      "de" : [ "https://data.onb.ac.at/rep/131EAA3A" ],
+      "en" : [ "https://data.onb.ac.at/rep/131EAA3A" ]
+    },
+    "format" : "text/html",
+    "language" : [ "de", "en" ]
+  } ],
+  "start" : {
+    "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/2",
+    "type" : "Canvas"
+  },
+  "items" : [ {
+    "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/1",
+    "type" : "Canvas",
+    "label" : {
+      "none" : [ "1" ]
+    },
+    "height" : 5061,
+    "width" : 9599,
+    "items" : [ {
+      "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/1/annotation-page-item/uk4nGb4kQHXWF3S1",
+      "type" : "AnnotationPage",
+      "items" : [ {
+        "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/annotation-painting/uk4nGb4kQHXWF3S1",
+        "type" : "Annotation",
+        "motivation" : "painting",
+        "body" : {
+          "id" : "https://api.onb.ac.at/iiif/image/v3/131EAA3A/uk4nGb4kQHXWF3S1/full/max/0/default.jpg",
+          "type" : "Image",
+          "format" : "image/jp2",
+          "width" : 9599,
+          "height" : 5061,
+          "service" : [ {
+            "id" : "https://api.onb.ac.at/iiif/image/v3/131EAA3A/uk4nGb4kQHXWF3S1",
+            "type" : "ImageService3",
+            "profile" : "level2"
+          } ]
+        },
+        "target" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/1"
+      } ]
+    } ]
+  }, {
+    "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/2",
+    "type" : "Canvas",
+    "label" : {
+      "none" : [ "2" ]
+    },
+    "height" : 12881,
+    "width" : 9599,
+    "items" : [ {
+      "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/2/annotation-page-item/uk4nGb4kQHe3msaH",
+      "type" : "AnnotationPage",
+      "items" : [ {
+        "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/annotation-painting/uk4nGb4kQHe3msaH",
+        "type" : "Annotation",
+        "motivation" : "painting",
+        "body" : {
+          "id" : "https://api.onb.ac.at/iiif/image/v3/131EAA3A/uk4nGb4kQHe3msaH/full/max/0/default.jpg",
+          "type" : "Image",
+          "format" : "image/jp2",
+          "width" : 9599,
+          "height" : 12881,
+          "service" : [ {
+            "id" : "https://api.onb.ac.at/iiif/image/v3/131EAA3A/uk4nGb4kQHe3msaH",
+            "type" : "ImageService3",
+            "profile" : "level2"
+          } ]
+        },
+        "target" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/2"
+      } ]
+    } ]
+  }, {
+    "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/3",
+    "type" : "Canvas",
+    "label" : {
+      "none" : [ "3" ]
+    },
+    "height" : 12875,
+    "width" : 9762,
+    "items" : [ {
+      "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/3/annotation-page-item/uk4nGb4kQHkbJhiZ",
+      "type" : "AnnotationPage",
+      "items" : [ {
+        "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/annotation-painting/uk4nGb4kQHkbJhiZ",
+        "type" : "Annotation",
+        "motivation" : "painting",
+        "body" : {
+          "id" : "https://api.onb.ac.at/iiif/image/v3/131EAA3A/uk4nGb4kQHkbJhiZ/full/max/0/default.jpg",
+          "type" : "Image",
+          "format" : "image/jp2",
+          "width" : 9762,
+          "height" : 12875,
+          "service" : [ {
+            "id" : "https://api.onb.ac.at/iiif/image/v3/131EAA3A/uk4nGb4kQHkbJhiZ",
+            "type" : "ImageService3",
+            "profile" : "level2"
+          } ]
+        },
+        "target" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/3"
+      } ]
+    } ]
+  }, {
+    "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/4",
+    "type" : "Canvas",
+    "label" : {
+      "none" : [ "4" ]
+    },
+    "height" : 12797,
+    "width" : 9638,
+    "items" : [ {
+      "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/4/annotation-page-item/uk4nGb4kQHs8qXrq",
+      "type" : "AnnotationPage",
+      "items" : [ {
+        "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/annotation-painting/uk4nGb4kQHs8qXrq",
+        "type" : "Annotation",
+        "motivation" : "painting",
+        "body" : {
+          "id" : "https://api.onb.ac.at/iiif/image/v3/131EAA3A/uk4nGb4kQHs8qXrq/full/max/0/default.jpg",
+          "type" : "Image",
+          "format" : "image/jp2",
+          "width" : 9638,
+          "height" : 12797,
+          "service" : [ {
+            "id" : "https://api.onb.ac.at/iiif/image/v3/131EAA3A/uk4nGb4kQHs8qXrq",
+            "type" : "ImageService3",
+            "profile" : "level2"
+          } ]
+        },
+        "target" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/4"
+      } ]
+    } ]
+  }, {
+    "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/5",
+    "type" : "Canvas",
+    "label" : {
+      "none" : [ "5" ]
+    },
+    "height" : 12878,
+    "width" : 9804,
+    "items" : [ {
+      "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/5/annotation-page-item/uk4nGb4kQHygNN17",
+      "type" : "AnnotationPage",
+      "items" : [ {
+        "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/annotation-painting/uk4nGb4kQHygNN17",
+        "type" : "Annotation",
+        "motivation" : "painting",
+        "body" : {
+          "id" : "https://api.onb.ac.at/iiif/image/v3/131EAA3A/uk4nGb4kQHygNN17/full/max/0/default.jpg",
+          "type" : "Image",
+          "format" : "image/jp2",
+          "width" : 9804,
+          "height" : 12878,
+          "service" : [ {
+            "id" : "https://api.onb.ac.at/iiif/image/v3/131EAA3A/uk4nGb4kQHygNN17",
+            "type" : "ImageService3",
+            "profile" : "level2"
+          } ]
+        },
+        "target" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/5"
+      } ]
+    } ]
+  }, {
+    "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/6",
+    "type" : "Canvas",
+    "label" : {
+      "none" : [ "6" ]
+    },
+    "height" : 12953,
+    "width" : 9716,
+    "items" : [ {
+      "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/6/annotation-page-item/uk4nGb4kQJ6DuC9P",
+      "type" : "AnnotationPage",
+      "items" : [ {
+        "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/annotation-painting/uk4nGb4kQJ6DuC9P",
+        "type" : "Annotation",
+        "motivation" : "painting",
+        "body" : {
+          "id" : "https://api.onb.ac.at/iiif/image/v3/131EAA3A/uk4nGb4kQJ6DuC9P/full/max/0/default.jpg",
+          "type" : "Image",
+          "format" : "image/jp2",
+          "width" : 9716,
+          "height" : 12953,
+          "service" : [ {
+            "id" : "https://api.onb.ac.at/iiif/image/v3/131EAA3A/uk4nGb4kQJ6DuC9P",
+            "type" : "ImageService3",
+            "profile" : "level2"
+          } ]
+        },
+        "target" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/6"
+      } ]
+    } ]
+  }, {
+    "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/7",
+    "type" : "Canvas",
+    "label" : {
+      "none" : [ "7" ]
+    },
+    "height" : 13041,
+    "width" : 9690,
+    "items" : [ {
+      "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/7/annotation-page-item/uk4nGb4kQJCmS2Hf",
+      "type" : "AnnotationPage",
+      "items" : [ {
+        "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/annotation-painting/uk4nGb4kQJCmS2Hf",
+        "type" : "Annotation",
+        "motivation" : "painting",
+        "body" : {
+          "id" : "https://api.onb.ac.at/iiif/image/v3/131EAA3A/uk4nGb4kQJCmS2Hf/full/max/0/default.jpg",
+          "type" : "Image",
+          "format" : "image/jp2",
+          "width" : 9690,
+          "height" : 13041,
+          "service" : [ {
+            "id" : "https://api.onb.ac.at/iiif/image/v3/131EAA3A/uk4nGb4kQJCmS2Hf",
+            "type" : "ImageService3",
+            "profile" : "level2"
+          } ]
+        },
+        "target" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/7"
+      } ]
+    } ]
+  }, {
+    "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/8",
+    "type" : "Canvas",
+    "label" : {
+      "none" : [ "8" ]
+    },
+    "height" : 13098,
+    "width" : 9556,
+    "items" : [ {
+      "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/8/annotation-page-item/uk4nGb4kQJKJxrRw",
+      "type" : "AnnotationPage",
+      "items" : [ {
+        "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/annotation-painting/uk4nGb4kQJKJxrRw",
+        "type" : "Annotation",
+        "motivation" : "painting",
+        "body" : {
+          "id" : "https://api.onb.ac.at/iiif/image/v3/131EAA3A/uk4nGb4kQJKJxrRw/full/max/0/default.jpg",
+          "type" : "Image",
+          "format" : "image/jp2",
+          "width" : 9556,
+          "height" : 13098,
+          "service" : [ {
+            "id" : "https://api.onb.ac.at/iiif/image/v3/131EAA3A/uk4nGb4kQJKJxrRw",
+            "type" : "ImageService3",
+            "profile" : "level2"
+          } ]
+        },
+        "target" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/8"
+      } ]
+    } ]
+  }, {
+    "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/9",
+    "type" : "Canvas",
+    "label" : {
+      "none" : [ "9" ]
+    },
+    "height" : 13139,
+    "width" : 9808,
+    "items" : [ {
+      "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/9/annotation-page-item/uk4nGb4kQJRrVgaD",
+      "type" : "AnnotationPage",
+      "items" : [ {
+        "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/annotation-painting/uk4nGb4kQJRrVgaD",
+        "type" : "Annotation",
+        "motivation" : "painting",
+        "body" : {
+          "id" : "https://api.onb.ac.at/iiif/image/v3/131EAA3A/uk4nGb4kQJRrVgaD/full/max/0/default.jpg",
+          "type" : "Image",
+          "format" : "image/jp2",
+          "width" : 9808,
+          "height" : 13139,
+          "service" : [ {
+            "id" : "https://api.onb.ac.at/iiif/image/v3/131EAA3A/uk4nGb4kQJRrVgaD",
+            "type" : "ImageService3",
+            "profile" : "level2"
+          } ]
+        },
+        "target" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/9"
+      } ]
+    } ]
+  }, {
+    "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/10",
+    "type" : "Canvas",
+    "label" : {
+      "none" : [ "10" ]
+    },
+    "height" : 13063,
+    "width" : 9637,
+    "items" : [ {
+      "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/10/annotation-page-item/uk4nGb4kQJYQ2WiV",
+      "type" : "AnnotationPage",
+      "items" : [ {
+        "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/annotation-painting/uk4nGb4kQJYQ2WiV",
+        "type" : "Annotation",
+        "motivation" : "painting",
+        "body" : {
+          "id" : "https://api.onb.ac.at/iiif/image/v3/131EAA3A/uk4nGb4kQJYQ2WiV/full/max/0/default.jpg",
+          "type" : "Image",
+          "format" : "image/jp2",
+          "width" : 9637,
+          "height" : 13063,
+          "service" : [ {
+            "id" : "https://api.onb.ac.at/iiif/image/v3/131EAA3A/uk4nGb4kQJYQ2WiV",
+            "type" : "ImageService3",
+            "profile" : "level2"
+          } ]
+        },
+        "target" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/10"
+      } ]
+    } ]
+  }, {
+    "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/11",
+    "type" : "Canvas",
+    "label" : {
+      "none" : [ "11" ]
+    },
+    "height" : 12952,
+    "width" : 9555,
+    "items" : [ {
+      "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/11/annotation-page-item/uk4nGb4kQnQgKXxd",
+      "type" : "AnnotationPage",
+      "items" : [ {
+        "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/annotation-painting/uk4nGb4kQnQgKXxd",
+        "type" : "Annotation",
+        "motivation" : "painting",
+        "body" : {
+          "id" : "https://api.onb.ac.at/iiif/image/v3/131EAA3A/uk4nGb4kQnQgKXxd/full/max/0/default.jpg",
+          "type" : "Image",
+          "format" : "image/jp2",
+          "width" : 9555,
+          "height" : 12952,
+          "service" : [ {
+            "id" : "https://api.onb.ac.at/iiif/image/v3/131EAA3A/uk4nGb4kQnQgKXxd",
+            "type" : "ImageService3",
+            "profile" : "level2"
+          } ]
+        },
+        "target" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/11"
+      } ]
+    } ]
+  }, {
+    "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/12",
+    "type" : "Canvas",
+    "label" : {
+      "none" : [ "12" ]
+    },
+    "height" : 13035,
+    "width" : 9639,
+    "items" : [ {
+      "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/12/annotation-page-item/uk4nGb4kQnXDrN6u",
+      "type" : "AnnotationPage",
+      "items" : [ {
+        "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/annotation-painting/uk4nGb4kQnXDrN6u",
+        "type" : "Annotation",
+        "motivation" : "painting",
+        "body" : {
+          "id" : "https://api.onb.ac.at/iiif/image/v3/131EAA3A/uk4nGb4kQnXDrN6u/full/max/0/default.jpg",
+          "type" : "Image",
+          "format" : "image/jp2",
+          "width" : 9639,
+          "height" : 13035,
+          "service" : [ {
+            "id" : "https://api.onb.ac.at/iiif/image/v3/131EAA3A/uk4nGb4kQnXDrN6u",
+            "type" : "ImageService3",
+            "profile" : "level2"
+          } ]
+        },
+        "target" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/12"
+      } ]
+    } ]
+  }, {
+    "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/13",
+    "type" : "Canvas",
+    "label" : {
+      "none" : [ "13" ]
+    },
+    "height" : 13008,
+    "width" : 9638,
+    "items" : [ {
+      "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/13/annotation-page-item/uk4nGb4kQndmPCFB",
+      "type" : "AnnotationPage",
+      "items" : [ {
+        "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/annotation-painting/uk4nGb4kQndmPCFB",
+        "type" : "Annotation",
+        "motivation" : "painting",
+        "body" : {
+          "id" : "https://api.onb.ac.at/iiif/image/v3/131EAA3A/uk4nGb4kQndmPCFB/full/max/0/default.jpg",
+          "type" : "Image",
+          "format" : "image/jp2",
+          "width" : 9638,
+          "height" : 13008,
+          "service" : [ {
+            "id" : "https://api.onb.ac.at/iiif/image/v3/131EAA3A/uk4nGb4kQndmPCFB",
+            "type" : "ImageService3",
+            "profile" : "level2"
+          } ]
+        },
+        "target" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/13"
+      } ]
+    } ]
+  }, {
+    "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/14",
+    "type" : "Canvas",
+    "label" : {
+      "none" : [ "14" ]
+    },
+    "height" : 13034,
+    "width" : 9637,
+    "items" : [ {
+      "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/14/annotation-page-item/uk4nGb4kQnkJv2PT",
+      "type" : "AnnotationPage",
+      "items" : [ {
+        "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/annotation-painting/uk4nGb4kQnkJv2PT",
+        "type" : "Annotation",
+        "motivation" : "painting",
+        "body" : {
+          "id" : "https://api.onb.ac.at/iiif/image/v3/131EAA3A/uk4nGb4kQnkJv2PT/full/max/0/default.jpg",
+          "type" : "Image",
+          "format" : "image/jp2",
+          "width" : 9637,
+          "height" : 13034,
+          "service" : [ {
+            "id" : "https://api.onb.ac.at/iiif/image/v3/131EAA3A/uk4nGb4kQnkJv2PT",
+            "type" : "ImageService3",
+            "profile" : "level2"
+          } ]
+        },
+        "target" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/14"
+      } ]
+    } ]
+  }, {
+    "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/15",
+    "type" : "Canvas",
+    "label" : {
+      "none" : [ "15" ]
+    },
+    "height" : 13075,
+    "width" : 9587,
+    "items" : [ {
+      "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/15/annotation-page-item/uk4nGb4kQnrrSrXj",
+      "type" : "AnnotationPage",
+      "items" : [ {
+        "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/annotation-painting/uk4nGb4kQnrrSrXj",
+        "type" : "Annotation",
+        "motivation" : "painting",
+        "body" : {
+          "id" : "https://api.onb.ac.at/iiif/image/v3/131EAA3A/uk4nGb4kQnrrSrXj/full/max/0/default.jpg",
+          "type" : "Image",
+          "format" : "image/jp2",
+          "width" : 9587,
+          "height" : 13075,
+          "service" : [ {
+            "id" : "https://api.onb.ac.at/iiif/image/v3/131EAA3A/uk4nGb4kQnrrSrXj",
+            "type" : "ImageService3",
+            "profile" : "level2"
+          } ]
+        },
+        "target" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/15"
+      } ]
+    } ]
+  }, {
+    "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/16",
+    "type" : "Canvas",
+    "label" : {
+      "none" : [ "16" ]
+    },
+    "height" : 13104,
+    "width" : 9669,
+    "items" : [ {
+      "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/16/annotation-page-item/uk4nGb4kQnyPygg1",
+      "type" : "AnnotationPage",
+      "items" : [ {
+        "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/annotation-painting/uk4nGb4kQnyPygg1",
+        "type" : "Annotation",
+        "motivation" : "painting",
+        "body" : {
+          "id" : "https://api.onb.ac.at/iiif/image/v3/131EAA3A/uk4nGb4kQnyPygg1/full/max/0/default.jpg",
+          "type" : "Image",
+          "format" : "image/jp2",
+          "width" : 9669,
+          "height" : 13104,
+          "service" : [ {
+            "id" : "https://api.onb.ac.at/iiif/image/v3/131EAA3A/uk4nGb4kQnyPygg1",
+            "type" : "ImageService3",
+            "profile" : "level2"
+          } ]
+        },
+        "target" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/16"
+      } ]
+    } ]
+  }, {
+    "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/17",
+    "type" : "Canvas",
+    "label" : {
+      "none" : [ "17" ]
+    },
+    "height" : 13005,
+    "width" : 9605,
+    "items" : [ {
+      "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/17/annotation-page-item/uk4nGb4kQo5wWWpH",
+      "type" : "AnnotationPage",
+      "items" : [ {
+        "id" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/annotation-painting/uk4nGb4kQo5wWWpH",
+        "type" : "Annotation",
+        "motivation" : "painting",
+        "body" : {
+          "id" : "https://api.onb.ac.at/iiif/image/v3/131EAA3A/uk4nGb4kQo5wWWpH/full/max/0/default.jpg",
+          "type" : "Image",
+          "format" : "image/jp2",
+          "width" : 9605,
+          "height" : 13005,
+          "service" : [ {
+            "id" : "https://api.onb.ac.at/iiif/image/v3/131EAA3A/uk4nGb4kQo5wWWpH",
+            "type" : "ImageService3",
+            "profile" : "level2"
+          } ]
+        },
+        "target" : "https://api.onb.ac.at/iiif/presentation/v3/manifest/131EAA3A/canvas/17"
+      } ]
+    } ]
+  } ]
+}

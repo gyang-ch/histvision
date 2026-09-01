@@ -1,0 +1,353 @@
+.glow-btn-group {
+  position: relative;
+  display: inline-block;
+  height: 48px;
+  pointer-events: auto;
+  transition: all 0.2s ease;
+  border: none;
+  background: transparent;
+  padding: 2px;
+  cursor: pointer;
+  outline: none;
+  overflow: hidden;
+  border-radius: 10px;
+}
+.glow-btn-group.transcribe-btn-new {
+  background: linear-gradient(135deg, #06b6d4 0%, var(--blue) 100%);
+}
+.glow-btn-group.detect-btn-new {
+  background: linear-gradient(135deg, #4ade80 0%, #2563eb 100%);
+}
+.glow-btn-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 8px;
+  background: var(--ink-900);
+  color: var(--on-dark-1);
+  font-weight: 700;
+  font-size: 13px;
+  font-family: "Syne", sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s ease-in-out;
+}
+.glow-btn-fill {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: inherit;
+  border-radius: 8px;
+  transform: translateY(100%);
+  pointer-events: none;
+}
+.glow-btn-group:hover .glow-btn-content {
+  background: transparent;
+}
+.glow-btn-group.loading .glow-btn-content {
+  background: rgba(15, 23, 42, 0.8);
+}
+
+/* Two-Column Main Layout */
+.reader-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 420px;
+  gap: 0;
+  align-items: stretch;
+  transition: grid-template-columns 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.reader-layout.resizing {
+  transition: none;
+}
+@media (max-width: 1100px) {
+  .reader-layout {
+    grid-template-columns: 1fr !important;
+  }
+  .resizer-bar {
+    display: none;
+  }
+  .side-results-panel {
+    height: auto !important;
+    max-height: 500px;
+    width: 100% !important;
+  }
+}
+
+/* Resizer */
+.resizer-bar {
+  width: 24px;
+  height: auto;
+  cursor: col-resize;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 10;
+  margin: 0;
+  transition: all 0.2s;
+}
+.resizer-line {
+  width: 1px;
+  height: 100%;
+  background: rgba(148, 163, 184, 0.15);
+  transition: all 0.3s;
+}
+.resizer-handle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 12px;
+  height: 48px;
+  background: var(--ink-600);
+  border: 1px solid var(--text-2);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+  opacity: 0.6;
+}
+.grip-dot {
+  width: 3px;
+  height: 3px;
+  background: var(--on-dark-5);
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+.resizer-bar:hover .resizer-handle,
+.resizer-bar.active .resizer-handle {
+  opacity: 1;
+  height: 64px;
+  background: var(--blue);
+  border-color: var(--blue-lt);
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+}
+.resizer-bar:hover .grip-dot,
+.resizer-bar.active .grip-dot {
+  background: var(--surface);
+}
+.resizer-bar:hover .resizer-line,
+.resizer-bar.active .resizer-line {
+  background: rgba(59, 130, 246, 0.4);
+  width: 2px;
+}
+
+.book-reader-viewer-main {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+
+/* Thumbnails Strip */
+.thumbnails-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: rgba(15, 23, 42, 0.6);
+  border-radius: 12px;
+  padding: 12px;
+  border: 1px solid var(--ink-500);
+  height: auto;
+}
+.strip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(74, 85, 104, 0.5);
+  padding-bottom: 8px;
+  margin-bottom: 4px;
+}
+.strip-header h3 {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--on-dark-2);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.page-nav-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--on-dark-4);
+}
+.page-counter-form {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 4px;
+}
+.page-input {
+  width: 44px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(74, 85, 104, 0.8);
+  border-radius: 4px;
+  color: var(--on-dark-1);
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  outline: none;
+  padding: 2px 0;
+  transition: all 0.2s;
+}
+.page-input:focus {
+  background: rgba(30, 41, 59, 0.9);
+  border-color: var(--blue);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+.page-total {
+  color: var(--on-dark-5);
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.thumbnails-row {
+  display: flex;
+  flex-direction: row;
+  overflow-x: auto;
+  gap: 12px;
+  padding-bottom: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ink-500) transparent;
+}
+.thumbnails-row::-webkit-scrollbar {
+  height: 6px;
+}
+.thumbnails-row::-webkit-scrollbar-track {
+  background: transparent;
+}
+.thumbnails-row::-webkit-scrollbar-thumb {
+  background-color: var(--ink-500);
+  border-radius: 10px;
+}
+.strip-thumb-btn {
+  flex: 0 0 auto;
+  width: 80px;
+  height: 110px;
+  background: var(--ink-750);
+  border: 2px solid transparent;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  padding: 0;
+  position: relative;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.strip-thumb-btn img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+.strip-thumb-btn.selected {
+  border-color: var(--blue);
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
+}
+.strip-thumb-btn:hover:not(.selected) {
+  border-color: var(--ink-400);
+}
+.thumb-label {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(15, 23, 42, 0.8);
+  color: white;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 2px 0;
+  text-align: center;
+}
+
+.side-results-panel {
+  height: 0;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+.side-results-container {
+  flex: 1;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid var(--ink-500);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Processing animations */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+@keyframes breathing {
+  0%, 100% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.2), inset 0 0 0 rgba(59, 130, 246, 0); }
+  50%       { box-shadow: 0 0 20px rgba(59, 130, 246, 0.5), inset 0 0 10px rgba(59, 130, 246, 0.2); }
+}
+
+.glow-btn-group.loading {
+  animation: breathing 2s infinite ease-in-out;
+  cursor: wait;
+}
+.glow-btn-group.loading .glow-btn-content {
+  background: linear-gradient(
+    90deg,
+    rgba(15, 23, 42, 0.9) 0%,
+    rgba(30, 41, 59, 0.95) 50%,
+    rgba(15, 23, 42, 0.9) 100%
+  ) !important;
+  background-size: 200% 100% !important;
+  animation: shimmer 1.5s infinite linear !important;
+  border-color: var(--blue) !important;
+  color: var(--blue-lt) !important;
+}
+
+.loading-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(96, 165, 250, 0.2);
+  border-top-color: var(--blue-lt);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+}
+
+/* OSD action button overrides for the copy/translate buttons in the side panel */
+.osd-btn {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.osd-btn:hover:not(:disabled) {
+  background: var(--teal-dark) !important;
+  border-color: var(--teal-hover) !important;
+  color: var(--surface) !important;
+}
+.osd-btn.copy-transcription-btn:hover:not(:disabled) {
+  background: rgba(59, 130, 246, 0.1) !important;
+  border-color: var(--blue) !important;
+  color: var(--blue-lt) !important;
+}
+.osd-btn.translate-btn:hover:not(:disabled) {
+  background: rgba(59, 130, 246, 0.1) !important;
+  border-color: var(--blue) !important;
+  color: var(--blue-lt) !important;
+}

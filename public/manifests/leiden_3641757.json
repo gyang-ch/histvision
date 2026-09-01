@@ -1,0 +1,104 @@
+{
+    "@context": "http://iiif.io/api/presentation/2/context.json",
+    "@id": "https://digitalcollections.universiteitleiden.nl/iiif_manifest/item:3641757/manifest",
+    "@type": "sc:Manifest",
+    "label": "Kitāb al-Ḥašāʾiš fī hāyūlā al-ʿilāg ̌al-ṭibbī Or. 289",
+    "logo": "https://iiifviewer.universiteitleiden.nl/logo/",
+    "metadata": [
+        {
+            "label": "Title",
+            "value": "Kitāb al-Ḥašāʾiš fī hāyūlā al-ʿilāg ̌al-ṭibbī Or. 289"
+        },
+        {
+            "label": "Title",
+            "value": "Peri hulēs iatrikēs"
+        },
+        {
+            "label": "Title",
+            "value": "Materia medica"
+        },
+        {
+            "label": "Author/creator",
+            "value": [
+                "Dioscorides Pedanius (1e E)",
+                "Ḥunayn b. Isḥāq al-ʿIbādī, Abū Zayd (810-873)",
+                "Stephanus b. Bāsīl",
+                "Nātilī, Ḥusayn b. Ibrāhīm al- (990 fl)"
+            ]
+        },
+        {
+            "label": "Subject (topical)",
+            "value": "Manuscripts (documents)"
+        },
+        {
+            "label": "Country",
+            "value": {
+                "@value": "Uzbekistan",
+                "@language": "eng"
+            }
+        },
+        {
+            "label": "Language",
+            "value": {
+                "@value": "Arabic",
+                "@language": "eng"
+            }
+        },
+        {
+            "label": "Language",
+            "value": {
+                "@value": "Greek, Ancient (to 1453)",
+                "@language": "eng"
+            }
+        },
+        {
+            "label": "Extent",
+            "value": "233 + 464 scans"
+        },
+        {
+            "label": "Note",
+            "value": [
+                "Arabic translation of Dioscurides, Peri hulēs iatrikēs, more commonly known as the Materia medica. The work was originally translated from Greek into Arabic via Syriac by Ḥunayn b. Isḥāq (810-873) with the collaboration of Stephanus b. Bāsīl between 847-861 CE. This translation was slightly revised by Ḥusayn b. Ibrāhīm al-Nātilī in 990-991 CE. The current copy is based on an exemplar in the hand of al-Nātilī. The work was offered to the amīr of Samarqand, Abū ʿAlī al-Simǧūrī.",
+                "Naskh script, mostly without diacritical signs.",
+                "Brown full leather Islamic binding with flap and blind tooled decoration on the covers, not contemporary with the text block.",
+                "Acquired by Levinus Warner (1619-1665) and bequeathed to Leiden University on his death.",
+                "One of the oldest illustrated Arabic MSS in existence.",
+                "Not accessible without permission of the curator.",
+                "The manuscript underwent an extensive conservation treatment at the library's conservation studio in 2022."
+            ]
+        },
+        {
+            "label": "Reference",
+            "value": "GAL I 207, S I 369, GAS III 58-60, CCO 1301 (III, 227-229), Voorhoeve 109, Goed Gezien 151, 155. For an elaborate study of the Arabic versions of the Materia medica see M.M. Sadek, The Arabic Materia Medica of Dioscorides, St-Jean-Chrysostome 1983"
+        },
+        {
+            "label": "Published",
+            "value": "Samarqand, copied on a Monday in the middle of Ramaḍān 475/[February 1083]"
+        },
+        {
+            "label": "Form",
+            "value": "Arabic MS on paper, 228 f. : with numerous coloured illustrations, mainly botanical ; 30x19.5 (24.5x14.5) cm"
+        },
+        {
+            "label": "Shelfmark",
+            "value": "Or. 289"
+        },
+        {
+            "label": "Persistent URL",
+            "value": "http://hdl.handle.net/1887.1/item:3641757"
+        }
+    ],
+    "attribution": "Full access.<br><a href='https://creativecommons.org/publicdomain/mark/1.0/'>The rights status of this resource is public domain</a>",
+    "viewingDirection": "left-to-right",
+    "viewingHint": "paged",
+    "sequences": [
+        {
+            "@type": "sc:Sequence",
+            "label": "Kitāb al-Ḥašāʾiš fī hāyūlā al-ʿilāg ̌al-ṭibbī Or. 289",
+            "canvases": [
+                [],
+                []
+            ]
+        }
+    ]
+}
