@@ -151,12 +151,12 @@ function App() {
             ))}
             <br />
             <span className="hero-gradient">
-              {'Global Botanical Iconography'.split('').map((char, i) => (
+              {'Illustrations in Historical Books'.split('').map((char, i) => (
                 <span key={i} className="hero-char">{char}</span>
               ))}
             </span>
           </h1>
-          <p className="subtitle">Exploring the intersection of art history, science, and digital humanities.</p>
+          <p className="subtitle">Exploring the intersection of visual culture, book history, and digital humanities.</p>
         </div>
       </header>
 
