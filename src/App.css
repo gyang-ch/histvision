@@ -789,7 +789,7 @@
   font-family: "Playfair Display", Georgia, serif;
 }
 
-.brand-phyto {
+.brand-hist {
   font-style: normal;
   font-weight: 500;
   font-size: 1.45rem;
@@ -812,7 +812,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  .brand-phyto {
+  .brand-hist {
     color: #f1f5f9;
     text-shadow: 0 0 15px rgba(255,255,255,0.05);
   }
@@ -974,7 +974,3 @@
   filter: brightness(1.05) saturate(1.2);
 }
 
-.full-width-content {
-  padding: 0 !important;
-  max-width: 100% !important;
-}

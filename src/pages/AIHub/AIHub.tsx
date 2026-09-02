@@ -15,13 +15,13 @@ export function AIHubPage() {
   if (!bookId) {
     return (
       <section className="ai-hub-empty">
-        <h2 className="ai-hub-title">AI Hub</h2>
+        <h2 className="ai-hub-title">Explore</h2>
         <p className="ai-hub-body">
-          The AI Hub opens from a selected book. Choose an item in the Library to begin.
+          Explore opens from a selected book. Choose an item in Books to begin.
         </p>
         <div className="ai-hub-actions">
           <Link className="ai-hub-link" to="/library">
-            Go to Library
+            Go to Books
           </Link>
         </div>
       </section>
@@ -31,13 +31,13 @@ export function AIHubPage() {
   if (!selectedBook) {
     return (
       <section className="ai-hub-empty">
-        <h2 className="ai-hub-title">AI Hub</h2>
+        <h2 className="ai-hub-title">Explore</h2>
         <p className="ai-hub-body">
           This manuscript could not be found. It may have been renamed or removed.
         </p>
         <div className="ai-hub-actions">
           <Link className="ai-hub-link" to="/library">
-            Browse Library
+            Browse Books
           </Link>
         </div>
       </section>

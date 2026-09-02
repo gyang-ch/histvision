@@ -173,7 +173,7 @@ export const BookDetail: React.FC<BookDetailProps> = ({ books, period, onSelectB
             }}
             role={onSelectBook ? 'button' : undefined}
             tabIndex={onSelectBook ? 0 : -1}
-            aria-label={onSelectBook ? `Open AI Hub for ${book.title}` : undefined}
+            aria-label={onSelectBook ? `Open Explore for ${book.title}` : undefined}
           >
             <div className="book-image-container">
               <SmartImage src={book.thumbnailUrl} alt={book.title} className="book-thumbnail" />

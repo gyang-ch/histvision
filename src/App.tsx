@@ -8,7 +8,6 @@ import { HeroMosaic } from './components/HeroMosaic'
 import { HomePage } from './pages/Home/Home'
 import { LibraryPage } from './pages/Library/Library'
 import { AIHubPage } from './pages/AIHub/AIHub'
-import { GeographicalDistribution } from './pages/GeographicalDistribution/GeographicalDistribution'
 import { IllustrationsPage } from './pages/Illustrations/Illustrations'
 import { MethodologyPage } from './pages/Methodology/Methodology'
 
@@ -24,11 +23,10 @@ export const scrollToContent = (heroRef: React.RefObject<HTMLElement | null>) =>
 
 const navItems = [
   { to: '/home', label: 'Home', end: true },
-  { to: '/library', label: 'Library', end: true },
-  { to: '/ai-hub', label: 'AI Hub', end: false },
-  { to: '/illustrations', label: 'Illustrations', end: true },
-  { to: '/geography', label: 'Geographical Distribution', end: true },
-  { to: '/methodology', label: 'Methodology', end: true },
+  { to: '/library', label: 'Books', end: true },
+  { to: '/ai-hub', label: 'Explore', end: false },
+  { to: '/illustrations', label: 'Illustration Archive', end: true },
+  { to: '/methodology', label: 'Methods & Findings', end: true },
 ] as const
 
 function App() {
@@ -47,10 +45,6 @@ function App() {
 
   const pathname = location.pathname
   const isReaderMode = useMemo(() => pathname.startsWith('/ai-hub/') && pathname.split('/').length >= 3, [pathname])
-  const isFullWidth = useMemo(
-    () => pathname.startsWith('/geography'),
-    [pathname],
-  )
   const isWhiteTheme = pathname === '/home' || pathname === '/' || pathname.startsWith('/library') || pathname.startsWith('/ai-hub') || pathname.startsWith('/illustrations') || pathname.startsWith('/methodology')
 
   // Scroll to top on navigation so the hero and its entrance animation are visible
@@ -176,9 +170,9 @@ function App() {
             }}
             aria-label="Go to home"
           >
-            <img src="/Icon.png" className="brand-icon" alt="PhytoVision Logo" />
+            <img src="/Icon.png" className="brand-icon" alt="HistVision Logo" />
             <span className="brand-title" aria-hidden="true">
-              <span className="brand-phyto">Phyto</span>
+              <span className="brand-hist">Hist</span>
               <span className="brand-vision">Vision</span>
             </span>
           </button>
@@ -200,7 +194,7 @@ function App() {
 
       <main
         id="main"
-        className={`content ${isReaderMode ? 'reader-mode' : ''} ${isFullWidth ? 'full-width-content' : ''} ${isWhiteTheme ? 'white-theme-mode' : ''}`}
+        className={`content ${isReaderMode ? 'reader-mode' : ''} ${isWhiteTheme ? 'white-theme-mode' : ''}`}
       >
         <Routes>
           <Route path="/" element={<Navigate to="/home" replace />} />
@@ -208,7 +202,6 @@ function App() {
           <Route path="/library" element={<LibraryPage />} />
           <Route path="/ai-hub" element={<AIHubPage />} />
           <Route path="/ai-hub/:bookId" element={<AIHubPage />} />
-<Route path="/geography" element={<GeographicalDistribution />} />
           <Route path="/illustrations" element={<IllustrationsPage />} />
           <Route path="/methodology" element={<MethodologyPage />} />
           <Route path="*" element={<Navigate to="/home" replace />} />

@@ -16,8 +16,6 @@ export default defineConfig({
     alias: {
       'react': path.resolve(__dirname, './node_modules/react'),
       'react-dom': path.resolve(__dirname, './node_modules/react-dom'),
-      'react-redux': path.resolve(__dirname, './node_modules/react-redux'),
-      'styled-components': path.resolve(__dirname, './node_modules/styled-components'),
     }
   },
   server: {

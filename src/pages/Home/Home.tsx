@@ -1,79 +1,75 @@
-import { useRef, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import './Home.css'
 
-const AZURE_BASE = import.meta.env.VITE_AZURE_BLOB_BASE as string
-const AZURE_SAS = import.meta.env.VITE_AZURE_SAS_TOKEN as string
-
-const PRESENTATION_VIDEO_URL = `${AZURE_BASE}/presentation.mp4?${AZURE_SAS}`
+// Video temporarily disabled — presentation video to be re-recorded.
+// import { useRef, useState } from 'react'
+// const AZURE_BASE = import.meta.env.VITE_AZURE_BLOB_BASE as string
+// const AZURE_SAS = import.meta.env.VITE_AZURE_SAS_TOKEN as string
+// const PRESENTATION_VIDEO_URL = `${AZURE_BASE}/presentation.mp4?${AZURE_SAS}`
 
 const entries = [
   {
     to: '/library',
-    title: 'Library',
+    title: 'Books',
     side: 'High-resolution book images are retrieved via IIIF directly from museum and library servers, supporting decentralised access to digital cultural resources.',
     align: 'left',
   },
   {
     to: '/ai-hub',
-    title: 'AI Hub',
+    title: 'Explore',
     side: 'Transcription is handled by Kraken and Qwen-VL, a vision-language model reflecting the multimodal turn in Digital Humanities.',
     align: 'right',
   },
   {
     to: '/illustrations',
-    title: 'Illustrations',
+    title: 'Illustration Archive',
     side: 'Plant illustrations extracted and cropped from book page images by the YOLO model.',
     align: 'left',
-  },
-  {
-    to: '/geography',
-    title: 'Geographical Distribution',
-    side: 'Plant distributions are mapped using kepler.gl, situating the archive in space and engaging spatial humanities methods.',
-    align: 'right',
   },
 ] as const
 
 export function HomePage() {
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const videoWrapperRef = useRef<HTMLDivElement>(null)
-  const [buffering, setBuffering] = useState(false)
+  // Video temporarily disabled — presentation video to be re-recorded.
+  // const videoRef = useRef<HTMLVideoElement>(null)
+  // const videoWrapperRef = useRef<HTMLDivElement>(null)
+  // const [buffering, setBuffering] = useState(false)
 
-  const toggleFullscreen = () => {
-    if (!videoWrapperRef.current) return
-    if (!document.fullscreenElement) {
-      videoWrapperRef.current.requestFullscreen()
-    } else {
-      document.exitFullscreen()
-    }
-  }
+  // const toggleFullscreen = () => {
+  //   if (!videoWrapperRef.current) return
+  //   if (!document.fullscreenElement) {
+  //     videoWrapperRef.current.requestFullscreen()
+  //   } else {
+  //     document.exitFullscreen()
+  //   }
+  // }
 
-  const togglePictureInPicture = () => {
-    if (!videoRef.current || !document.pictureInPictureEnabled) return
-    if (document.pictureInPictureElement) {
-      document.exitPictureInPicture()
-    } else {
-      videoRef.current.requestPictureInPicture()
-    }
-  }
+  // const togglePictureInPicture = () => {
+  //   if (!videoRef.current || !document.pictureInPictureEnabled) return
+  //   if (document.pictureInPictureElement) {
+  //     document.exitPictureInPicture()
+  //   } else {
+  //     videoRef.current.requestPictureInPicture()
+  //   }
+  // }
 
-  const handleVideoKeyDown = (event: React.KeyboardEvent<HTMLVideoElement>) => {
-    if (event.key === 'p' || event.key === 'P') {
-      event.preventDefault()
-      togglePictureInPicture()
-    }
-  }
+  // const handleVideoKeyDown = (event: React.KeyboardEvent<HTMLVideoElement>) => {
+  //   if (event.key === 'p' || event.key === 'P') {
+  //     event.preventDefault()
+  //     togglePictureInPicture()
+  //   }
+  // }
 
   return (
     <section className="home">
       <div className="home-intro">
         <p>
-          PhytoVision explores the history of botany through digitised historical books,
+          HistVision explores the history of botany through digitised historical books,
           investigating how computer-assisted techniques can enhance the analysis of botanical
           texts and images at large scale through AI models and digital infrastructures.
         </p>
       </div>
 
+      {/* Video temporarily disabled — presentation video to be re-recorded.
       <div className="home-video">
         <p className="home-video-caption">The video below is my presentation of the project.</p>
         <div className="home-video-wrapper" ref={videoWrapperRef}>
@@ -84,7 +80,7 @@ export function HomePage() {
             controls
             playsInline
             preload="metadata"
-            aria-label="PhytoVision project presentation video"
+            aria-label="HistVision project presentation video"
             onDoubleClick={toggleFullscreen}
             onKeyDown={handleVideoKeyDown}
             onWaiting={() => setBuffering(true)}
@@ -112,6 +108,7 @@ export function HomePage() {
           </button>
         </div>
       </div>
+      */}
 
       <div className="home-entries">
         {entries.map((entry) => (

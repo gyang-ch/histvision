@@ -692,7 +692,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
         <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
       </svg>
       <p style={{ color: '#94a3b8', fontSize: '1rem', margin: 0 }}>{error}</p>
-      <button onClick={onBack} style={{ padding: '0.65rem 2rem', fontSize: '0.95rem', fontWeight: 700, borderRadius: '8px', border: '1px solid #475569', background: '#1e293b', color: '#e2e8f0', cursor: 'pointer', letterSpacing: '0.03em' }}>← Back to Library</button>
+      <button onClick={onBack} style={{ padding: '0.65rem 2rem', fontSize: '0.95rem', fontWeight: 700, borderRadius: '8px', border: '1px solid #475569', background: '#1e293b', color: '#e2e8f0', cursor: 'pointer', letterSpacing: '0.03em' }}>← Back to Books</button>
     </div>
   );
   if (!tileSources || tileSources.length === 0) return (
@@ -701,7 +701,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
         <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
       </svg>
       <p style={{ color: '#94a3b8', fontSize: '1rem', margin: 0 }}>No images found.</p>
-      <button onClick={onBack} style={{ padding: '0.65rem 2rem', fontSize: '0.95rem', fontWeight: 700, borderRadius: '8px', border: '1px solid #475569', background: '#1e293b', color: '#e2e8f0', cursor: 'pointer', letterSpacing: '0.03em' }}>← Back to Library</button>
+      <button onClick={onBack} style={{ padding: '0.65rem 2rem', fontSize: '0.95rem', fontWeight: 700, borderRadius: '8px', border: '1px solid #475569', background: '#1e293b', color: '#e2e8f0', cursor: 'pointer', letterSpacing: '0.03em' }}>← Back to Books</button>
     </div>
   );
 
