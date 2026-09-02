@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import gsap from 'gsap'
 import { Paginator } from '../../components/Paginator'
 import {
   cropImageUrl,
@@ -18,7 +19,7 @@ import type { BookRecord } from '../../data/books'
 import { DinoIllustrationNetwork } from './DinoIllustrationNetwork'
 import './DinoIllustrationArchive.css'
 
-const PAGE_SIZE = 60
+const PAGE_SIZE = 20
 
 function bookKey(source: string, itemId: string) {
   return `${source}\0${itemId}`
@@ -94,11 +95,123 @@ function ArchiveInspector({
   const [neighbours, setNeighbours] = useState<Array<{ item: ArchiveItem; score: number }>>([])
   const [error, setError] = useState<string | null>(null)
 
+  const backdropRef = useRef<HTMLDivElement>(null)
+  const cardRef = useRef<HTMLDivElement>(null)
+  // Track mount status so the exit-animation onComplete never calls onClose
+  // after the component has already been unmounted (e.g. a neighbour click
+  // swaps in a fresh, differently-keyed instance before the tween finishes).
+  const isMountedRef = useRef(true)
   useEffect(() => {
-    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') onClose() }
+    isMountedRef.current = true
+    return () => { isMountedRef.current = false }
+  }, [])
+  // Guards so the content/neighbour stagger-ins each fire once per reveal
+  // rather than replaying every time an unrelated state update re-renders.
+  const contentAnimatedRef = useRef(false)
+  const neighboursAnimatedRef = useRef(false)
+
+  // Animated close – plays exit tween, then unmounts.
+  const animatedClose = useCallback(() => {
+    const backdrop = backdropRef.current
+    const card = cardRef.current
+    if (!backdrop || !card || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      onClose()
+      return
+    }
+    // Block further interaction while animating out
+    card.style.pointerEvents = 'none'
+    gsap.to(backdrop, { opacity: 0, duration: 0.28, ease: 'power2.in' })
+    gsap.to(card, {
+      opacity: 0,
+      y: 20,
+      scale: 0.96,
+      duration: 0.28,
+      ease: 'power3.in',
+      onComplete: () => { if (isMountedRef.current) onClose() },
+    })
+  }, [onClose])
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') animatedClose() }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
+  }, [animatedClose])
+
+  // GSAP entrance – backdrop fade + card pop-in, runs once per mount.
+  useEffect(() => {
+    const backdrop = backdropRef.current
+    const card = cardRef.current
+    if (!backdrop || !card || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+
+    gsap.fromTo(backdrop, { opacity: 0 }, { opacity: 1, duration: 0.32, ease: 'power2.out' })
+    const tween = gsap.fromTo(
+      card,
+      { opacity: 0, y: 32, scale: 0.96 },
+      { opacity: 1, y: 0, scale: 1, duration: 0.52, ease: 'power3.out', clearProps: 'transform' },
+    )
+    return () => { tween.kill() }
+  }, [])
+
+  // Content stagger-in – fires once the fetched item/geometry replace the
+  // "Loading illustration details…" placeholder inside the card.
+  useEffect(() => {
+    if (!item || !geometry || contentAnimatedRef.current) return
+    contentAnimatedRef.current = true
+    const card = cardRef.current
+    if (!card || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+
+    const tl = gsap.timeline()
+
+    const sourcePage = card.querySelector('.archive-source-page')
+    if (sourcePage) {
+      tl.fromTo(
+        sourcePage,
+        { opacity: 0, x: -16 },
+        { opacity: 1, x: 0, duration: 0.4, ease: 'power2.out', clearProps: 'transform' },
+      )
+    }
+
+    const metaEls = card.querySelectorAll('.archive-inspector-meta > *')
+    if (metaEls.length) {
+      tl.fromTo(
+        metaEls,
+        { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: 0.3, stagger: 0.05, ease: 'power2.out', clearProps: 'transform' },
+        '-=0.25',
+      )
+    }
+
+    const neighboursSection = card.querySelector('.archive-neighbours')
+    if (neighboursSection) {
+      tl.fromTo(
+        neighboursSection,
+        { opacity: 0, y: 14 },
+        { opacity: 1, y: 0, duration: 0.38, ease: 'power2.out', clearProps: 'transform' },
+        '-=0.08',
+      )
+    }
+
+    return () => { tl.kill() }
+  }, [item, geometry])
+
+  // Reset the neighbour-thumb stagger guard whenever the embedding model
+  // changes, so switching DINOv2 ↔ OpenCLIP re-plays the reveal for the new set.
+  useEffect(() => { neighboursAnimatedRef.current = false }, [model])
+
+  // Neighbour thumbs stagger in once their images have loaded for this model.
+  useEffect(() => {
+    if (!neighbours.length || neighboursAnimatedRef.current) return
+    neighboursAnimatedRef.current = true
+    const strip = cardRef.current?.querySelector('.archive-neighbour-strip')
+    if (!strip || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const thumbs = strip.querySelectorAll('button')
+    if (!thumbs.length) return
+    gsap.fromTo(
+      thumbs,
+      { opacity: 0, scale: 0.88 },
+      { opacity: 1, scale: 1, duration: 0.28, stagger: 0.04, ease: 'back.out(1.4)', clearProps: 'transform' },
+    )
+  }, [neighbours])
 
   useEffect(() => {
     let active = true
@@ -127,9 +240,13 @@ function ArchiveInspector({
   }, [model, row])
 
   return (
-    <div className="archive-inspector-backdrop" onPointerDown={(event) => { if (event.target === event.currentTarget) onClose() }}>
-      <article className="archive-inspector" role="dialog" aria-modal="true" aria-label="Illustration details">
-        <button type="button" className="archive-inspector-close" onClick={onClose} aria-label="Close illustration details">
+    <div
+      className="archive-inspector-backdrop"
+      ref={backdropRef}
+      onPointerDown={(event) => { if (event.target === event.currentTarget) animatedClose() }}
+    >
+      <article className="archive-inspector" ref={cardRef} role="dialog" aria-modal="true" aria-label="Illustration details">
+        <button type="button" className="archive-inspector-close" onClick={animatedClose} aria-label="Close illustration details">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
         </button>
         {error && <p className="archive-error" role="alert">{error}</p>}

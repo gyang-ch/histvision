@@ -217,7 +217,10 @@ export function IllustrationPopup({
   // Track mount status so the exit-animation onComplete never calls onClose
   // after the popup has already been replaced by a neighbour selection.
   const isMountedRef = useRef(true)
-  useEffect(() => () => { isMountedRef.current = false }, [])
+  useEffect(() => {
+    isMountedRef.current = true
+    return () => { isMountedRef.current = false }
+  }, [])
 
   // Animated close – plays exit tween, then unmounts.
   const animatedClose = useCallback(() => {

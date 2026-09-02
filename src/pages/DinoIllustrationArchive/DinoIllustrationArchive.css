@@ -75,18 +75,6 @@
   align-items: start;
 }
 
-.archive-sidebar {
-  position: sticky;
-  top: 74px;
-  max-height: calc(100vh - 90px);
-  overflow: auto;
-  padding: 1rem;
-  border: 1px solid #d9dfdc;
-  border-radius: 9px;
-  background: #faf9f5;
-  scrollbar-width: thin;
-}
-
 .archive-filter-heading,
 .archive-results-bar,
 .archive-neighbour-heading,
@@ -701,8 +689,6 @@
   }
 
   .archive-sidebar {
-    position: static;
-    max-height: none;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0 1rem;
