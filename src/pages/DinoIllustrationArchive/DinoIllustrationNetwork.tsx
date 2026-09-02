@@ -168,7 +168,6 @@ export function DinoIllustrationNetwork({ onSelectRow }: { onSelectRow: (row: nu
     <section className="archive-network" aria-labelledby="archive-network-heading">
       <div className="archive-section-heading">
         <div>
-          <p className="archive-kicker">Visual structure</p>
           <h2 id="archive-network-heading">Illustration Network</h2>
           <p>
             All {index?.cropCount.toLocaleString() ?? '…'} illustrations positioned in a precomputed UMAP projection.

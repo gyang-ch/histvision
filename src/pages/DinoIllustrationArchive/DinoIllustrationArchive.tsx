@@ -25,12 +25,6 @@ function bookKey(source: string, itemId: string) {
   return `${source}\0${itemId}`
 }
 
-function formatTier(tier: string) {
-  if (tier.includes('high')) return 'High confidence'
-  if (tier.includes('medium')) return 'Medium confidence'
-  return 'Low confidence'
-}
-
 function rowsForFacet(facets: ArchiveFacet[], id: string) {
   return id === 'all' ? null : facets.find((facet) => facet.id === id)?.rows ?? []
 }
@@ -454,7 +448,6 @@ export function DinoIllustrationArchivePage() {
                     <div className="archive-card-image"><img src={cropImageUrl(item)} alt={`Illustration from ${book?.title ?? item.item_id}`} loading="lazy" /></div>
                     <div className="archive-card-tags"><span>{book?.sourceLabel ?? item.source}</span><span>{Math.round(item.confidence * 100)}%</span></div>
                     <h3>{book?.title ?? item.item_id}</h3>
-                    <p>{formatTier(item.confidence_tier)} · {item.page_number ?? item.page_filename}</p>
                   </button>
                 )
               })}
