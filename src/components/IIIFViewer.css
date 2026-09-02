@@ -77,3 +77,57 @@
 .osd-btn:active {
   background-color: #0f766e;
 }
+.archive-detection-box {
+  fill: rgba(245, 158, 68, 0.08);
+  stroke: #f59e44;
+  stroke-width: 2.2;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 1px 2px rgba(15, 23, 42, 0.34));
+  pointer-events: auto;
+  cursor: help;
+}
+
+.archive-detection-label { pointer-events: none; }
+.archive-detection-label rect {
+  fill: rgba(245, 158, 68, 0.94);
+  stroke: rgba(255, 255, 255, 0.78);
+  stroke-width: 0.7;
+}
+
+.archive-detection-label text {
+  fill: #17231f;
+  font-family: Inter, "Segoe UI", sans-serif;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0.01em;
+}
+
+.archive-detection[data-detection-label="text_block"] .archive-detection-box {
+  fill: rgba(72, 169, 205, 0.055);
+  stroke: #48a9cd;
+  stroke-width: 1.7;
+}
+
+.archive-detection[data-detection-label="text_block"] .archive-detection-label rect {
+  fill: rgba(72, 169, 205, 0.93);
+}
+
+.archive-detection[data-detection-label="text_block"] .archive-detection-label {
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+.archive-detection[data-detection-label="text_block"]:hover .archive-detection-label,
+.archive-detection[data-detection-label="text_block"]:focus-visible .archive-detection-label {
+  opacity: 1;
+}
+
+.archive-detection:focus-visible { outline: none; }
+.archive-detection:focus-visible .archive-detection-box {
+  stroke-width: 3;
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.85));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .archive-detection[data-detection-label="text_block"] .archive-detection-label { transition: none; }
+}

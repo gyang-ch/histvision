@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css';
 import { gsap } from 'gsap';
@@ -6,6 +6,7 @@ import { IIIFViewer } from './IIIFViewer';
 import type { OCRResult } from './IIIFViewer';
 import type { CharacterBox } from './IIIFViewer';
 import type { BookRecord } from '../data/books';
+import { fetchBookDetectionBoxes, type PageDetectionBox } from '../data/detectionBoxes';
 import { getPlantColor } from '../utils/colors';
 import { bookLangToCode, getPrompt, getDecodingParams } from '../utils/ocrProfiles';
 import './BookReader.css';
@@ -154,7 +155,48 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
   const [error, setError] = useState<string | null>(null);
   const [selectedPageIndex, setSelectedPageIndex] = useState(0);
   const [pageInput, setPageInput] = useState((selectedPageIndex + 1).toString());
+  const [pageDetections, setPageDetections] = useState<Map<number, PageDetectionBox[]>>(new Map());
+  const [detectionsLoading, setDetectionsLoading] = useState(false);
+  const [detectionsError, setDetectionsError] = useState(false);
+  const [showIllustratedPagesOnly, setShowIllustratedPagesOnly] = useState(false);
   const thumbnailsRowRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let active = true;
+    setPageDetections(new Map());
+    setDetectionsError(false);
+    setShowIllustratedPagesOnly(false);
+    if (book.source === 'custom') return () => { active = false; };
+
+    setDetectionsLoading(true);
+    fetchBookDetectionBoxes(book)
+      .then((detections) => {
+        if (active) setPageDetections(detections);
+      })
+      .catch((error) => {
+        console.error('Failed to load DINO-1575 detection boxes:', error);
+        if (active) setDetectionsError(true);
+      })
+      .finally(() => {
+        if (active) setDetectionsLoading(false);
+      });
+
+    return () => { active = false; };
+  }, [book]);
+
+  const illustratedPageIndexes = useMemo(
+    () => [...pageDetections.entries()]
+      .filter(([index, detections]) => index >= 0 && index < tileSources.length && detections.some((detection) => detection.label === 'illustration'))
+      .map(([index]) => index)
+      .sort((a, b) => a - b),
+    [pageDetections, tileSources.length],
+  );
+  const visiblePageIndexes = useMemo(
+    () => showIllustratedPagesOnly
+      ? illustratedPageIndexes
+      : Array.from({ length: tileSources.length }, (_, index) => index),
+    [illustratedPageIndexes, showIllustratedPagesOnly, tileSources.length],
+  );
 
   // Sync pageInput with selectedPageIndex
   useEffect(() => {
@@ -164,7 +206,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
   // Synchronize thumbnail scrolling
   useEffect(() => {
     if (thumbnailsRowRef.current) {
-      const selectedThumb = thumbnailsRowRef.current.children[selectedPageIndex] as HTMLElement;
+      const selectedThumb = thumbnailsRowRef.current.querySelector<HTMLElement>(`[data-page-index="${selectedPageIndex}"]`);
       if (selectedThumb) {
         selectedThumb.scrollIntoView({
           behavior: 'smooth',
@@ -173,7 +215,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
         });
       }
     }
-  }, [selectedPageIndex]);
+  }, [selectedPageIndex, showIllustratedPagesOnly]);
   
   // Resizing State
   const [sidePanelWidth, setSidePanelWidth] = useState(420);
@@ -738,6 +780,16 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
                   Library Folios
                 </h3>
                 <div className="page-nav-container">
+                  {book.source !== 'custom' && <label className={`illustration-page-filter ${detectionsLoading ? 'loading' : ''}`}>
+                    <input
+                      type="checkbox"
+                      checked={showIllustratedPagesOnly}
+                      disabled={detectionsLoading || detectionsError || illustratedPageIndexes.length === 0}
+                      onChange={(event) => setShowIllustratedPagesOnly(event.target.checked)}
+                    />
+                    <span>Illustrated pages</span>
+                    <small>{detectionsLoading ? '…' : illustratedPageIndexes.length.toLocaleString()}</small>
+                  </label>}
                   <form 
                     className="page-counter-form" 
                     onSubmit={(e) => {
@@ -767,10 +819,12 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
                     />
                     <span className="page-total"> / {tileSources.length} pages</span>
                   </form>
-                </div>              </div>
+              </div>              </div>
               <div className="thumbnails-row custom-scrollbar" ref={thumbnailsRowRef}>
-                {tileSources.map((source, index) => {
+                {visiblePageIndexes.map((index) => {
+                  const source = tileSources[index];
                   const isSelected = selectedPageIndex === index;
+                  const detectionCount = pageDetections.get(index)?.filter((detection) => detection.label === 'illustration').length ?? 0;
                   const thumbUrl = (source && source.type === 'image')
                     ? source.url
                     : (source['@id'] || source.id || (typeof source === 'string' ? source : '')).replace('/info.json', '/full/200,/0/default.jpg');
@@ -778,6 +832,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
                   return (
                     <button
                       key={index}
+                      data-page-index={index}
                       onClick={() => setSelectedPageIndex(index)}
                       className={`strip-thumb-btn ${isSelected ? 'selected' : ''}`}
                       title={`Page ${index + 1}`}
@@ -788,6 +843,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
                         isNearSelected={Math.abs(index - selectedPageIndex) <= 3}
                         alt={`Page ${index + 1}`}
                       />
+                      {detectionCount > 0 && <span className="thumb-detection-count" aria-label={`${detectionCount} detected ${detectionCount === 1 ? 'illustration' : 'illustrations'}`}>{detectionCount}</span>}
                       <div className="thumb-label">{index + 1}</div>
                     </button>
                   );
@@ -814,6 +870,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
                 highlightIndex={highlightIndex}
                 onHoverLine={setHighlightIndex}
                 imageSize={imageSize}
+                illustrationBoxes={pageDetections.get(selectedPageIndex) ?? []}
               />
             </div>
           </div>

@@ -4,6 +4,7 @@ import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/animations/scale.css';
 import { getPlantColor } from '../utils/colors';
+import type { PageDetectionBox } from '../data/detectionBoxes';
 import './IIIFViewer.css';
 
 export interface OCRResult {
@@ -32,6 +33,7 @@ interface IIIFViewerProps {
   highlightIndex?: number | null;
   onHoverLine?: (index: number | null) => void;
   imageSize?: { width: number; height: number } | null;
+  illustrationBoxes?: PageDetectionBox[];
 }
 
 export const IIIFViewer: React.FC<IIIFViewerProps> = ({ 
@@ -42,9 +44,11 @@ export const IIIFViewer: React.FC<IIIFViewerProps> = ({
   characterBoxes = [],
   highlightIndex = null,
   onHoverLine,
+  illustrationBoxes = [],
 }) => {
   const viewerRef = useRef<HTMLDivElement>(null);
   const osdRef = useRef<OpenSeadragon.Viewer | null>(null);
+  const [viewerInstance, setViewerInstance] = useState<OpenSeadragon.Viewer | null>(null);
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
@@ -91,12 +95,14 @@ export const IIIFViewer: React.FC<IIIFViewerProps> = ({
       });
 
       osdRef.current = viewer;
+      setViewerInstance(viewer);
     }
 
     return () => {
       if (osdRef.current) {
         osdRef.current.destroy();
         osdRef.current = null;
+        setViewerInstance(null);
       }
     };
   }, []); // Only init once
@@ -251,9 +257,10 @@ export const IIIFViewer: React.FC<IIIFViewerProps> = ({
       </div>
 
       <div ref={viewerRef} style={{ width: '100%', height: '100%' }} />
-      {isReady && osdRef.current && ((ocrResults && ocrResults.length > 0) || (characterBoxes && characterBoxes.length > 0)) && (
+      {isReady && viewerInstance && (illustrationBoxes.length > 0 || (ocrResults && ocrResults.length > 0) || (characterBoxes && characterBoxes.length > 0)) && (
         <OverlayLayer 
-          viewer={osdRef.current} 
+          viewer={viewerInstance}
+          illustrationBoxes={illustrationBoxes}
           ocrResults={ocrResults} 
           characterBoxes={characterBoxes}
           highlightIndex={highlightIndex}
@@ -266,13 +273,14 @@ export const IIIFViewer: React.FC<IIIFViewerProps> = ({
 
 interface OverlayLayerProps {
   viewer: OpenSeadragon.Viewer;
+  illustrationBoxes: PageDetectionBox[];
   ocrResults: OCRResult[];
   characterBoxes: CharacterBox[];
   highlightIndex: number | null;
   onHoverLine?: (index: number | null) => void;
 }
 
-const OverlayLayer: React.FC<OverlayLayerProps> = ({ viewer, ocrResults, characterBoxes, highlightIndex, onHoverLine }) => {
+const OverlayLayer: React.FC<OverlayLayerProps> = ({ viewer, illustrationBoxes, ocrResults, characterBoxes, highlightIndex, onHoverLine }) => {
   const [, setTick] = useState(0);
 
   useEffect(() => {
@@ -304,9 +312,41 @@ const OverlayLayer: React.FC<OverlayLayerProps> = ({ viewer, ocrResults, charact
     }
   };
 
+  const getNormalizedSVGPoints = (box: [number, number, number, number]) => {
+    if (!viewer.viewport || !viewer.world) return null;
+    try {
+      const item = viewer.world.getItemAt(0);
+      if (!item) return null;
+      const size = item.getContentSize();
+      const [x1, y1, x2, y2] = box;
+      return [[x1, y1], [x2, y1], [x2, y2], [x1, y2]].map(([x, y]) => {
+        const viewportPoint = viewer.viewport.imageToViewportCoordinates(x * size.x, y * size.y);
+        return viewer.viewport.viewportToViewerElementCoordinates(viewportPoint);
+      });
+    } catch {
+      return null;
+    }
+  };
+
   return (
     <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 10 }}>
       <svg style={{ width: '100%', height: '100%', pointerEvents: 'none' }}>
+        {[...illustrationBoxes].sort((left, right) => Number(left.label === 'illustration') - Number(right.label === 'illustration')).map((detection) => {
+          const points = getNormalizedSVGPoints(detection.bboxNormalized);
+          if (!points) return null;
+          const path = `M ${points.map((point) => `${point.x},${point.y}`).join(' L ')} Z`;
+          const anchor = points[0];
+          const labelY = anchor.y > 27 ? anchor.y - 23 : anchor.y + 3;
+          const label = `${detection.label === 'text_block' ? 'Text block' : 'Illustration'} · ${(detection.confidence * 100).toFixed(1)}%`;
+
+          return <g key={detection.cropId} className="archive-detection" data-detection-label={detection.label} role="img" tabIndex={0} aria-label={label}>
+            <path className="archive-detection-box" d={path} vectorEffect="non-scaling-stroke" />
+            <g className="archive-detection-label" transform={`translate(${anchor.x} ${labelY})`}>
+              <rect width="118" height="20" rx="3" />
+              <text x="7" y="14">{label}</text>
+            </g>
+          </g>;
+        })}
         {characterBoxes.map((char, idx) => {
           const path = getSVGPath(char.boundary);
           if (!path) return null;

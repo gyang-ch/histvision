@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "dino1575-page-boxes-v1",
+  "sourceManifest": "crop_manifest.jsonl",
+  "sourcePageLog": "page_log.jsonl",
+  "textBlockThreshold": 0.19,
+  "shardCount": 256,
+  "bookCount": 3358,
+  "indexedPageCount": 142945,
+  "illustratedPageCount": 114126,
+  "illustrationDetectionCount": 189764,
+  "textBlockDetectionCount": 362953
+}
