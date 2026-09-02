@@ -130,7 +130,6 @@ export function LibraryPage() {
   return (
     <>
       <section className="library-intro" aria-labelledby="library-heading">
-        <p className="library-kicker">DINO-1575 research corpus</p>
         <div className="library-intro-row">
           <div>
             <h2 id="library-heading">Illustrated books across eight digital libraries</h2>

@@ -612,7 +612,6 @@ export function IllustrationsPage() {
   return (
     <div className="illus-page">
       <div className="illus-header">
-        <p className="archive-kicker">Earlier focused dataset</p>
         <h2 className="illus-heading">Botanical Case Study</h2>
         <p className="illus-subheading">
           {totalCount.toLocaleString()} botanical illustrations from the earlier focused collection.

@@ -291,7 +291,6 @@ export function DinoIllustrationArchivePage() {
     <div className="archive-page">
       <header className="archive-header">
         <div>
-          <p className="archive-kicker">DINO-1575 detected corpus</p>
           <h1>Illustration Archive</h1>
           <p>
             Explore {index.cropCount.toLocaleString()} illustration crops from {index.bookCount.toLocaleString()} books
