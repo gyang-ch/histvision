@@ -101,7 +101,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
     (window as any).APP_CONFIG?.API_URL ||
     import.meta.env.VITE_API_URL ||
     import.meta.env.VITE_API_BASE_URL ||
-    'https://gyang-ch--image-api.modal.run'
+    'https://gyang-ch--image-api-2.modal.run'
   ).replace(/\/+$/, '');
   const PREDICT_URL = `${API_BASE_URL}/predict`;
   const backBtnRef = useRef<HTMLButtonElement>(null);
