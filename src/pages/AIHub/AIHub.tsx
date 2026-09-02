@@ -116,7 +116,7 @@ export function AIHubPage() {
           Explore opens from a selected book. Choose an item in Books to begin.
         </p>
         <div className="ai-hub-actions">
-          <Link className="ai-hub-link" to="/library">
+          <Link className="ai-hub-link" to="/books">
             Go to Books
           </Link>
         </div>
@@ -192,7 +192,7 @@ export function AIHubPage() {
           This manuscript could not be found. It may have been renamed or removed.
         </p>
         <div className="ai-hub-actions">
-          <Link className="ai-hub-link" to="/library">
+          <Link className="ai-hub-link" to="/books">
             Browse Books
           </Link>
         </div>
@@ -204,7 +204,7 @@ export function AIHubPage() {
     <BookReader
       book={selectedBook}
       onBack={() => {
-        navigate('/library')
+        navigate('/books')
       }}
     />
   )

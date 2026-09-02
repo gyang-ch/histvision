@@ -23,10 +23,10 @@ export const scrollToContent = (heroRef: React.RefObject<HTMLElement | null>) =>
 
 const navItems = [
   { to: '/home', label: 'Home', end: true },
-  { to: '/library', label: 'Books', end: true },
-  { to: '/ai-hub', label: 'Explore', end: false },
-  { to: '/illustrations', label: 'Illustration Archive', end: true },
-  { to: '/methodology', label: 'Methods & Findings', end: true },
+  { to: '/books', label: 'Books', end: true },
+  { to: '/explore', label: 'Explore', end: false },
+  { to: '/illustration-archive', label: 'Illustration Archive', end: true },
+  { to: '/methods-and-findings', label: 'Methods & Findings', end: true },
 ] as const
 
 function App() {
@@ -44,8 +44,8 @@ function App() {
   const tabBarRef = useRef<HTMLDivElement>(null)
 
   const pathname = location.pathname
-  const isReaderMode = useMemo(() => pathname.startsWith('/ai-hub/') && pathname.split('/').length >= 3, [pathname])
-  const isWhiteTheme = pathname === '/home' || pathname === '/' || pathname.startsWith('/library') || pathname.startsWith('/ai-hub') || pathname.startsWith('/illustrations') || pathname.startsWith('/methodology')
+  const isReaderMode = useMemo(() => pathname.startsWith('/explore/') && pathname.split('/').length >= 3, [pathname])
+  const isWhiteTheme = pathname === '/home' || pathname === '/' || pathname.startsWith('/books') || pathname.startsWith('/explore') || pathname.startsWith('/illustration-archive') || pathname.startsWith('/methods-and-findings')
 
   // Scroll to top on navigation so the hero and its entrance animation are visible
   useEffect(() => {
@@ -199,11 +199,11 @@ function App() {
         <Routes>
           <Route path="/" element={<Navigate to="/home" replace />} />
           <Route path="/home" element={<HomePage />} />
-          <Route path="/library" element={<LibraryPage />} />
-          <Route path="/ai-hub" element={<AIHubPage />} />
-          <Route path="/ai-hub/:bookId" element={<AIHubPage />} />
-          <Route path="/illustrations" element={<IllustrationsPage />} />
-          <Route path="/methodology" element={<MethodologyPage />} />
+          <Route path="/books" element={<LibraryPage />} />
+          <Route path="/explore" element={<AIHubPage />} />
+          <Route path="/explore/:bookId" element={<AIHubPage />} />
+          <Route path="/illustration-archive" element={<IllustrationsPage />} />
+          <Route path="/methods-and-findings" element={<MethodologyPage />} />
           <Route path="*" element={<Navigate to="/home" replace />} />
         </Routes>
       </main>

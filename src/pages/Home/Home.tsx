@@ -9,19 +9,19 @@ import './Home.css'
 
 const entries = [
   {
-    to: '/library',
+    to: '/books',
     title: 'Books',
     side: 'High-resolution book images are retrieved via IIIF directly from museum and library servers, supporting decentralised access to digital cultural resources.',
     align: 'left',
   },
   {
-    to: '/ai-hub',
+    to: '/explore',
     title: 'Explore',
     side: 'Transcription is handled by Kraken and Qwen-VL, a vision-language model reflecting the multimodal turn in Digital Humanities.',
     align: 'right',
   },
   {
-    to: '/illustrations',
+    to: '/illustration-archive',
     title: 'Illustration Archive',
     side: 'Plant illustrations extracted and cropped from book page images by the YOLO model.',
     align: 'left',
