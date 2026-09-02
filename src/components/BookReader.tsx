@@ -13,6 +13,8 @@ import './BookReader.css';
 interface BookReaderProps {
   book: BookRecord;
   onBack: () => void;
+  /** When provided, these tile sources are used directly instead of fetching book.manifestUrl. */
+  initialTileSources?: any[];
 }
 
 interface OCRDebugInfo {
@@ -93,7 +95,7 @@ function getTileSourceImageUrl(source: any, iiifSize = '1000,'): string {
   return id.replace('info.json', `full/${iiifSize}/0/default.jpg`);
 }
 
-export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
+export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTileSources }) => {
   const API_BASE_URL = (
     (window as any).APP_CONFIG?.API_URL ||
     import.meta.env.VITE_API_URL ||
@@ -242,6 +244,13 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
   const [ocrDebug, setOcrDebug] = useState<OCRDebugInfo | null>(null);
 
   useEffect(() => {
+    if (initialTileSources) {
+      setTileSources(initialTileSources);
+      setError(null);
+      setLoading(false);
+      return;
+    }
+
     const fetchManifest = async () => {
       try {
         setLoading(true);
@@ -297,7 +306,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack }) => {
       }
     };
     fetchManifest();
-  }, [book.manifestUrl]);
+  }, [book.manifestUrl, initialTileSources]);
 
   const handleTranslate = async () => {
     const textToTranslate = (qwenResults.length > 0 ? qwenResults.join('\n') : ocrResults.map((line) => line.text).join('\n')).trim();

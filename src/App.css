@@ -197,6 +197,118 @@
   outline-offset: 3px;
 }
 
+.ai-hub-divider {
+  width: 64px;
+  height: 1px;
+  margin: 3rem auto 2.5rem;
+  background: rgba(15, 23, 42, 0.12);
+}
+
+.ai-hub-custom-section {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.ai-hub-custom-title {
+  font-family: "EB Garamond", Georgia, serif;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: rgba(15, 23, 42, 0.9);
+  margin: 0 0 0.6rem;
+}
+
+.ai-hub-custom-body {
+  margin: 0 auto 1.75rem;
+  max-width: 58ch;
+  line-height: 1.7;
+  color: var(--text-2);
+  font-size: 0.95rem;
+}
+
+.ai-hub-custom-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.ai-hub-upload-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.1rem;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: "EB Garamond", Georgia, serif;
+  letter-spacing: 0.02em;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: rgba(15, 23, 42, 0.9);
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ai-hub-upload-btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(99, 102, 241, 0.45);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+}
+
+.ai-hub-manifest-form {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ai-hub-manifest-input {
+  width: 260px;
+  max-width: 60vw;
+  padding: 0.65rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: rgba(255, 255, 255, 0.7);
+  font-size: 0.85rem;
+  color: rgba(15, 23, 42, 0.9);
+}
+
+.ai-hub-manifest-input:focus-visible {
+  outline: none;
+  border-color: rgba(99, 102, 241, 0.6);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.ai-hub-manifest-submit {
+  padding: 0.65rem 1.1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, 0.9);
+  background: rgba(15, 23, 42, 0.9);
+  color: #fff;
+  font-family: "EB Garamond", Georgia, serif;
+  letter-spacing: 0.02em;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.ai-hub-manifest-submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.ai-hub-manifest-submit:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.ai-hub-custom-error {
+  margin: 1rem auto 0;
+  max-width: 58ch;
+  color: #b91c1c;
+  font-size: 0.85rem;
+}
+
 
 .content.reader-mode {
   max-width: 100%; 
