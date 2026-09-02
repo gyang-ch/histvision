@@ -23,7 +23,7 @@ const entries = [
   {
     to: '/illustration-archive',
     title: 'Illustration Archive',
-    side: 'Plant illustrations extracted and cropped from book page images by the YOLO model.',
+    side: 'Explore 189,764 illustration crops detected across 3,358 books, with page provenance, visual similarity, and two embedding-space maps.',
     align: 'left',
   },
 ] as const

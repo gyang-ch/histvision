@@ -1,0 +1,32 @@
+{
+  "status": "completed",
+  "schemaVersion": "dino1575_illustration_archive_v1",
+  "cropCount": 189764,
+  "bookCount": 3358,
+  "files": {
+    "archive-geometry.bin": {
+      "bytes": 7590560,
+      "sha256": "76d621e17903793d41061ab415dd05dab16bd04b9ad144eaff4ef0e035e7c7e8"
+    },
+    "archive-index.json": {
+      "bytes": 7409739,
+      "sha256": "762bfa6a36f85636d57c82d01d94df8a75d17527291b0cfe9e45c1ee7faa00a2"
+    },
+    "clusters-dinov2.i16": {
+      "bytes": 379528,
+      "sha256": "47022b1b065f189bc21ef299946fe1425e16820939511ba29efe8c05313d918d"
+    },
+    "clusters-openclip.i16": {
+      "bytes": 379528,
+      "sha256": "ab9fc9c34c0fedd4c97f49f3a49a7436e92bf47840fe97c177b961170d5ce1a1"
+    },
+    "umap-dinov2.f32": {
+      "bytes": 1518112,
+      "sha256": "20ad455659c8d3f00d67c095e7a63ccb3d62beae818a8616adaa83e2be8f582b"
+    },
+    "umap-openclip.f32": {
+      "bytes": 1518112,
+      "sha256": "5b0c92edd191d7ad2053c0de3e67899552962f346680de3f77591b895e2e18e2"
+    }
+  }
+}

@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "catalogue:build": "node scripts/buildBookCatalogue.mjs",
+    "archive:build": "python3 scripts/buildIllustrationArchive.py",
     "prebuild": "node scripts/downloadManifests.js && node scripts/generateHeroTiles.js",
     "build": "tsc -b && vite build",
     "lint": "eslint .",

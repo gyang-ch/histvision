@@ -20,6 +20,25 @@ The deployed site retrieves representative crop images through a read-only Verce
 
 Do not prefix either variable with `VITE_`. A `VITE_` variable is compiled into browser JavaScript and would expose the storage credential. For local development, `VITE_SEARCH_BOTANY_IMAGE_PROXY` may point at a compatible local proxy; otherwise the application uses `/api/search-botany-blob`.
 
+## DINO-1575 Illustration Archive
+
+The Illustration Archive presents all 189,764 retained DINO-1575 crops. The browser downloads a compact static index, binary crop geometry, precomputed UMAP coordinates, and K-means labels. Crop records, images, source pages, and nearest-neighbour records are requested from Azure only when needed through the same server-side proxy. This keeps the SAS credential out of browser code and avoids sending the complete corpus metadata or 22 GB image collection to every visitor.
+
+The previous 5,958-image botanical archive is retained at `/botanical-case-study`. To rebuild the compact archive assets from a later detector run, use:
+
+```bash
+npm run archive:build -- \
+  --crop-manifest "/absolute/path/to/crop_manifest.jsonl" \
+  --books-catalogue "public/data/books.catalog.json" \
+  --dinov2-umap "/absolute/path/to/dinov2/umap2_visual.npy" \
+  --openclip-umap "/absolute/path/to/openclip/umap2_visual.npy" \
+  --dinov2-labels "/absolute/path/to/dinov2/k_0200/seed_000042/cluster_labels.npy" \
+  --openclip-labels "/absolute/path/to/openclip/k_0200/seed_000042/cluster_labels.npy" \
+  --output-dir "public/data/archive"
+```
+
+The public archive is deliberately organised by source library, detector confidence, crop orientation, source-page provenance, and recorded book date. Human annotation labels remain separate until they are sufficiently complete and reviewed. K-means colour is an exploratory view of embedding-space structure and is not presented as a named subject taxonomy.
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:

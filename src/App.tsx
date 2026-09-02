@@ -9,6 +9,7 @@ import { HomePage } from './pages/Home/Home'
 import { LibraryPage } from './pages/Library/Library'
 import { AIHubPage } from './pages/AIHub/AIHub'
 import { IllustrationsPage } from './pages/Illustrations/Illustrations'
+import { DinoIllustrationArchivePage } from './pages/DinoIllustrationArchive/DinoIllustrationArchive'
 import { MethodologyPage } from './pages/Methodology/Methodology'
 
 const prefersReducedMotion = () =>
@@ -26,6 +27,7 @@ const navItems = [
   { to: '/books', label: 'Books', end: true },
   { to: '/explore', label: 'Explore', end: false },
   { to: '/illustration-archive', label: 'Illustration Archive', end: true },
+  { to: '/botanical-case-study', label: 'Botanical Case Study', end: true },
   { to: '/methods-and-findings', label: 'Methods & Findings', end: true },
 ] as const
 
@@ -45,7 +47,7 @@ function App() {
 
   const pathname = location.pathname
   const isReaderMode = useMemo(() => pathname.startsWith('/explore/') && pathname.split('/').length >= 3, [pathname])
-  const isWhiteTheme = pathname === '/home' || pathname === '/' || pathname.startsWith('/books') || pathname.startsWith('/explore') || pathname.startsWith('/illustration-archive') || pathname.startsWith('/methods-and-findings')
+  const isWhiteTheme = pathname === '/home' || pathname === '/' || pathname.startsWith('/books') || pathname.startsWith('/explore') || pathname.startsWith('/illustration-archive') || pathname.startsWith('/botanical-case-study') || pathname.startsWith('/methods-and-findings')
 
   // Scroll to top on navigation so the hero and its entrance animation are visible
   useEffect(() => {
@@ -202,7 +204,8 @@ function App() {
           <Route path="/books" element={<LibraryPage />} />
           <Route path="/explore" element={<AIHubPage />} />
           <Route path="/explore/:bookId" element={<AIHubPage />} />
-          <Route path="/illustration-archive" element={<IllustrationsPage />} />
+          <Route path="/illustration-archive" element={<DinoIllustrationArchivePage />} />
+          <Route path="/botanical-case-study" element={<IllustrationsPage />} />
           <Route path="/methods-and-findings" element={<MethodologyPage />} />
           <Route path="*" element={<Navigate to="/home" replace />} />
         </Routes>
