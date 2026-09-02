@@ -257,7 +257,7 @@ export const IIIFViewer: React.FC<IIIFViewerProps> = ({
       </div>
 
       <div ref={viewerRef} style={{ width: '100%', height: '100%' }} />
-      {isReady && viewerInstance && (illustrationBoxes.length > 0 || (ocrResults && ocrResults.length > 0) || (characterBoxes && characterBoxes.length > 0)) && (
+      {isReady && viewerInstance && (
         <OverlayLayer 
           viewer={viewerInstance}
           illustrationBoxes={illustrationBoxes}
@@ -290,11 +290,15 @@ const OverlayLayer: React.FC<OverlayLayerProps> = ({ viewer, illustrationBoxes, 
     viewer.addHandler('canvas-drag', update);
     viewer.addHandler('canvas-scroll', update);
     viewer.addHandler('resize', update);
+    viewer.addHandler('page', update);
+    viewer.addHandler('open', update);
     return () => {
       viewer.removeHandler('animation', update);
       viewer.removeHandler('canvas-drag', update);
       viewer.removeHandler('canvas-scroll', update);
       viewer.removeHandler('resize', update);
+      viewer.removeHandler('page', update);
+      viewer.removeHandler('open', update);
     };
   }, [viewer]);
 
