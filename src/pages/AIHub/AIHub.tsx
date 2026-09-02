@@ -33,7 +33,9 @@ export function AIHubPage() {
   const [customTileSources, setCustomTileSources] = useState<any[] | undefined>(undefined)
   const [manifestUrlInput, setManifestUrlInput] = useState('')
   const [uploadError, setUploadError] = useState<string | null>(null)
+  const [isDragActive, setIsDragActive] = useState(false)
   const objectUrlsRef = useRef<string[]>([])
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const selectedBook = useMemo(() => {
     if (!bookId) return null
@@ -56,11 +58,7 @@ export function AIHubPage() {
     setCustomBook(makeCustomBook(trimmed, 'Custom manifest'))
   }
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    event.target.value = ''
-    if (!file) return
-
+  const processFile = async (file: File) => {
     setUploadError(null)
     const isJson = file.type === 'application/json' || file.name.toLowerCase().endsWith('.json')
     const isImage = file.type.startsWith('image/')
@@ -85,6 +83,19 @@ export function AIHubPage() {
       console.error(err)
       setUploadError('Could not open that file. Make sure it is a valid image or IIIF manifest JSON.')
     }
+  }
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (file) await processFile(file)
+  }
+
+  const handleDrop = async (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    setIsDragActive(false)
+    const file = event.dataTransfer.files?.[0]
+    if (file) await processFile(file)
   }
 
   if (customBook) {
@@ -118,31 +129,54 @@ export function AIHubPage() {
             Upload a book page image or a IIIF manifest file, or paste a IIIF manifest URL, to view it with the same transcription and detection tools.
           </p>
 
-          <div className="ai-hub-custom-controls">
-            <label className="ai-hub-upload-btn">
-              Upload image or manifest (.json)
-              <input
-                type="file"
-                accept="image/*,.json,application/json"
-                onChange={handleFileChange}
-                style={{ display: 'none' }}
-              />
-            </label>
-
-            <form className="ai-hub-manifest-form" onSubmit={handleManifestUrlSubmit}>
-              <input
-                type="url"
-                className="ai-hub-manifest-input"
-                placeholder="Paste a IIIF manifest URL"
-                value={manifestUrlInput}
-                onChange={(event) => setManifestUrlInput(event.target.value)}
-                aria-label="IIIF manifest URL"
-              />
-              <button type="submit" className="ai-hub-manifest-submit" disabled={!manifestUrlInput.trim()}>
-                Open
-              </button>
-            </form>
+          <div
+            className={`ai-hub-dropzone ${isDragActive ? 'active' : ''}`}
+            role="button"
+            tabIndex={0}
+            onClick={() => fileInputRef.current?.click()}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault()
+                fileInputRef.current?.click()
+              }
+            }}
+            onDragOver={(event) => {
+              event.preventDefault()
+              setIsDragActive(true)
+            }}
+            onDragLeave={() => setIsDragActive(false)}
+            onDrop={handleDrop}
+          >
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="17 8 12 3 7 8" />
+              <line x1="12" y1="3" x2="12" y2="15" />
+            </svg>
+            <p className="ai-hub-dropzone-text">
+              Drag and drop an image or manifest (.json), or click to choose a file
+            </p>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*,.json,application/json"
+              onChange={handleFileChange}
+              style={{ display: 'none' }}
+            />
           </div>
+
+          <form className="ai-hub-manifest-form" onSubmit={handleManifestUrlSubmit}>
+            <input
+              type="url"
+              className="ai-hub-manifest-input"
+              placeholder="Paste a IIIF manifest URL"
+              value={manifestUrlInput}
+              onChange={(event) => setManifestUrlInput(event.target.value)}
+              aria-label="IIIF manifest URL"
+            />
+            <button type="submit" className="ai-hub-manifest-submit" disabled={!manifestUrlInput.trim()}>
+              Open
+            </button>
+          </form>
 
           {uploadError && <p className="ai-hub-custom-error">{uploadError}</p>}
         </div>
