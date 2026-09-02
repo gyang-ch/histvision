@@ -1,136 +1,251 @@
-/* ── Methodology page ─────────────────────────────────── */
-
-.meth-page {
-  max-width: 860px;
-  margin: 0 auto;
-  padding: 3rem 2rem 5rem;
-  color: #1a1a1a;
+.research-page {
+  --research-ink: #17231f;
+  --research-muted: #617069;
+  --research-line: #d7ddd9;
+  --research-paper: #f8f6ef;
+  color: var(--research-ink);
 }
 
-/* Header */
-.meth-header {
-  margin-bottom: 2.8rem;
-  text-align: center;
+.research-header {
+  margin-bottom: 4.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--research-line);
 }
 
-.meth-title {
-  font-size: 1.9rem;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  color: #111;
+.research-header h1 {
+  margin: 0;
+  font-family: "EB Garamond", Georgia, serif;
+  font-size: clamp(2.8rem, 6vw, 5.4rem);
+  font-weight: 500;
+  letter-spacing: -.035em;
+  line-height: .95;
+}
+
+.research-section + .research-section { margin-top: 7rem; }
+
+.research-section-label {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 1rem;
+  align-items: baseline;
+  margin-bottom: 2.4rem;
+}
+
+.research-section-label span {
+  color: #287159;
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .12em;
+}
+
+.research-section-label h2 {
+  margin: 0;
+  font-family: "EB Garamond", Georgia, serif;
+  font-size: clamp(1.9rem, 4vw, 3rem);
+  font-weight: 500;
+}
+
+.research-figure { margin: 0 0 5rem; }
+
+.research-figure-heading {
+  display: flex;
+  gap: .8rem;
+  align-items: center;
   margin: 0 0 1rem;
 }
 
-.meth-rule {
-  width: 56px;
-  height: 2px;
-  background: linear-gradient(90deg, #3a7d44, #6aab78);
-  margin: 0 auto;
-  border-radius: 2px;
+.research-figure-heading > span {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid #92aa9f;
+  border-radius: 50%;
+  color: #287159;
+  font-size: .68rem;
+  font-weight: 800;
 }
 
-/* Body text */
-.meth-body p {
-  font-family: "Times New Roman", Times, serif;
-  font-size: 1.2rem;
-  line-height: 1.7;
-  color: #2c2c2c;
-  margin: 0 0 1.5rem;
-  text-align: justify;
-  hyphens: auto;
-}
-
-.meth-body a:not(.flip-link) {
-  color: #3a7d44;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  text-decoration-thickness: 1px;
-}
-
-.meth-body a:not(.flip-link):hover {
-  color: #2b5e33;
-}
-
-/* Figure */
-.meth-figure {
-  margin: 2.5rem 0 2rem;
-  text-align: center;
-}
-
-.meth-figure-img {
-  max-width: 78%;
-  width: 78%;
-  border-radius: 6px;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.1);
-  display: block;
-  margin: 0 auto;
-}
-
-.meth-figure-caption {
-  margin-top: 0.75rem;
-  font-size: 0.875rem;
-  color: #666;
-  font-style: italic;
-  line-height: 1.5;
-}
-
-/* In-text citations */
-.meth-citation {
-  color: #0e7fe8;
-}
-
-/* References */
-.meth-references {
-  margin-top: 3.5rem;
-  padding-top: 2rem;
-  border-top: 1px solid #e0e0e0;
-}
-
-.meth-references-heading {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #111;
-  margin: 0 0 1.25rem;
-  letter-spacing: 0.01em;
-}
-
-.meth-references-list {
-  list-style: none;
-  padding: 0;
+.research-figure-heading h2 {
   margin: 0;
+  font-family: "EB Garamond", Georgia, serif;
+  font-size: clamp(1.3rem, 2.5vw, 1.8rem);
+  font-weight: 600;
+}
+
+.research-figure-canvas {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #d3dad6;
+  border-radius: 10px;
+  background: var(--research-paper);
+  padding: clamp(.6rem, 2vw, 1.4rem);
+  box-shadow: 0 12px 35px rgba(25, 44, 36, .06);
+}
+
+.research-figure figcaption {
+  max-width: 88ch;
+  margin: .85rem 0 0;
+  color: var(--research-muted);
+  font-size: .78rem;
+  line-height: 1.6;
+}
+
+.chart-wrap, .refinement-wrap { position: relative; }
+
+.research-chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+.research-legend {
   display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
+  gap: 1rem;
+  align-items: center;
+  justify-content: flex-end;
+  min-height: 28px;
+  margin: 0 .4rem .25rem;
+  color: #43554d;
+  font-size: .68rem;
 }
 
-.meth-references-list li {
-  font-size: 0.9rem;
-  line-height: 1.7;
-  color: #444;
-  padding-left: 1.5rem;
-  text-indent: -1.5rem;
+.research-legend span { display: inline-flex; gap: .38rem; align-items: center; }
+.research-legend i { width: 14px; height: 3px; border-radius: 4px; }
+.chart-grid line { stroke: #d7ddd9; stroke-width: 1; }
+
+.chart-grid text, .chart-tick {
+  fill: #69766f;
+  font-size: 12px;
+  text-anchor: end;
 }
 
-.meth-references-list a {
-  color: #3a7d44;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  text-decoration-thickness: 1px;
-  word-break: break-all;
+.chart-tick-x { text-anchor: middle; }
+
+.chart-axis-label {
+  fill: #425149;
+  font-size: 13px;
+  text-anchor: middle;
 }
 
-.meth-references-list a:hover {
-  color: #2b5e33;
+.chart-panel-title {
+  fill: #23372f;
+  font-family: "EB Garamond", Georgia, serif;
+  font-size: 15px;
+  font-weight: 650;
 }
 
-/* Responsive */
-@media (max-width: 600px) {
-  .meth-page {
-    padding: 2rem 1.25rem 4rem;
-  }
+.chart-panel-title-centred { text-anchor: middle; }
+.chart-line { fill: none; stroke-width: 3; }
 
-  .meth-body p {
-    text-align: left;
-    hyphens: none;
-  }
+.chart-point, .chart-bar {
+  cursor: crosshair;
+  outline: none;
+}
+
+.chart-point circle, .chart-bar rect {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: filter 180ms ease, opacity 180ms ease, transform 180ms ease;
+}
+
+.chart-point:hover circle, .chart-point:focus-visible circle {
+  filter: drop-shadow(0 2px 4px rgba(16, 43, 33, .28));
+  transform: scale(1.35);
+}
+
+.shared-point {
+  pointer-events: none;
+  transition: filter 180ms ease, transform 180ms ease;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.shared-point.active {
+  filter: drop-shadow(0 2px 4px rgba(16, 43, 33, .3));
+  transform: scale(1.38);
+}
+
+.shared-hover-target {
+  fill: transparent;
+  cursor: crosshair;
+  outline: none;
+}
+
+.shared-hover-target:focus-visible {
+  fill: rgba(40, 113, 89, .045);
+  stroke: #287159;
+  stroke-width: 1.5;
+  stroke-dasharray: 4 4;
+}
+
+.shared-hover-line {
+  pointer-events: none;
+  stroke: #17231f;
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+  opacity: .38;
+}
+
+.shared-tooltip { pointer-events: none; }
+.shared-tooltip rect {
+  fill: rgba(248, 246, 239, .98);
+  stroke: rgba(23, 35, 31, .2);
+  stroke-width: 1;
+  filter: drop-shadow(0 7px 12px rgba(23, 35, 31, .16));
+}
+
+.shared-tooltip text { font-family: "Inter", "Segoe UI", sans-serif; }
+.shared-tooltip-title { fill: #17231f; font-size: 11px; font-weight: 750; }
+.shared-tooltip-label { fill: #43554d; font-size: 10px; }
+.shared-tooltip-value { fill: #17231f; font-size: 10px; font-weight: 750; text-anchor: end; }
+.shared-tooltip-range { fill: #68766f; font-size: 8px; text-anchor: end; }
+
+.chart-bar:hover rect, .chart-bar:focus-visible rect {
+  filter: saturate(1.18) drop-shadow(0 2px 3px rgba(16, 43, 33, .2));
+}
+
+.chart-callout { pointer-events: none; }
+.chart-callout rect { fill: #17231f; }
+
+.chart-callout text {
+  fill: #fff;
+  font-size: 10px;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  transform: translateY(-13px);
+}
+
+.bar-value {
+  fill: #475851;
+  font-size: 10px;
+  text-anchor: middle;
+  opacity: .72;
+  transition: opacity 180ms ease;
+}
+
+.bar-value.active { fill: #17231f; font-weight: 750; opacity: 1; }
+
+.refinement-grid, .paired-chart-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .6rem;
+}
+
+@media (max-width: 760px) {
+  .research-header { margin-bottom: 3rem; }
+  .research-section + .research-section { margin-top: 5rem; }
+  .research-section-label { grid-template-columns: 32px minmax(0, 1fr); gap: .6rem; }
+  .refinement-grid, .paired-chart-grid { grid-template-columns: 1fr; }
+  .research-figure { margin-bottom: 3.8rem; }
+  .research-figure-canvas { margin-inline: -1rem; border-radius: 6px; padding: .45rem; }
+  .research-legend { padding-right: .4rem; }
+  .chart-grid text, .chart-tick { font-size: 14px; }
+  .chart-axis-label { font-size: 15px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chart-point circle, .chart-bar rect, .bar-value, .shared-point { transition: none; }
 }

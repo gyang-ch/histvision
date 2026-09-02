@@ -1,57 +1,209 @@
-import { FlipLink } from '../../components/FlipLink'
+import { useState } from 'react'
+import { area, curveMonotoneX, line, scaleBand, scaleLinear, scalePoint } from 'd3'
 import './Methodology.css'
 
+type ModelName = 'YOLO11m' | 'DINO-R50' | 'OpenCLIP' | 'DINOv2'
+
+const colours: Record<ModelName, string> = {
+  YOLO11m: '#287da1',
+  'DINO-R50': '#c7642d',
+  OpenCLIP: '#287da1',
+  DINOv2: '#c7642d',
+}
+
+const learningCurve = [
+  { model: 'YOLO11m' as const, values: [[200, .534520], [400, .568255], [600, .625337], [800, .578416], [1000, .577650], [1152, .575210]] },
+  { model: 'DINO-R50' as const, values: [[200, .607507], [400, .637093], [600, .654865], [800, .666576], [1000, .652324], [1152, .667090]] },
+]
+
+const refinement = {
+  YOLO11m: {
+    overall: { labels: ['AP', 'AP50', 'AP75'], old: [.576895, .761388, .621330], next: [.590708, .785325, .650414] },
+    classes: { labels: ['Illustration', 'Text block'], old: [.740735, .413056], next: [.688867, .492549] },
+  },
+  'DINO-R50': {
+    overall: { labels: ['AP', 'AP50', 'AP75'], old: [.674079, .864868, .749228], next: [.714184, .894790, .781036] },
+    classes: { labels: ['Illustration', 'Text block'], old: [.752444, .595713], next: [.770546, .657823] },
+  },
+}
+
+const overlapBins = [
+  { title: 'Unrestricted top-20 overlap', colour: '#5597ad', counts: [13731, 22152, 24112, 23408, 21187, 18423, 15425, 12633, 10052, 7738, 6077, 4445, 3397, 2393, 1735, 1170, 775, 454, 300, 137, 20] },
+  { title: 'Cross-book top-20 overlap', colour: '#cb8054', counts: [37730, 36487, 29002, 22586, 16957, 12841, 9612, 7016, 5110, 3679, 2772, 1879, 1294, 862, 630, 420, 320, 237, 172, 122, 36] },
+]
+
+const stability = [
+  { model: 'OpenCLIP' as const, k: 50, ari: [.528668, .574206, .617687], ami: [.743664, .762663, .788217] },
+  { model: 'OpenCLIP' as const, k: 100, ari: [.533834, .538694, .542478], ami: [.766256, .771350, .776142] },
+  { model: 'OpenCLIP' as const, k: 200, ari: [.500171, .513209, .537856], ami: [.775391, .779890, .788367] },
+  { model: 'OpenCLIP' as const, k: 400, ari: [.490756, .504071, .515585], ami: [.781115, .786299, .789791] },
+  { model: 'DINOv2' as const, k: 50, ari: [.559362, .567071, .580060], ami: [.758559, .761172, .762539] },
+  { model: 'DINOv2' as const, k: 100, ari: [.549856, .555970, .566449], ami: [.776140, .779462, .783896] },
+  { model: 'DINOv2' as const, k: 200, ari: [.538044, .550393, .574690], ami: [.789274, .795454, .802128] },
+  { model: 'DINOv2' as const, k: 400, ari: [.490815, .494838, .502053], ami: [.781415, .782324, .784009] },
+]
+
+const yTicks = (minimum: number, maximum: number, count = 5) =>
+  Array.from({ length: count }, (_, index) => minimum + (maximum - minimum) * index / (count - 1))
+
+function Legend({ models }: { models: ModelName[] }) {
+  return <div className="research-legend" aria-label="Chart legend">{models.map((model) => <span key={model}><i style={{ background: colours[model] }} />{model}</span>)}</div>
+}
+
+function LearningCurveChart() {
+  const width = 920, height = 470
+  const margin = { top: 28, right: 28, bottom: 72, left: 80 }
+  const x = scalePoint<number>().domain([200, 400, 600, 800, 1000, 1152]).range([margin.left, width - margin.right])
+  const y = scaleLinear().domain([.50, .70]).range([height - margin.bottom, margin.top])
+  const makeLine = line<[number, number]>().x((value) => x(value[0]) ?? 0).y((value) => y(value[1])).curve(curveMonotoneX)
+  const trainingSizes = [200, 400, 600, 800, 1000, 1152]
+  const [focus, setFocus] = useState<number | null>(null)
+
+  return <div className="chart-wrap">
+    <Legend models={['YOLO11m', 'DINO-R50']} />
+    <svg className="research-chart" viewBox={`0 0 ${width} ${height}`} role="img" aria-labelledby="learning-title learning-desc">
+      <title id="learning-title">Page-layout detection performance by training-set size</title>
+      <desc id="learning-desc">Line chart comparing COCO average precision for YOLO11m and DINO-R50 at six training-set sizes.</desc>
+      {yTicks(.50, .70).map((tick) => <g key={tick} className="chart-grid"><line x1={margin.left} x2={width - margin.right} y1={y(tick)} y2={y(tick)} /><text x={margin.left - 12} y={y(tick) + 4}>{tick.toFixed(2)}</text></g>)}
+      {trainingSizes.map((tick) => <text key={tick} className="chart-tick chart-tick-x" x={x(tick)} y={height - margin.bottom + 28}>{tick}</text>)}
+      <text className="chart-axis-label" x={width / 2} y={height - 16}>Number of training images</text>
+      <text className="chart-axis-label" transform={`translate(20 ${height / 2}) rotate(-90)`}>COCO AP (IoU = 0.50:0.95)</text>
+      {learningCurve.map((series) => <g key={series.model}>
+        <path className="chart-line" d={makeLine(series.values as [number, number][]) ?? ''} stroke={colours[series.model]} />
+        {series.values.map(([images, value]) => <circle key={images} className={focus === images ? 'shared-point active' : 'shared-point'} cx={x(images)} cy={y(value)} r="6" fill={colours[series.model]} />)}
+      </g>)}
+      {focus !== null && <>
+        <line className="shared-hover-line" x1={x(focus)} x2={x(focus)} y1={margin.top} y2={height - margin.bottom} />
+        <g className="shared-tooltip" transform={`translate(${(x(focus) ?? 0) > width * .69 ? (x(focus) ?? 0) - 206 : (x(focus) ?? 0) + 16} ${margin.top + 10})`}>
+          <rect width="190" height="82" rx="8" />
+          <text className="shared-tooltip-title" x="13" y="21">{focus.toLocaleString()} training images</text>
+          {[learningCurve[1], learningCurve[0]].map((series, index) => {
+            const value = series.values.find(([images]) => images === focus)?.[1] ?? 0
+            return <g key={series.model} transform={`translate(0 ${37 + index * 20})`}><circle cx="15" cy="0" r="4" fill={colours[series.model]} /><text className="shared-tooltip-label" x="27" y="4">{series.model}</text><text className="shared-tooltip-value" x="176" y="4">AP {value.toFixed(3)}</text></g>
+          })}
+        </g>
+      </>}
+      {trainingSizes.map((images, index) => {
+        const currentX = x(images) ?? 0
+        const previousX = index === 0 ? margin.left : (x(trainingSizes[index - 1]) ?? currentX)
+        const nextX = index === trainingSizes.length - 1 ? width - margin.right : (x(trainingSizes[index + 1]) ?? currentX)
+        return <rect key={images} className="shared-hover-target" role="button" tabIndex={0} aria-label={`${images} training images: YOLO11m AP ${learningCurve[0].values[index][1].toFixed(3)}, DINO-R50 AP ${learningCurve[1].values[index][1].toFixed(3)}`} x={(previousX + currentX) / 2} y={margin.top} width={(nextX - previousX) / 2} height={height - margin.top - margin.bottom} onFocus={() => setFocus(images)} onBlur={() => setFocus(null)} onMouseEnter={() => setFocus(images)} />
+      })}
+    </svg>
+  </div>
+}
+
+function BarPanel({ model, kind, panel }: { model: 'YOLO11m' | 'DINO-R50'; kind: 'overall' | 'classes'; panel: string }) {
+  const data = refinement[model][kind]
+  const width = 450, height = 280
+  const margin = { top: 32, right: 16, bottom: 55, left: 56 }
+  const x = scaleBand().domain(data.labels).range([margin.left, width - margin.right]).padding(.28)
+  const y = scaleLinear().domain([0, 1]).range([height - margin.bottom, margin.top])
+  const sub = scaleBand().domain(['old', 'next']).range([0, x.bandwidth()]).padding(.07)
+  const [focus, setFocus] = useState<string | null>(null)
+  return <svg className="research-chart refinement-panel" viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${model} ${kind === 'overall' ? 'overall detection' : 'per-class AP'} comparison`}>
+    <text className="chart-panel-title" x={margin.left} y="18">{panel} {model}: {kind === 'overall' ? 'Overall detection' : 'Per-class AP'}</text>
+    {yTicks(0, 1, 6).map((tick) => <g key={tick} className="chart-grid"><line x1={margin.left} x2={width - margin.right} y1={y(tick)} y2={y(tick)} /><text x={margin.left - 10} y={y(tick) + 4}>{tick.toFixed(1)}</text></g>)}
+    {data.labels.map((label, index) => <g key={label}>
+      <text className="chart-tick chart-tick-x" x={(x(label) ?? 0) + x.bandwidth() / 2} y={height - margin.bottom + 25}>{label}</text>
+      {(['old', 'next'] as const).map((version) => {
+        const value = data[version][index], key = `${label}-${version}`
+        return <g key={version} className="chart-bar" role="button" tabIndex={0} aria-label={`${label}, ${version === 'old' ? 'old 1152' : 'new 1511'}, ${value.toFixed(3)}`} onFocus={() => setFocus(key)} onBlur={() => setFocus(null)} onMouseEnter={() => setFocus(key)} onMouseLeave={() => setFocus(null)}><rect x={(x(label) ?? 0) + (sub(version) ?? 0)} y={y(value)} width={sub.bandwidth()} height={y(0) - y(value)} fill={version === 'old' ? '#aab1b6' : colours[model]} /><text className={focus === key ? 'bar-value active' : 'bar-value'} x={(x(label) ?? 0) + (sub(version) ?? 0) + sub.bandwidth() / 2} y={y(value) - 7}>{value.toFixed(3)}</text></g>
+      })}
+    </g>)}
+  </svg>
+}
+
+function RefinementChart() {
+  return <div className="refinement-wrap"><div className="research-legend"><span><i style={{ background: '#aab1b6' }} />Old 1152</span><span><i style={{ background: '#287da1' }} />New 1511</span></div><div className="refinement-grid"><BarPanel model="YOLO11m" kind="overall" panel="A" /><BarPanel model="DINO-R50" kind="overall" panel="B" /><BarPanel model="YOLO11m" kind="classes" panel="C" /><BarPanel model="DINO-R50" kind="classes" panel="D" /></div></div>
+}
+
+function HistogramPanel({ dataset }: { dataset: typeof overlapBins[number] }) {
+  const width = 450, height = 310
+  const margin = { top: 36, right: 18, bottom: 58, left: 64 }
+  const x = scaleLinear().domain([0, 1]).range([margin.left, width - margin.right])
+  const maximum = Math.ceil(Math.max(...dataset.counts) / 5000) * 5000
+  const y = scaleLinear().domain([0, maximum]).range([height - margin.bottom, margin.top])
+  const barWidth = (width - margin.left - margin.right) / 21
+  const [focus, setFocus] = useState<number | null>(null)
+  return <svg className="research-chart" viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${dataset.title} distribution across 189,764 illustrations`}>
+    <text className="chart-panel-title chart-panel-title-centred" x={width / 2} y="20">{dataset.title}</text>
+    {yTicks(0, maximum, maximum / 5000 + 1).map((tick) => <g key={tick} className="chart-grid"><line x1={margin.left} x2={width - margin.right} y1={y(tick)} y2={y(tick)} /><text x={margin.left - 10} y={y(tick) + 4}>{tick === 0 ? '0' : `${tick / 1000}k`}</text></g>)}
+    {[0, .2, .4, .6, .8, 1].map((tick) => <text key={tick} className="chart-tick chart-tick-x" x={x(tick)} y={height - margin.bottom + 24}>{tick.toFixed(1)}</text>)}
+    <text className="chart-axis-label" x={width / 2} y={height - 13}>Fraction shared</text><text className="chart-axis-label" transform={`translate(17 ${height / 2}) rotate(-90)`}>Illustrations</text>
+    {dataset.counts.map((count, index) => {
+      const start = index / 21, end = (index + 1) / 21
+      return <g key={index} className="chart-bar" role="button" tabIndex={0} aria-label={`${start.toFixed(2)} to ${end.toFixed(2)} shared, ${count.toLocaleString()} illustrations`} onFocus={() => setFocus(index)} onBlur={() => setFocus(null)} onMouseEnter={() => setFocus(index)} onMouseLeave={() => setFocus(null)}><rect x={margin.left + index * barWidth + .7} y={y(count)} width={Math.max(1, barWidth - 1.4)} height={y(0) - y(count)} fill={dataset.colour} opacity={focus === null || focus === index ? .9 : .38} />{focus === index && <g className="chart-callout" transform={`translate(${Math.min(width - 62, Math.max(62, margin.left + (index + .5) * barWidth))} ${Math.max(32, y(count) - 10)})`}><rect x="-57" y="-25" width="114" height="24" rx="4" /><text>{count.toLocaleString()} images</text></g>}</g>
+    })}
+  </svg>
+}
+
+function OverlapChart() {
+  return <div className="paired-chart-grid">{overlapBins.map((dataset) => <HistogramPanel key={dataset.title} dataset={dataset} />)}</div>
+}
+
+function StabilityPanel({ metric }: { metric: 'ari' | 'ami' }) {
+  const width = 450, height = 320
+  const margin = { top: 38, right: 18, bottom: 58, left: 68 }
+  const domain = metric === 'ari' ? [.48, .63] : [.74, .805]
+  const x = scalePoint<number>().domain([50, 100, 200, 400]).range([margin.left, width - margin.right])
+  const y = scaleLinear().domain(domain).range([height - margin.bottom, margin.top])
+  const clusterCounts = [50, 100, 200, 400]
+  const [focus, setFocus] = useState<number | null>(null)
+  const valuesFor = (model: 'OpenCLIP' | 'DINOv2') => stability.filter((value) => value.model === model)
+  return <svg className="research-chart" viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${metric === 'ari' ? 'Adjusted Rand index' : 'Adjusted mutual information'} across K-means seeds`}>
+    <text className="chart-panel-title chart-panel-title-centred" x={width / 2} y="20">{metric === 'ari' ? 'Partition stability across seeds' : 'Information stability across seeds'}</text>
+    {yTicks(domain[0], domain[1], 5).map((tick) => <g key={tick} className="chart-grid"><line x1={margin.left} x2={width - margin.right} y1={y(tick)} y2={y(tick)} /><text x={margin.left - 10} y={y(tick) + 4}>{tick.toFixed(2)}</text></g>)}
+    {clusterCounts.map((tick) => <text key={tick} className="chart-tick chart-tick-x" x={x(tick)} y={height - margin.bottom + 24}>{tick}</text>)}
+    <text className="chart-axis-label" x={width / 2} y={height - 13}>Number of clusters (K)</text>
+    {(['OpenCLIP', 'DINOv2'] as const).map((model) => {
+      const rows = valuesFor(model)
+      const band = area<typeof rows[number]>().x((value) => x(value.k) ?? 0).y0((value) => y(value[metric][0])).y1((value) => y(value[metric][2])).curve(curveMonotoneX)
+      const centre = line<typeof rows[number]>().x((value) => x(value.k) ?? 0).y((value) => y(value[metric][1])).curve(curveMonotoneX)
+      return <g key={model}><path d={band(rows) ?? ''} fill={colours[model]} opacity=".14" /><path className="chart-line" d={centre(rows) ?? ''} stroke={colours[model]} />{rows.map((row) => <circle key={row.k} className={focus === row.k ? 'shared-point active' : 'shared-point'} cx={x(row.k)} cy={y(row[metric][1])} r="5" fill={colours[model]} />)}</g>
+    })}
+    {focus !== null && <>
+      <line className="shared-hover-line" x1={x(focus)} x2={x(focus)} y1={margin.top} y2={height - margin.bottom} />
+      <g className="shared-tooltip shared-tooltip-compact" transform={`translate(${(x(focus) ?? 0) > width * .62 ? (x(focus) ?? 0) - 201 : (x(focus) ?? 0) + 12} ${margin.top + 8})`}>
+        <rect width="189" height="91" rx="8" />
+        <text className="shared-tooltip-title" x="13" y="20">K = {focus}</text>
+        {(['OpenCLIP', 'DINOv2'] as const).map((model, index) => {
+          const values = valuesFor(model).find((row) => row.k === focus)?.[metric] ?? [0, 0, 0]
+          return <g key={model} transform={`translate(0 ${38 + index * 22})`}><circle cx="15" cy="0" r="4" fill={colours[model]} /><text className="shared-tooltip-label" x="27" y="4">{model}</text><text className="shared-tooltip-value" x="176" y="-2">{values[1].toFixed(3)}</text><text className="shared-tooltip-range" x="176" y="9">{values[0].toFixed(3)}–{values[2].toFixed(3)}</text></g>
+        })}
+      </g>
+    </>}
+    {clusterCounts.map((clusterCount, index) => {
+      const currentX = x(clusterCount) ?? 0
+      const previousX = index === 0 ? margin.left : (x(clusterCounts[index - 1]) ?? currentX)
+      const nextX = index === clusterCounts.length - 1 ? width - margin.right : (x(clusterCounts[index + 1]) ?? currentX)
+      const openclip = valuesFor('OpenCLIP')[index][metric]
+      const dinov2 = valuesFor('DINOv2')[index][metric]
+      return <rect key={clusterCount} className="shared-hover-target" role="button" tabIndex={0} aria-label={`K ${clusterCount}: OpenCLIP mean ${openclip[1].toFixed(3)}, range ${openclip[0].toFixed(3)} to ${openclip[2].toFixed(3)}; DINOv2 mean ${dinov2[1].toFixed(3)}, range ${dinov2[0].toFixed(3)} to ${dinov2[2].toFixed(3)}`} x={(previousX + currentX) / 2} y={margin.top} width={(nextX - previousX) / 2} height={height - margin.top - margin.bottom} onFocus={() => setFocus(clusterCount)} onBlur={() => setFocus(null)} onMouseEnter={() => setFocus(clusterCount)} />
+    })}
+  </svg>
+}
+
+function StabilityChart() {
+  return <div><Legend models={['OpenCLIP', 'DINOv2']} /><div className="paired-chart-grid"><StabilityPanel metric="ari" /><StabilityPanel metric="ami" /></div></div>
+}
+
+function ResearchFigure({ number, title, caption, children }: { number: string; title: string; caption: string; children: React.ReactNode }) {
+  return <figure className="research-figure"><div className="research-figure-heading"><span>{number}</span><h2>{title}</h2></div><div className="research-figure-canvas">{children}</div><figcaption>{caption}</figcaption></figure>
+}
+
 export function MethodologyPage() {
-  return (
-    <article className="meth-page">
-      <header className="meth-header">
-        <h2 className="meth-title">Methods & Findings</h2>
-        <div className="meth-rule" />
-      </header>
-
-      <div className="meth-body">
-        <p>This website is designed to explore the history of botany through digitised historical books. The project investigates how computer-assisted techniques can enhance the analysis of historical botanical texts and images at scale by utilising contemporary AI models and digital infrastructures, enabling patterns of visual and textual comparison that would be difficult to identify through traditional archival methods alone.</p>
-
-        <p>The design of the website draws together several methodological strands introduced throughout the module. The processes of transcription, object detection, and dataset construction reflect data science approaches to humanities materials, transforming archival images into computationally analysable capta. Automated analysis across multiple texts enables forms of macro-analysis associated with distant reading, extending these approaches into visual as well as textual domains. Finally, the Geographical Distribution page engages spatial humanities methodologies, demonstrating how mapping functions not only as a visualisation tool but also as an interpretative framework. In this context, digital technologies are not simply supplementary tools but methodological necessities, enabling forms of scale, comparison, and pattern recognition that would be impractical through traditional close reading alone.</p>
-
-        <p>The website uses IIIF to retrieve high-resolution images directly from museum and library servers, which are displayed via the open-source viewer OpenSeadragon. Images are retrieved via IIIF links rather than hosted locally in order to avoid redundant data storage and to respect institutional stewardship of digital collections, which reflects both the principles of IIIF and broader Digital Humanities commitments to accessibility and decentralised data management by avoiding the need to locally store large image collections. However, it also exposes the project's dependence on institutional infrastructures, raising questions about sustainability and platform longevity.</p>
-
-        <p>A different storage strategy was adopted for the derived illustration datasets. While original book pages are accessed through institutional services or preserved source copies, the cropped illustrations are stored in Azure Blob Storage because they constitute research outputs generated through detection and extraction rather than institutional source materials. Hosting them independently enables reuse in later analytical workflows and avoids the computational inefficiency of repeatedly retrieving and cropping page images at runtime. This distinction illustrates how Digital Humanities projects often negotiate between decentralised cultural heritage infrastructures and researcher-controlled data environments, depending on whether materials function as archival sources or newly produced scholarly datasets.</p>
-
-        <p>To enable textual analysis, the project uses the open-source OCR/HTR engine Kraken, on which the widely used transcription platform eScriptorium is built, and a vision-language model Qwen-VL (accessed through Together AI's API service) to transcribe historical book images. While Kraken is a more traditional, scholarly-oriented tool for transcription, the use of Qwen reflects what Smits and Wevers <span className="meth-citation">(2023)</span> describe as a "multimodal turn" in Digital Humanities, in which machine learning models for both textual and visual analysis are often used. Qwen-VL demonstrated stronger transcription performance than Kraken. The selection of Qwen-VL was informed by considerations of both performance and computational cost, as it combines competitive multimodal performance with relatively low operational expense and strong results in historical OCR, particularly for premodern Chinese texts. Its adoption by projects such as Nanjing University's Digital iLab further reflects the model's growing relevance within digital humanities research.</p>
-
-        <p>In addition, the project incorporates a fine-tuned YOLO model for detecting plant illustrations in book images. The YOLO model is a state-of-the-art open-source model for object detection. It has been increasingly used in Digital Humanities research. For instance, Du, Le, and Honig <span className="meth-citation">(2024)</span> use YOLO to identify recurring photographs in twentieth-century newspaper archives. YOLO was originally developed to detect everyday objects in photographs, such as people and vehicles. To adapt it for illustrations in historical books, I first manually annotated 1,360 images using bounding boxes on Roboflow <span className="meth-citation">(Roboflow, Inc., n.d.)</span>, and then fine-tuned a YOLO model based on the annotated dataset. The annotation process represents an interpretative act, since decisions about what qualifies as an "illustration" shaped the resulting dataset and the analytical outcomes.</p>
-
-        <figure className="meth-figure">
-          <img
-            src="/figure1.jpeg"
-            alt="Annotation workflow in Roboflow"
-            className="meth-figure-img"
-          />
-          <figcaption className="meth-figure-caption">
-            Figure 1: Annotation workflow in Roboflow
-          </figcaption>
-        </figure>
-
-        <p>By automating transcription and illustration detection, the project aligns with macro-analytical approaches that shift interpretation from individual texts toward patterns across collections.</p>
-
-        <p>The website includes an <FlipLink to="/illustration-archive">Illustration Archive</FlipLink> that presents the large-scale DINO-1575 crop corpus together with source provenance, detection evidence, nearest-neighbour retrieval, and UMAP views of its DINOv2 and OpenCLIP embedding spaces. The earlier focused botanical collection remains available as a separate <FlipLink to="/botanical-case-study">Botanical Case Study</FlipLink>. While the <FlipLink to="/books">Books</FlipLink> and <FlipLink to="/explore">Explore</FlipLink> pages expose the analytical workflow and allow users to engage with the research process, these archive views present the resulting datasets visually. The difference reflects the design choices of DH projects: whether digital cultural resources should prioritise transparency of scholarly process or the presentation of refined cultural artefacts. As Johanna Drucker argues, graphical displays in humanities contexts are interpretative constructions shaped by scholarly choices and assumptions rather than neutral representations of data <span className="meth-citation">(Drucker, 2011)</span>. The illustrations function as capta rather than neutral data; they materialise a series of computational and curatorial decisions that transform machine-generated outputs into cultural knowledge. I have also considered how to integrate them to allow users to move from exploratory research environments to curated outputs.</p>
-
-        <p>The website also includes a Geographical Distribution page, where kepler.gl is used to map plant distributions, demonstrating the potential of spatial humanities approaches. I initially considered visualising the geographical distribution of plants depicted in the historical illustrations. However, this required curated botanical metadata that is not yet available, and extracting accurate distribution data from historical texts proved to be a labour-intensive and complex task. I also explored mapping the institutional origins of the books, such as their holding museums and libraries, though this approach was less meaningful for addressing the project's research questions. As a result, the current visualisation uses an existing European plant distribution dataset sourced from contemporary scientific research. This choice highlights a central constraint of digital humanities projects: visualisation depends fundamentally on the availability and curation of data. Without substantial manual labour devoted to data creation and standardisation, meaningful spatial analysis cannot be produced.</p>
-
-        <p>Overall, the project positions digital cultural resources not merely as repositories of digitised materials but as interpretative systems shaped by computational methods, infrastructural dependencies, and scholarly choices. By integrating transcription, computer vision, and spatial visualisation, the website demonstrates how Digital Humanities methodologies expand the scale and form of cultural analysis while simultaneously introducing new epistemological and ethical challenges. The project therefore demonstrates that digital technologies do not merely accelerate existing humanities practices but reshape the kinds of historical questions that can be asked.</p>
-
-        <section className="meth-references">
-          <h3 className="meth-references-heading">References</h3>
-          <ul className="meth-references-list">
-            <li>Drucker, J. (2011). Humanities approaches to graphical display. <em>Digital Humanities Quarterly</em>, <em>5</em>(1), 1–21.</li>
-            <li>Du, L., Le, B., &amp; Honig, E. (2024). Probing historical image contexts: Enhancing visual archive retrieval through computer vision. <em>ACM Journal on Computing and Cultural Heritage</em>, <em>16</em>(4), 1–17.</li>
-            <li>Nanjing University Digital iLab. (n.d.). <em>Digital humanities research platform.</em> <a href="https://www.digitalilab.cn/" target="_blank" rel="noreferrer">https://www.digitalilab.cn/</a></li>
-            <li>Roboflow, Inc. (n.d.). <em>Roboflow</em> [Computer software]. Roboflow. <a href="https://roboflow.com" target="_blank" rel="noreferrer">https://roboflow.com</a></li>
-            <li>Smits, T., &amp; Wevers, M. (2023). A multimodal turn in Digital Humanities. Using contrastive machine learning models to explore, enrich, and analyze digital visual historical collections. <em>Digital Scholarship in the Humanities</em>, <em>38</em>(3), 1267–1280.</li>
-          </ul>
-        </section>
-      </div>
-    </article>
-  )
+  return <article className="research-page">
+    <header className="research-header"><h1>Methods &amp; Findings</h1></header>
+    <section className="research-section" aria-labelledby="layout-detection-heading">
+      <div className="research-section-label"><span>01</span><h2 id="layout-detection-heading">Page-layout detection</h2></div>
+      <ResearchFigure number="1" title="Learning across training-set sizes" caption="Test-set COCO AP on the fixed 263-image evaluation set. DINO-R50 exceeded YOLO11m at every training-set size; each point is the validation-selected checkpoint from seed 20260822."><LearningCurveChart /></ResearchFigure>
+      <ResearchFigure number="2" title="Effect of dataset refinement" caption="Paired evaluation on the same 263-image version-three test set. The 1,511-image models continued from the earlier 1,152-image checkpoints, so every old/new comparison uses the same annotations and evaluator."><RefinementChart /></ResearchFigure>
+    </section>
+    <section className="research-section" aria-labelledby="visual-similarity-heading">
+      <div className="research-section-label"><span>02</span><h2 id="visual-similarity-heading">Illustration similarity</h2></div>
+      <ResearchFigure number="3" title="Agreement between embedding models" caption="Distribution across all 189,764 crops of the fraction of top-20 neighbour identities shared by OpenCLIP and DINOv2. Cross-book retrieval removes neighbours from the query crop's own book and produces lower overlap."><OverlapChart /></ResearchFigure>
+      <ResearchFigure number="4" title="K-means stability across seeds" caption="Mean agreement across the three pairwise comparisons formed by seeds 42, 271828, and 314159. Ribbons show the minimum-to-maximum range. ARI measures partition agreement; AMI measures shared information after chance correction."><StabilityChart /></ResearchFigure>
+    </section>
+  </article>
 }

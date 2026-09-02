@@ -210,7 +210,6 @@ export function DinoIllustrationArchivePage() {
   const [selectedSource, setSelectedSource] = useState('all')
   const [selectedTier, setSelectedTier] = useState('all')
   const [selectedAspect, setSelectedAspect] = useState('all')
-  const [selectedSourceSet, setSelectedSourceSet] = useState('all')
   const [selectedCentury, setSelectedCentury] = useState('all')
   const [query, setQuery] = useState('')
   const [page, setPage] = useState(1)
@@ -241,11 +240,10 @@ export function DinoIllustrationArchivePage() {
       rowsForFacet(index.facets.sources, selectedSource),
       rowsForFacet(index.facets.confidenceTiers, selectedTier),
       rowsForFacet(index.facets.aspects, selectedAspect),
-      rowsForFacet(index.facets.sourceSets, selectedSourceSet),
       rowsForFacet(index.facets.centuries, selectedCentury),
       searchRows,
     ])
-  }, [index, searchRows, selectedAspect, selectedCentury, selectedSource, selectedSourceSet, selectedTier])
+  }, [index, searchRows, selectedAspect, selectedCentury, selectedSource, selectedTier])
 
   const totalPages = Math.max(1, Math.ceil(filteredRows.length / PAGE_SIZE))
   const pageRows = useMemo(
@@ -278,7 +276,6 @@ export function DinoIllustrationArchivePage() {
     setSelectedSource('all')
     setSelectedTier('all')
     setSelectedAspect('all')
-    setSelectedSourceSet('all')
     setSelectedCentury('all')
     setQuery('')
     setPage(1)
@@ -314,7 +311,6 @@ export function DinoIllustrationArchivePage() {
           <FacetButtons title="Source library" facets={index.facets.sources} selected={selectedSource} onChange={changeFilter(setSelectedSource)} />
           <FacetButtons title="Detection confidence" facets={index.facets.confidenceTiers} selected={selectedTier} onChange={changeFilter(setSelectedTier)} />
           <FacetButtons title="Crop orientation" facets={index.facets.aspects} selected={selectedAspect} onChange={changeFilter(setSelectedAspect)} />
-          <FacetButtons title="Page provenance" facets={index.facets.sourceSets} selected={selectedSourceSet} onChange={changeFilter(setSelectedSourceSet)} />
           <label className="archive-century">
             <span>Book date</span>
             <select value={selectedCentury} onChange={(event) => changeFilter(setSelectedCentury)(event.target.value)}>
