@@ -1,298 +1,252 @@
-import { useEffect, useMemo, useRef, useState, type MouseEvent } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ParentSize } from '@visx/responsive'
-import gsap from 'gsap'
 import { useNavigate } from 'react-router-dom'
 
-import { bookData } from '../../data/books'
-import type { BookRecord } from '../../data/books'
+import { fetchBookCatalogue, type BookCatalogue, type BookRecord } from '../../data/books'
 import { Timeline } from '../../components/Timeline'
 import { BookDetail } from '../../components/BookDetail'
 
-const prefersReducedMotion = () =>
-  typeof window !== 'undefined' &&
-  window.matchMedia &&
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
-const BAR_PALETTE = [
-  '#4299e1', // blue
-  '#48bb78', // green
-  '#f6ad55', // orange
-  '#9f7aea', // purple
-  '#fc8181', // red
-  '#2dd4bf', // teal
-  '#ec4899', // pink
-  '#facc15', // amber
+const SOURCE_ORDER = [
+  'bodleian_new',
+  'gallica',
+  'harvard_yenching',
+  'mdz',
+  'ndl',
+  'pul',
+  'rmda',
+  'wellcome',
 ]
 
-const hexToRgba = (hex: string, alpha: number) => {
-  const r = parseInt(hex.slice(1, 3), 16)
-  const g = parseInt(hex.slice(3, 5), 16)
-  const b = parseInt(hex.slice(5, 7), 16)
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`
+const sourceShortLabel: Record<string, string> = {
+  bodleian_new: 'Bodleian',
+  gallica: 'Gallica',
+  harvard_yenching: 'Harvard-Yenching',
+  mdz: 'Bavarian State Library',
+  ndl: 'National Diet Library',
+  pul: 'Princeton',
+  rmda: 'Kyoto University',
+  wellcome: 'Wellcome',
+}
+
+function bookMatchesSearch(book: BookRecord, query: string) {
+  if (!query) return true
+  const haystack = [
+    book.title,
+    ...book.authors,
+    ...book.subjects,
+    ...book.keywordsMatched,
+    book.institution,
+    book.shelfmark,
+    book.sourceItemId,
+  ].join(' ').toLocaleLowerCase()
+  return haystack.includes(query.toLocaleLowerCase())
 }
 
 export function LibraryPage() {
   const navigate = useNavigate()
-
-  const [selectedBooks, setSelectedBooks] = useState<BookRecord[]>(bookData || [])
-  const [selectedPeriod, setSelectedPeriod] = useState<string>('All Time')
-  const [selectedLanguage, setSelectedLanguage] = useState<string>('All')
-
-  const filterContainerRef = useRef<HTMLDivElement>(null)
-
-  const languageStats = useMemo(() => {
-    if (!bookData) return []
-    const counts: Record<string, number> = {}
-
-    selectedBooks.forEach((b) => {
-      b.language?.forEach((l) => {
-        counts[l] = (counts[l] || 0) + 1
-      })
-    })
-
-    return Object.entries(counts)
-      .map(([lang, count]) => ({ lang, count }))
-      .sort((a, b) => b.count - a.count)
-  }, [selectedBooks])
-
-  const maxCount = useMemo(() => Math.max(...languageStats.map((s) => s.count), 0), [languageStats])
+  const [catalogue, setCatalogue] = useState<BookCatalogue | null>(null)
+  const [loadError, setLoadError] = useState<string | null>(null)
+  const [selectedPeriod, setSelectedPeriod] = useState('All Time')
+  const [selectedLanguage, setSelectedLanguage] = useState('All')
+  const [selectedSource, setSelectedSource] = useState('All')
+  const [searchInput, setSearchInput] = useState('')
 
   useEffect(() => {
-    if (prefersReducedMotion()) return
-    if (!filterContainerRef.current) return
-
-    const items = filterContainerRef.current.querySelectorAll('.legend-item')
-    const bars = filterContainerRef.current.querySelectorAll('.legend-bar-inner')
-
-    const tl = gsap.timeline()
-
-    tl.fromTo(
-      items,
-      { opacity: 0, y: 10, filter: 'blur(4px)' },
-      { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.55, stagger: 0.045, ease: 'expo.out' },
-    )
-
-    tl.fromTo(
-      bars,
-      { clipPath: 'inset(0 100% 0 0)' },
-      {
-        clipPath: (_i, target) => {
-          const percentage = target.getAttribute('data-percentage')
-          return `inset(0 ${100 - Number(percentage)}% 0 0)`
-        },
-        duration: 1.05,
-        stagger: 0.045,
-        ease: 'power4.out',
-      },
-      '-=0.35',
-    )
-  }, [languageStats])
-
-  const handleSelectPeriod = (books: BookRecord[], period: string) => {
-    if (selectedPeriod === period) {
-      setSelectedBooks(bookData)
-      setSelectedPeriod('All Time')
-    } else {
-      setSelectedBooks(books)
-      setSelectedPeriod(period)
+    let active = true
+    fetchBookCatalogue()
+      .then((result) => {
+        if (active) setCatalogue(result)
+      })
+      .catch((error) => {
+        if (active) setLoadError(error instanceof Error ? error.message : 'Could not load the catalogue')
+      })
+    return () => {
+      active = false
     }
-    setSelectedLanguage('All')
-  }
+  }, [])
+
+  const bookData = useMemo(() => catalogue?.books ?? [], [catalogue])
+  const searchQuery = searchInput.trim()
+
+  const sourceAndSearchBooks = useMemo(
+    () => bookData.filter((book) =>
+      (selectedSource === 'All' || book.source === selectedSource) && bookMatchesSearch(book, searchQuery),
+    ),
+    [bookData, searchQuery, selectedSource],
+  )
+
+  const languageStats = useMemo(() => {
+    const counts = new Map<string, number>()
+    sourceAndSearchBooks.forEach((book) => {
+      const languages = book.language.length ? book.language : ['Not recorded']
+      languages.forEach((language) => counts.set(language, (counts.get(language) || 0) + 1))
+    })
+    return [...counts.entries()]
+      .map(([language, count]) => ({ language, count }))
+      .sort((a, b) => b.count - a.count || a.language.localeCompare(b.language))
+      .slice(0, 12)
+  }, [sourceAndSearchBooks])
 
   const displayedBooks = useMemo(() => {
-    const filtered =
-      selectedLanguage === 'All' ? selectedBooks : selectedBooks.filter((b) => b.language?.includes(selectedLanguage))
+    let books = sourceAndSearchBooks
+    if (selectedLanguage !== 'All') {
+      books = books.filter((book) => {
+        if (selectedLanguage === 'Not recorded') return book.language.length === 0
+        return book.language.includes(selectedLanguage)
+      })
+    }
+    if (selectedPeriod === 'Date unknown') {
+      books = books.filter((book) => book.year == null)
+    } else if (selectedPeriod !== 'All Time') {
+      const start = Number(selectedPeriod.slice(0, 4))
+      books = books.filter((book) => book.year != null && book.year >= start && book.year <= start + 99)
+    }
+    return [...books].sort((a, b) => {
+      if (a.year !== b.year) {
+        if (a.year == null) return 1
+        if (b.year == null) return -1
+        return a.year - b.year
+      }
+      return a.title.localeCompare(b.title) || a.id.localeCompare(b.id)
+    })
+  }, [selectedLanguage, selectedPeriod, sourceAndSearchBooks])
 
-    return [...filtered].sort((a, b) => a.year - b.year || a.title.localeCompare(b.title) || a.id.localeCompare(b.id))
-  }, [selectedBooks, selectedLanguage])
+  const unknownDateCount = sourceAndSearchBooks.filter((book) => book.year == null).length
 
-  const handleLegendMouseEnter = (e: MouseEvent<HTMLDivElement>) => {
-    if (prefersReducedMotion()) return
-    const bar = e.currentTarget.querySelector('.legend-bar-inner')
-    gsap.to(bar, { filter: 'saturate(1.25) brightness(1.08)', duration: 0.25 })
+  const resetFilters = () => {
+    setSelectedPeriod('All Time')
+    setSelectedLanguage('All')
+    setSelectedSource('All')
+    setSearchInput('')
   }
 
-  const handleLegendMouseLeave = (e: MouseEvent<HTMLDivElement>) => {
-    if (prefersReducedMotion()) return
-    const bar = e.currentTarget.querySelector('.legend-bar-inner')
-    gsap.to(bar, { filter: 'saturate(1) brightness(1)', duration: 0.25 })
+  if (loadError) {
+    return <section className="library-status" role="alert"><h2>Books</h2><p>{loadError}</p></section>
   }
-
-  if (!bookData) return <div style={{ padding: '20px' }}>Loading data...</div>
+  if (!catalogue) {
+    return <section className="library-status" aria-live="polite"><h2>Books</h2><p>Loading the research catalogue…</p></section>
+  }
 
   return (
     <>
+      <section className="library-intro" aria-labelledby="library-heading">
+        <p className="library-kicker">DINO-1575 research corpus</p>
+        <div className="library-intro-row">
+          <div>
+            <h2 id="library-heading">Illustrated books across eight digital libraries</h2>
+            <p>
+              Browse {catalogue.bookCount.toLocaleString()} source items containing{' '}
+              {catalogue.illustrationCount.toLocaleString()} retained illustration crops. Each preview is an
+              illustration selected from the book, rather than a generic cover image.
+            </p>
+          </div>
+          <dl className="library-summary" aria-label="Catalogue summary">
+            <div><dt>Books</dt><dd>{catalogue.bookCount.toLocaleString()}</dd></div>
+            <div><dt>Illustrations</dt><dd>{catalogue.illustrationCount.toLocaleString()}</dd></div>
+            <div><dt>Libraries</dt><dd>{SOURCE_ORDER.length}</dd></div>
+          </dl>
+        </div>
+
+        <div className="library-controls">
+          <label className="library-search">
+            <span>Search catalogue</span>
+            <input
+              type="search"
+              value={searchInput}
+              onChange={(event) => {
+                setSearchInput(event.target.value)
+                setSelectedPeriod('All Time')
+              }}
+              placeholder="Title, author, subject, shelfmark, or item ID"
+            />
+          </label>
+          <button type="button" className="library-reset" onClick={resetFilters}>Reset filters</button>
+        </div>
+
+        <div className="source-filter" aria-label="Filter books by source library">
+          <button
+            type="button"
+            className={selectedSource === 'All' ? 'active' : ''}
+            aria-pressed={selectedSource === 'All'}
+            onClick={() => { setSelectedSource('All'); setSelectedPeriod('All Time') }}
+          >
+            <span>All libraries</span><strong>{catalogue.bookCount.toLocaleString()}</strong>
+          </button>
+          {SOURCE_ORDER.map((source) => (
+            <button
+              key={source}
+              type="button"
+              className={selectedSource === source ? 'active' : ''}
+              aria-pressed={selectedSource === source}
+              onClick={() => { setSelectedSource(source); setSelectedPeriod('All Time') }}
+            >
+              <span>{sourceShortLabel[source]}</span><strong>{catalogue.sourceCounts[source].toLocaleString()}</strong>
+            </button>
+          ))}
+        </div>
+      </section>
+
       <section className="timeline-section">
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'baseline',
-            marginBottom: '1.5rem',
-            borderBottom: '1px solid rgba(148, 163, 184, 0.2)',
-            paddingBottom: '0.5rem',
-          }}
-        >
-          <h3 className="section-heading" style={{ fontSize: '1.75rem', margin: 0, color: 'inherit' }}>
-            Temporal Distribution
-          </h3>
+        <div className="library-section-heading">
+          <h3>Temporal distribution</h3>
+          <div className="period-controls">
+            <button
+              type="button"
+              className={selectedPeriod === 'All Time' ? 'active' : ''}
+              onClick={() => setSelectedPeriod('All Time')}
+            >All dates</button>
+            <button
+              type="button"
+              className={selectedPeriod === 'Date unknown' ? 'active' : ''}
+              onClick={() => setSelectedPeriod('Date unknown')}
+            >Date not recorded ({unknownDateCount.toLocaleString()})</button>
+          </div>
         </div>
         <div className="timeline-wrapper">
           <ParentSize>
             {({ width, height }) => (
               <Timeline
-                data={bookData}
+                data={sourceAndSearchBooks}
                 width={width}
                 height={height || 400}
-                onSelectPeriod={handleSelectPeriod}
+                onSelectPeriod={(_books, period) => setSelectedPeriod(period)}
                 selectedPeriod={selectedPeriod}
               />
             )}
           </ParentSize>
         </div>
 
-        <div className="language-filter" style={{ marginTop: '3rem' }}>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'baseline',
-              marginBottom: '1.5rem',
-              borderBottom: '1px solid rgba(148, 163, 184, 0.2)',
-              paddingBottom: '0.5rem',
-            }}
-          >
-            <h3 className="section-heading" style={{ fontSize: '1.75rem', margin: 0, color: 'inherit' }}>
-              Linguistic Distribution
-            </h3>
-            <button
-              onClick={() => setSelectedLanguage('All')}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: selectedLanguage === 'All' ? '#13cf71' : '#718096',
-                fontSize: '0.8rem',
-                cursor: 'pointer',
-                fontWeight: 600,
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px',
-              }}
-              type="button"
-            >
-              {selectedLanguage === 'All' ? '• Showing All' : 'Reset Filter'}
+        <div className="language-filter">
+          <div className="library-section-heading">
+            <h3>Most represented languages</h3>
+            <button type="button" onClick={() => setSelectedLanguage('All')}>
+              {selectedLanguage === 'All' ? 'Showing all' : 'Clear language filter'}
             </button>
           </div>
-
-          <div
-            ref={filterContainerRef}
-            className="legend-grid"
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(420px, 1fr))',
-              gap: '0.9rem 2.5rem',
-            }}
-          >
-            {languageStats.map(({ lang, count }, idx) => {
-              const isActive = selectedLanguage === lang
-              const percentage = maxCount > 0 ? (count / maxCount) * 100 : 0
-              const color = BAR_PALETTE[idx % BAR_PALETTE.length]
-
-              return (
-                <div
-                  key={lang}
-                  className={`legend-item ${isActive ? 'active' : ''}`}
-                  onClick={() => setSelectedLanguage(isActive ? 'All' : lang)}
-                  onMouseEnter={handleLegendMouseEnter}
-                  onMouseLeave={handleLegendMouseLeave}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.85rem',
-                    cursor: 'pointer',
-                    padding: '0.5rem 0.6rem',
-                    borderRadius: '8px',
-                    background: isActive ? hexToRgba(color, 0.12) : 'transparent',
-                    border: isActive ? `1px solid ${hexToRgba(color, 0.5)}` : '1px solid transparent',
-                    transition: 'background 0.2s ease, border-color 0.2s ease',
-                    ['--bar-color' as string]: color,
-                  }}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault()
-                      setSelectedLanguage(isActive ? 'All' : lang)
-                    }
-                  }}
-                  aria-pressed={isActive}
-                >
-                  <strong
-                    style={{
-                      minWidth: '110px',
-                      fontSize: '0.9rem',
-                      fontWeight: 600,
-                      color: '#1e293b',
-                      letterSpacing: '0.01em',
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                    }}
-                  >
-                    {lang}
-                  </strong>
-
-                  <div
-                    style={{
-                      flex: 1,
-                      position: 'relative',
-                      height: '22px',
-                      background: '#e2e8f0',
-                      borderRadius: '6px',
-                      overflow: 'hidden',
-                      boxShadow: 'inset 0 1px 2px rgba(15, 23, 42, 0.06)',
-                    }}
-                  >
-                    <div
-                      className="legend-bar-inner"
-                      data-percentage={percentage}
-                      style={{
-                        position: 'absolute',
-                        inset: 0,
-                        background: color,
-                        clipPath: `inset(0 ${100 - percentage}% 0 0)`,
-                        borderRadius: '6px',
-                        boxShadow: isActive ? `0 0 12px ${hexToRgba(color, 0.55)}` : 'none',
-                      }}
-                    />
-                  </div>
-
-                  <span
-                    style={{
-                      minWidth: '78px',
-                      textAlign: 'right',
-                      fontSize: '0.85rem',
-                      fontWeight: 600,
-                      color: '#475569',
-                      fontVariantNumeric: 'tabular-nums',
-                    }}
-                  >
-                    {count} {count === 1 ? 'Work' : 'Works'}
-                  </span>
-                </div>
-              )
-            })}
+          <div className="language-chip-list" aria-label="Filter by language">
+            {languageStats.map(({ language, count }) => (
+              <button
+                key={language}
+                type="button"
+                className={selectedLanguage === language ? 'active' : ''}
+                aria-pressed={selectedLanguage === language}
+                onClick={() => setSelectedLanguage(selectedLanguage === language ? 'All' : language)}
+              >
+                <span>{language}</span><strong>{count.toLocaleString()}</strong>
+              </button>
+            ))}
           </div>
         </div>
       </section>
 
-      <section className="detail-section" style={{ marginTop: '4rem' }}>
+      <section className="detail-section library-results">
+        <p className="library-result-context" aria-live="polite">
+          Showing {displayedBooks.length.toLocaleString()} of {catalogue.bookCount.toLocaleString()} books
+        </p>
         <BookDetail
           books={displayedBooks}
           period={selectedPeriod}
-          aiHubPathForBook={(b) => `/explore/${b.id}`}
-          onSelectBook={(book) => {
-            navigate(`/explore/${book.id}`)
-          }}
+          onSelectBook={(book) => navigate(`/explore/${encodeURIComponent(book.id)}`)}
         />
       </section>
     </>

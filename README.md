@@ -1,5 +1,25 @@
 # React + TypeScript + Vite
 
+## DINO-1575 book catalogue
+
+The Books page reads `public/data/books.catalog.json`, a normalized static catalogue of the 3,358 source items represented in the frozen DINO-1575 crop dataset. It is deliberately generated ahead of deployment instead of making browsers download the eight private pipeline `books.jsonl` state files.
+
+To rebuild the catalogue after a new detector run:
+
+```bash
+npm run catalogue:build -- \
+  --books-root "/absolute/path/to/illustration_runs" \
+  --crop-manifest "/absolute/path/to/crop_manifest.jsonl" \
+  --output "public/data/books.catalog.json"
+```
+
+The deployed site retrieves representative crop images through a read-only Vercel function. Configure these server-side environment variables in Vercel:
+
+- `SEARCH_BOTANY_CONTAINER_URL`: the container URL ending in `/search-botany`
+- `SEARCH_BOTANY_SAS_TOKEN`: a read-only SAS query, with or without its leading `?`
+
+Do not prefix either variable with `VITE_`. A `VITE_` variable is compiled into browser JavaScript and would expose the storage credential. For local development, `VITE_SEARCH_BOTANY_IMAGE_PROXY` may point at a compatible local proxy; otherwise the application uses `/api/search-botany-blob`.
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:

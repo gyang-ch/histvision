@@ -29,18 +29,21 @@ export const Timeline: React.FC<TimelineProps> = ({
 }) => {
   const mountRef = useRef<HTMLDivElement>(null);
 
-  // Group books by 100-year intervals
+  // Group books with recorded dates by 100-year intervals.
   const binnedData = useMemo(() => {
     const bins: Record<string, BookRecord[]> = {};
-    const minYear = 1300;
-    const maxYear = 1800;
+    const datedBooks = data.filter((book) => book.year != null);
+    const years = datedBooks.map((book) => book.year as number);
+    const minYear = years.length ? Math.floor(Math.min(...years) / 100) * 100 : 1000;
+    const maxYear = years.length ? Math.floor(Math.max(...years) / 100) * 100 : 2000;
     
     for (let year = minYear; year <= maxYear; year += 100) {
       const label = `${year}-${year + 99}`;
       bins[label] = [];
     }
 
-    data.forEach((book) => {
+    datedBooks.forEach((book) => {
+      if (book.year == null) return;
       const binStart = Math.floor(book.year / 100) * 100;
       const label = `${binStart}-${binStart + 99}`;
       if (bins[label]) {
@@ -140,6 +143,9 @@ export const Timeline: React.FC<TimelineProps> = ({
       .join('path')
       .attr('d', (d) => barPath(x(d.period) || 0, y(d.count), x.bandwidth(), bottomY - y(d.count)))
       .attr('fill', (d) => d.period === selectedPeriod ? '#7dd3fc' : `url(#${gradientId})`)
+      .attr('role', 'button')
+      .attr('tabindex', 0)
+      .attr('aria-label', (d) => `${d.period}: ${d.count} works`)
       .style('cursor', 'pointer');
 
     // Apply selected glow style on initialization
@@ -225,6 +231,12 @@ export const Timeline: React.FC<TimelineProps> = ({
       })
       .on('click', function(_event: any, d: any) {
         onSelectPeriod(d.books, d.period);
+      })
+      .on('keydown', function(event: KeyboardEvent, d: any) {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          onSelectPeriod(d.books, d.period);
+        }
       });
 
     root.on('pointerleave', () => {
@@ -248,7 +260,7 @@ export const Timeline: React.FC<TimelineProps> = ({
       .text((d) => d.period);
 
     return () => {
-      bars.on('pointerenter', null).on('pointerleave', null).on('click', null);
+      bars.on('pointerenter', null).on('pointerleave', null).on('click', null).on('keydown', null);
       root.on('pointerleave', null);
       bars.each(function() {
         gsap.killTweensOf(this);

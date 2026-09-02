@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import type { BookRecord } from '../data/books';
+import { getBookThumbnailUrl, type BookRecord } from '../data/books';
 import { Paginator } from './Paginator';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -54,7 +54,7 @@ const SmartImage: React.FC<{ src: string; alt: string; className?: string }> = (
 
   return (
     <img 
-      src={`${src}${retryCount > 0 ? `?retry=${retryCount}` : ''}`} 
+      src={`${src}${retryCount > 0 ? `${src.includes('?') ? '&' : '?'}retry=${retryCount}` : ''}`}
       alt={alt} 
       className={className}
       loading="lazy"
@@ -176,37 +176,29 @@ export const BookDetail: React.FC<BookDetailProps> = ({ books, period, onSelectB
             aria-label={onSelectBook ? `Open Explore for ${book.title}` : undefined}
           >
             <div className="book-image-container">
-              <SmartImage src={book.thumbnailUrl} alt={book.title} className="book-thumbnail" />
+              <SmartImage src={getBookThumbnailUrl(book)} alt={`Representative illustration from ${book.title}`} className="book-thumbnail" />
             </div>
             <div className="book-info">
               <div className="book-header">
-                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                <div className="book-label-row">
                   <span className="institution-tag">{book.institution}</span>
-                  <span className={`category-tag category-${book.category}`} style={{ 
-                    fontSize: '0.7rem', 
-                    padding: '2px 8px', 
-                    borderRadius: '999px', 
-                    background: book.category === 'astronomy' ? '#805ad5' : book.category === 'mathematics' ? '#3182ce' : '#38a169',
-                    color: 'white',
-                    fontWeight: 600,
-                    textTransform: 'uppercase'
-                  }}>{book.category}</span>
+                  <span className="illustration-count-tag">{book.illustrationCount.toLocaleString()} crops</span>
                 </div>
                 <h3>{book.title}</h3>
               </div>
               
               <div className="book-meta-grid">
                 <div className="meta-item" title={book.authors.join(', ')}>
-                  <strong>Authors:</strong> {book.authors[0]}
+                  <strong>Authors:</strong> {book.authors[0] || 'Not recorded'}
                 </div>
                 <div className="meta-item">
-                  <strong>Year:</strong> {book.year}
+                  <strong>Date:</strong> {book.dateLabel || book.year || 'Not recorded'}
                 </div>
                 <div className="meta-item">
-                  <strong>Language:</strong> {book.language[0]}
+                  <strong>Language:</strong> {book.language[0] || 'Not recorded'}
                 </div>
                 <div className="meta-item">
-                  <strong>Images:</strong> {book.pageCount}
+                  <strong>Pages:</strong> {book.pageCount.toLocaleString() || 'Not recorded'}
                 </div>
               </div>
               <div className="book-subjects">

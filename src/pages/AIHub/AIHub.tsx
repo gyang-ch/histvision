@@ -1,28 +1,36 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { bookData, type BookRecord } from '../../data/books'
+import { fetchBookCatalogue, type BookRecord } from '../../data/books'
 import { BookReader } from '../../components/BookReader'
 
 let customBookCounter = 0
+type CustomTileSource = { type: 'image'; url: string }
 
 const makeCustomBook = (manifestUrl: string, title: string): BookRecord => ({
   id: `custom-${Date.now()}-${customBookCounter++}`,
+  source: 'custom',
+  sourceLabel: 'Uploaded item',
+  sourceItemId: '',
   title: title || 'Untitled upload',
-  navDate: new Date().toISOString(),
   year: new Date().getFullYear(),
-  dynasty: '',
+  dateLabel: String(new Date().getFullYear()),
   description: 'Item opened directly in Explore.',
   subjects: [],
-  category: 'botany',
   manifestUrl,
-  thumbnailUrl: '',
+  museumUrl: '',
+  representativeCropBlobPath: '',
   pageCount: 0,
+  positivePageCount: 0,
   institution: 'Uploaded item',
   attribution: '',
+  license: '',
   language: [],
   authors: [],
   shelfmark: '',
-  hasIllustrations: false,
+  illustrationCount: 0,
+  yoloIllustrationCount: 0,
+  keywordsMatched: [],
+  metadataAvailable: true,
 })
 
 export function AIHubPage() {
@@ -30,16 +38,26 @@ export function AIHubPage() {
   const navigate = useNavigate()
 
   const [customBook, setCustomBook] = useState<BookRecord | null>(null)
-  const [customTileSources, setCustomTileSources] = useState<any[] | undefined>(undefined)
+  const [customTileSources, setCustomTileSources] = useState<CustomTileSource[] | undefined>(undefined)
   const [manifestUrlInput, setManifestUrlInput] = useState('')
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [isDragActive, setIsDragActive] = useState(false)
+  const [selectedBook, setSelectedBook] = useState<BookRecord | null>(null)
+  const [isCatalogueLoading, setIsCatalogueLoading] = useState(Boolean(bookId))
   const objectUrlsRef = useRef<string[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const selectedBook = useMemo(() => {
-    if (!bookId) return null
-    return bookData.find((b) => b.id === bookId) ?? null
+  useEffect(() => {
+    let active = true
+    if (!bookId) return
+    fetchBookCatalogue()
+      .then((catalogue) => {
+        if (active) setSelectedBook(catalogue.books.find((book) => book.id === bookId) ?? null)
+      })
+      .finally(() => {
+        if (active) setIsCatalogueLoading(false)
+      })
+    return () => { active = false }
   }, [bookId])
 
   const clearCustomBook = () => {
@@ -182,6 +200,10 @@ export function AIHubPage() {
         </div>
       </section>
     )
+  }
+
+  if (isCatalogueLoading) {
+    return <section className="ai-hub-empty" aria-live="polite"><h2 className="ai-hub-title">Explore</h2><p>Loading book…</p></section>
   }
 
   if (!selectedBook) {

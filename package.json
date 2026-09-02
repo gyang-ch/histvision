@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "catalogue:build": "node scripts/buildBookCatalogue.mjs",
     "prebuild": "node scripts/downloadManifests.js && node scripts/generateHeroTiles.js",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
