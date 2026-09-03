@@ -65,10 +65,6 @@ function App() {
 
     if (chars.length === 0) return
 
-    const firstLineLength = 'Computational Analysis of '.length
-    const line1Chars = chars.slice(0, firstLineLength)
-    const line2Chars = chars.slice(firstLineLength)
-
     if (subtitle) gsap.set(subtitle, { opacity: 0, y: 22, filter: 'blur(8px)' })
 
     const scatterFrom = {
@@ -81,8 +77,9 @@ function App() {
 
     const tl = gsap.timeline({ delay: 0.1 })
 
-    // Step 1: line 1 scatter fly-in (faster stagger)
-    tl.fromTo(line1Chars, scatterFrom, {
+    // Stage 1: the whole headline scatter-flies in as one continuous stagger
+    // (same per-char effect that used to be line 1 only, now covering both lines).
+    tl.fromTo(chars, scatterFrom, {
       opacity: 1, x: 0, y: 0, rotation: 0, scale: 1,
       duration: 0.65,
       stagger: { each: 0.018, from: 'start' },
@@ -90,16 +87,7 @@ function App() {
       clearProps: 'transform',
     })
 
-    // Step 2: line 2 starts shortly after line 1 ends
-    tl.fromTo(line2Chars, scatterFrom, {
-      opacity: 1, x: 0, y: 0, rotation: 0, scale: 1,
-      duration: 0.65,
-      stagger: { each: 0.022, from: 'start' },
-      ease: 'back.out(1.4)',
-      clearProps: 'transform',
-    }, '-=0.8')
-
-    // Step 3: subtitle slides up shortly after line 2 ends
+    // Stage 2: subtitle slides up once the headline settles
     if (subtitle) {
       tl.to(subtitle, {
         opacity: 1,
