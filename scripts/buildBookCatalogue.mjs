@@ -1,5 +1,5 @@
 import { createReadStream, createWriteStream } from 'node:fs'
-import { mkdir } from 'node:fs/promises'
+import { mkdir, writeFile } from 'node:fs/promises'
 import { createHash } from 'node:crypto'
 import path from 'node:path'
 import readline from 'node:readline'
@@ -304,6 +304,12 @@ const orderedCatalogue = balancedFixedOrder(catalogue)
 const sourceCounts = Object.fromEntries(
   Object.keys(SOURCE_CONFIG).map((source) => [source, catalogue.filter((book) => book.source === source).length]),
 )
+const sourceIllustrationCounts = Object.fromEntries(
+  Object.keys(SOURCE_CONFIG).map((source) => [
+    source,
+    catalogue.filter((book) => book.source === source).reduce((sum, book) => sum + book.illustrationCount, 0),
+  ]),
+)
 
 const output = {
   schemaVersion: 'dino1575_book_catalogue_v1',
@@ -333,6 +339,20 @@ await new Promise((resolve, reject) => {
   stream.on('finish', resolve)
   stream.on('error', reject)
 })
+
+const compositionPath = path.join(path.dirname(args.output), 'home-composition.json')
+await writeFile(compositionPath, `${JSON.stringify({
+  schemaVersion: 'phytovision_home_composition_v1',
+  orderingSeed: ORDER_SEED,
+  totalBooks: output.bookCount,
+  totalIllustrations: output.illustrationCount,
+  sources: Object.keys(SOURCE_CONFIG).map((source) => ({
+    id: source,
+    label: SOURCE_CONFIG[source].label,
+    books: sourceCounts[source],
+    illustrations: sourceIllustrationCounts[source],
+  })),
+})}\n`)
 
 console.log(JSON.stringify({
   status: 'completed',
