@@ -17,9 +17,12 @@ function useStickyFocus<T>(focus: T | null): [T | null, () => void] {
 }
 
 /**
- * Fades/scales a tooltip card in or out. Positioning stays on the parent <g>
- * (via its transform attribute) — this only animates the CSS transform, so
- * it can't fight with that attribute for the same property.
+ * Fades a tooltip card in or out. Positioning stays on the parent <g> (via
+ * its transform attribute) — this only animates opacity, deliberately never
+ * scale: a percentage-based transformOrigin on a nested SVG <g> doesn't
+ * reliably converge to the same rest position GSAP's clearProps snaps back
+ * to, which showed up as a small but visible jump right as the card
+ * finished appearing. Opacity alone can't cause any positional drift.
  */
 function TooltipFade({ open, onExited, children }: { open: boolean; onExited: () => void; children: React.ReactNode }) {
   const ref = useRef<SVGGElement>(null)
@@ -28,15 +31,15 @@ function TooltipFade({ open, onExited, children }: { open: boolean; onExited: ()
     const el = ref.current
     if (!el) return
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      gsap.set(el, { opacity: open ? 1 : 0, scale: 1, clearProps: open ? 'transform' : undefined })
+      gsap.set(el, { opacity: open ? 1 : 0 })
       if (!open) onExited()
       return
     }
     gsap.killTweensOf(el)
     if (open) {
-      gsap.fromTo(el, { opacity: 0, scale: 0.92 }, { opacity: 1, scale: 1, duration: 0.15, ease: 'power2.out', transformOrigin: '50% 50%', clearProps: 'transform' })
+      gsap.fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.15, ease: 'power2.out' })
     } else {
-      gsap.to(el, { opacity: 0, scale: 0.92, duration: 0.12, ease: 'power1.in', transformOrigin: '50% 50%', onComplete: onExited })
+      gsap.to(el, { opacity: 0, duration: 0.12, ease: 'power1.in', onComplete: onExited })
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
