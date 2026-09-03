@@ -133,7 +133,8 @@
 .ai-hub-page {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 2.5rem;
+  margin-top: 1rem;
 }
 
 .ai-hub-status {

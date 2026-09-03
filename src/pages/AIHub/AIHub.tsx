@@ -48,6 +48,7 @@ export function AIHubPage() {
   const [isCatalogueLoading, setIsCatalogueLoading] = useState(Boolean(bookId))
   const objectUrlsRef = useRef<string[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const viewerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     let active = true
@@ -61,6 +62,32 @@ export function AIHubPage() {
       })
     return () => { active = false }
   }, [bookId])
+
+  // Scroll the viewer into view whenever a *new* book actually opens (not on
+  // every re-render). Deferred a frame so it runs after App's own
+  // scroll-to-top-on-navigate effect, which would otherwise win the race.
+  // BookReader's manifest/thumbnails can keep growing the page for a bit
+  // after mount, so a ResizeObserver keeps re-aligning to the top for a
+  // short window instead of scrolling once against a still-short page.
+  const viewingId = customBook?.id ?? (selectedBook && bookId ? selectedBook.id : null)
+  useEffect(() => {
+    if (!viewingId || !viewerRef.current) return
+    const behavior: ScrollBehavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+    const el = viewerRef.current
+
+    const scroll = () => el.scrollIntoView({ behavior, block: 'start' })
+    const raf = requestAnimationFrame(scroll)
+
+    const observer = new ResizeObserver(scroll)
+    observer.observe(el)
+    const stopObserving = setTimeout(() => observer.disconnect(), 2500)
+
+    return () => {
+      cancelAnimationFrame(raf)
+      clearTimeout(stopObserving)
+      observer.disconnect()
+    }
+  }, [viewingId])
 
   const clearCustomBook = () => {
     objectUrlsRef.current.forEach((url) => URL.revokeObjectURL(url))
@@ -229,7 +256,7 @@ export function AIHubPage() {
   return (
     <div className="ai-hub-page">
       {picker}
-      {viewer}
+      <div ref={viewerRef}>{viewer}</div>
     </div>
   )
 }
