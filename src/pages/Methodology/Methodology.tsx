@@ -1,7 +1,71 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { area, curveMonotoneX, line, scaleBand, scaleLinear, scalePoint } from 'd3'
 import gsap from 'gsap'
 import './Methodology.css'
+
+const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+/** Fires once, the first time the returned ref's element scrolls into view. */
+function useRevealOnScroll<T extends HTMLElement>(threshold = 0.2) {
+  const ref = useRef<T>(null)
+  const [visible, setVisible] = useState(false)
+  useEffect(() => {
+    if (visible) return
+    const el = ref.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true)
+          observer.disconnect()
+        }
+      },
+      { threshold },
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  // threshold is fixed per call site, not meant to be reactive.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible])
+  return [ref, visible] as const
+}
+
+/**
+ * Grows a chart's bars up from their baseline the first time `play` becomes
+ * true (scroll-triggered by the caller). Animates the SVG y/height attributes
+ * directly rather than a transform/scale, so the bar's foot stays planted on
+ * the baseline throughout — animating y and height together with the same
+ * duration keeps y + height constant at the baseline for every frame.
+ */
+function useBarGrowth(svgRef: React.RefObject<SVGSVGElement | null>, play: boolean, baseline: number, bars: { y: number; height: number }[]) {
+  // Flatten to a stable string dependency — the arrays are rebuilt every
+  // render (cheap, derived from static data) but only actually change if the
+  // underlying chart data does.
+  const barsKey = bars.map((bar) => `${bar.y},${bar.height}`).join('|')
+
+  useLayoutEffect(() => {
+    if (prefersReducedMotion()) return
+    const svg = svgRef.current
+    if (!svg) return
+    const rects = svg.querySelectorAll<SVGRectElement>('.chart-bar rect')
+    gsap.set(rects, { attr: { y: baseline, height: 0 } })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [barsKey])
+
+  useEffect(() => {
+    if (!play || prefersReducedMotion()) return
+    const svg = svgRef.current
+    if (!svg) return
+    const rects = svg.querySelectorAll<SVGRectElement>('.chart-bar rect')
+    const tweens = Array.from(rects).map((rect, index) => {
+      const target = bars[index]
+      if (!target) return null
+      return gsap.to(rect, { attr: { y: target.y, height: target.height }, duration: 0.55, delay: index * 0.04, ease: 'power2.out' })
+    })
+    return () => tweens.forEach((tween) => tween?.kill())
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [play, barsKey])
+}
 
 /** Keeps returning the last non-null focus value during the exit fade, instead of snapping to null the instant the pointer leaves. */
 function useStickyFocus<T>(focus: T | null): [T | null, () => void] {
@@ -141,7 +205,7 @@ function LearningCurveChart() {
   </div>
 }
 
-function BarPanel({ model, kind, panel }: { model: 'YOLO11m' | 'DINO-R50'; kind: 'overall' | 'classes'; panel: string }) {
+function BarPanel({ model, kind, panel, play }: { model: 'YOLO11m' | 'DINO-R50'; kind: 'overall' | 'classes'; panel: string; play: boolean }) {
   const data = refinement[model][kind]
   const width = 450, height = 280
   const margin = { top: 32, right: 16, bottom: 55, left: 56 }
@@ -149,7 +213,13 @@ function BarPanel({ model, kind, panel }: { model: 'YOLO11m' | 'DINO-R50'; kind:
   const y = scaleLinear().domain([0, 1]).range([height - margin.bottom, margin.top])
   const sub = scaleBand().domain(['old', 'next']).range([0, x.bandwidth()]).padding(.07)
   const [focus, setFocus] = useState<string | null>(null)
-  return <svg className="research-chart refinement-panel" viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${model} ${kind === 'overall' ? 'overall detection' : 'per-class AP'} comparison`}>
+  const svgRef = useRef<SVGSVGElement>(null)
+  const bars = data.labels.flatMap((label, index) => (['old', 'next'] as const).map((version) => {
+    const value = data[version][index]
+    return { y: y(value), height: y(0) - y(value) }
+  }))
+  useBarGrowth(svgRef, play, y(0), bars)
+  return <svg ref={svgRef} className="research-chart refinement-panel" viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${model} ${kind === 'overall' ? 'overall detection' : 'per-class AP'} comparison`}>
     <text className="chart-panel-title" x={margin.left} y="18">{panel} {model}: {kind === 'overall' ? 'Overall detection' : 'Per-class AP'}</text>
     {yTicks(0, 1, 6).map((tick) => <g key={tick} className="chart-grid"><line x1={margin.left} x2={width - margin.right} y1={y(tick)} y2={y(tick)} /><text x={margin.left - 10} y={y(tick) + 4}>{tick.toFixed(1)}</text></g>)}
     {data.labels.map((label, index) => <g key={label}>
@@ -163,10 +233,11 @@ function BarPanel({ model, kind, panel }: { model: 'YOLO11m' | 'DINO-R50'; kind:
 }
 
 function RefinementChart() {
-  return <div className="refinement-wrap"><div className="research-legend"><span><i style={{ background: '#aab1b6' }} />Old 1152</span><span><i style={{ background: '#287da1' }} />New 1511</span></div><div className="refinement-grid"><BarPanel model="YOLO11m" kind="overall" panel="A" /><BarPanel model="DINO-R50" kind="overall" panel="B" /><BarPanel model="YOLO11m" kind="classes" panel="C" /><BarPanel model="DINO-R50" kind="classes" panel="D" /></div></div>
+  const [wrapRef, visible] = useRevealOnScroll<HTMLDivElement>()
+  return <div className="refinement-wrap" ref={wrapRef}><div className="research-legend"><span><i style={{ background: '#aab1b6' }} />Old 1152</span><span><i style={{ background: '#287da1' }} />New 1511</span></div><div className="refinement-grid"><BarPanel model="YOLO11m" kind="overall" panel="A" play={visible} /><BarPanel model="DINO-R50" kind="overall" panel="B" play={visible} /><BarPanel model="YOLO11m" kind="classes" panel="C" play={visible} /><BarPanel model="DINO-R50" kind="classes" panel="D" play={visible} /></div></div>
 }
 
-function HistogramPanel({ dataset }: { dataset: typeof overlapBins[number] }) {
+function HistogramPanel({ dataset, play }: { dataset: typeof overlapBins[number]; play: boolean }) {
   const width = 450, height = 310
   const margin = { top: 36, right: 18, bottom: 58, left: 64 }
   const x = scaleLinear().domain([0, 1]).range([margin.left, width - margin.right])
@@ -175,7 +246,10 @@ function HistogramPanel({ dataset }: { dataset: typeof overlapBins[number] }) {
   const barWidth = (width - margin.left - margin.right) / 21
   const [focus, setFocus] = useState<number | null>(null)
   const [displayFocus, clearDisplayFocus] = useStickyFocus(focus)
-  return <svg className="research-chart" viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${dataset.title} distribution across 189,764 illustrations`}>
+  const svgRef = useRef<SVGSVGElement>(null)
+  const bars = dataset.counts.map((count) => ({ y: y(count), height: y(0) - y(count) }))
+  useBarGrowth(svgRef, play, y(0), bars)
+  return <svg ref={svgRef} className="research-chart" viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${dataset.title} distribution across 189,764 illustrations`}>
     <text className="chart-panel-title chart-panel-title-centred" x={width / 2} y="20">{dataset.title}</text>
     {yTicks(0, maximum, maximum / 5000 + 1).map((tick) => <g key={tick} className="chart-grid"><line x1={margin.left} x2={width - margin.right} y1={y(tick)} y2={y(tick)} /><text x={margin.left - 10} y={y(tick) + 4}>{tick === 0 ? '0' : `${tick / 1000}k`}</text></g>)}
     {[0, .2, .4, .6, .8, 1].map((tick) => <text key={tick} className="chart-tick chart-tick-x" x={x(tick)} y={height - margin.bottom + 24}>{tick.toFixed(1)}</text>)}
@@ -196,7 +270,8 @@ function HistogramPanel({ dataset }: { dataset: typeof overlapBins[number] }) {
 }
 
 function OverlapChart() {
-  return <div className="paired-chart-grid">{overlapBins.map((dataset) => <HistogramPanel key={dataset.title} dataset={dataset} />)}</div>
+  const [wrapRef, visible] = useRevealOnScroll<HTMLDivElement>()
+  return <div className="paired-chart-grid" ref={wrapRef}>{overlapBins.map((dataset) => <HistogramPanel key={dataset.title} dataset={dataset} play={visible} />)}</div>
 }
 
 function StabilityPanel({ metric }: { metric: 'ari' | 'ami' }) {
