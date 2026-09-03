@@ -101,14 +101,7 @@ export function LibraryPage() {
       const start = Number(selectedPeriod.slice(0, 4))
       books = books.filter((book) => book.year != null && book.year >= start && book.year <= start + 99)
     }
-    return [...books].sort((a, b) => {
-      if (a.year !== b.year) {
-        if (a.year == null) return 1
-        if (b.year == null) return -1
-        return a.year - b.year
-      }
-      return a.title.localeCompare(b.title) || a.id.localeCompare(b.id)
-    })
+    return books
   }, [selectedLanguage, selectedPeriod, sourceAndSearchBooks])
 
   const unknownDateCount = sourceAndSearchBooks.filter((book) => book.year == null).length

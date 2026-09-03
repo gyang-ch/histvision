@@ -46,6 +46,8 @@ export interface ArchiveIndex {
     aspects: ArchiveFacet[]
   }
   bookRows: Record<string, number[]>
+  displayRows: number[]
+  displayOrdering: { method: string; seed: string }
   embeddingMaps: Record<EmbeddingModel, {
     coordinates: { url: string; record_count: number }
     clusters: { url: string; record_count: number; cluster_count: number; counts: Record<string, number> }

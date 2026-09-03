@@ -1,5 +1,6 @@
 import { createReadStream, createWriteStream } from 'node:fs'
 import { mkdir } from 'node:fs/promises'
+import { createHash } from 'node:crypto'
 import path from 'node:path'
 import readline from 'node:readline'
 
@@ -101,6 +102,75 @@ function concise(value, length = 900) {
   return text.length > length ? `${text.slice(0, length - 1).trimEnd()}…` : text
 }
 
+const ORDER_SEED = 'phytovision-balanced-order-v1'
+const EAST_ASIAN_SOURCES = new Set(['harvard_yenching', 'ndl', 'rmda'])
+const FAMILY_WEIGHTS = { european: 0.5, sino_japanese: 0.3, arabic_persian: 0.2 }
+const HARVARD_TEXT_FIRST_COUNT = 16
+
+function languageFamily(languages, source) {
+  const value = languages.join(' ').toLocaleLowerCase()
+  if (/arab|persian|persan|urdu|ottoman|turkish|turc/.test(value)) return 'arabic_persian'
+  if (/chinese|chinois|japanese|japonais|korean|cor[eé]en|mandarin/.test(value)) return 'sino_japanese'
+  if (!value || /not identified|no linguistic content/.test(value)) {
+    return EAST_ASIAN_SOURCES.has(source) ? 'sino_japanese' : 'european'
+  }
+  if (/english|anglais|french|fran[cç]ais|german|allemand|latin|italian|dutch|greek|grec|russian|spanish|portuguese|occitan|anglo-norman|armenian/.test(value)) {
+    return 'european'
+  }
+  return 'other'
+}
+
+function stableHash(value) {
+  return createHash('sha256').update(`${ORDER_SEED}\0${value}`).digest('hex')
+}
+
+function balancedFixedOrder(items) {
+  const buckets = new Map()
+  items.forEach((item) => {
+    const key = `${item.source}\0${item.languageFamily}`
+    const bucket = buckets.get(key) ?? []
+    bucket.push(item)
+    buckets.set(key, bucket)
+  })
+  buckets.forEach((bucket) => bucket.sort((a, b) => stableHash(a.id).localeCompare(stableHash(b.id))))
+
+  const sourceCounts = new Map()
+  const familyCounts = new Map()
+  const result = []
+  while (result.length < items.length) {
+    const candidates = [...buckets.entries()].filter(([, bucket]) => bucket.length)
+    candidates.sort(([keyA], [keyB]) => {
+      const [sourceA, familyA] = keyA.split('\0')
+      const [sourceB, familyB] = keyB.split('\0')
+      const deferHarvardPhotographsA = sourceA === 'harvard_yenching'
+        && familyA === 'european'
+        && (sourceCounts.get(sourceA) ?? 0) < HARVARD_TEXT_FIRST_COUNT
+      const deferHarvardPhotographsB = sourceB === 'harvard_yenching'
+        && familyB === 'european'
+        && (sourceCounts.get(sourceB) ?? 0) < HARVARD_TEXT_FIRST_COUNT
+      const familyBalanceA = deferHarvardPhotographsA
+        ? items.length * 2
+        : FAMILY_WEIGHTS[familyA]
+        ? (familyCounts.get(familyA) ?? 0) / FAMILY_WEIGHTS[familyA]
+        : items.length
+      const familyBalanceB = deferHarvardPhotographsB
+        ? items.length * 2
+        : FAMILY_WEIGHTS[familyB]
+        ? (familyCounts.get(familyB) ?? 0) / FAMILY_WEIGHTS[familyB]
+        : items.length
+      return (sourceCounts.get(sourceA) ?? 0) - (sourceCounts.get(sourceB) ?? 0)
+        || familyBalanceA - familyBalanceB
+        || stableHash(keyA).localeCompare(stableHash(keyB))
+    })
+    const [key, bucket] = candidates[0]
+    const [source, family] = key.split('\0')
+    result.push(bucket.shift())
+    sourceCounts.set(source, (sourceCounts.get(source) ?? 0) + 1)
+    familyCounts.set(family, (familyCounts.get(family) ?? 0) + 1)
+  }
+  return result
+}
+
 function fallbackUrls(source, itemId) {
   if (source === 'bodleian_new') return {
     manifestUrl: `https://iiif.bodleian.ox.ac.uk/iiif/manifest/${itemId}.json`,
@@ -195,6 +265,7 @@ const catalogue = [...books.values()].map((item) => {
   const subjects = asList(sourceRecord.subjects || sourceRecord.subject)
   const authors = asList(sourceRecord.author)
   const languages = asList(sourceRecord.language)
+  const languageFamilyId = languageFamily(languages, item.source)
   const shelfmark = asText(sourceRecord.shelfmark || sourceRecord.call_number || sourceRecord.bibliographic_id)
   const museumUrl = asText(sourceRecord[config.sourceUrlField]) || fallback.museumUrl
   const manifestUrl = asText(sourceRecord.manifest_url) || fallback.manifestUrl
@@ -220,19 +291,15 @@ const catalogue = [...books.values()].map((item) => {
     attribution: asText(sourceRecord.rights_statement || sourceRecord.repository || config.label),
     license: asText(sourceRecord.rights_statement),
     language: languages,
+    languageFamily: languageFamilyId,
     authors,
     shelfmark,
     keywordsMatched: asList(sourceRecord.keywords_matched),
     metadataAvailable: Boolean(record),
   }
-}).sort((a, b) => {
-  if (a.year !== b.year) {
-    if (a.year == null) return 1
-    if (b.year == null) return -1
-    return a.year - b.year
-  }
-  return a.title.localeCompare(b.title) || a.id.localeCompare(b.id)
 })
+
+const orderedCatalogue = balancedFixedOrder(catalogue)
 
 const sourceCounts = Object.fromEntries(
   Object.keys(SOURCE_CONFIG).map((source) => [source, catalogue.filter((book) => book.source === source).length]),
@@ -245,11 +312,18 @@ const output = {
     cropDatasetVersion: 'v1',
     detector: 'DINO-R50-1575',
   },
-  bookCount: catalogue.length,
-  illustrationCount: catalogue.reduce((sum, book) => sum + book.illustrationCount, 0),
+  bookCount: orderedCatalogue.length,
+  illustrationCount: orderedCatalogue.reduce((sum, book) => sum + book.illustrationCount, 0),
   missingMetadataCount,
   sourceCounts,
-  books: catalogue,
+  ordering: {
+    method: 'deterministic source-and-language-family balancing',
+    seed: ORDER_SEED,
+    languageFamilies: ['european', 'sino_japanese', 'arabic_persian', 'other'],
+    openingLanguageFamilyWeights: FAMILY_WEIGHTS,
+    harvardYenchingPhotographsDeferredUntilSourcePosition: HARVARD_TEXT_FIRST_COUNT,
+  },
+  books: orderedCatalogue,
 }
 
 await mkdir(path.dirname(args.output), { recursive: true })

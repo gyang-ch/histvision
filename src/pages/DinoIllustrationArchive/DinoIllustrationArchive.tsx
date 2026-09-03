@@ -29,13 +29,11 @@ function rowsForFacet(facets: ArchiveFacet[], id: string) {
   return id === 'all' ? null : facets.find((facet) => facet.id === id)?.rows ?? []
 }
 
-function intersectRows(total: number, groups: Array<number[] | null>) {
+function intersectRows(order: number[], groups: Array<number[] | null>) {
   const active = groups.filter((group): group is number[] => group !== null)
-  if (!active.length) return Array.from({ length: total }, (_, row) => row)
-  active.sort((a, b) => a.length - b.length)
-  const [smallest, ...rest] = active
-  const sets = rest.map((rows) => new Set(rows))
-  return smallest.filter((row) => sets.every((set) => set.has(row)))
+  if (!active.length) return order
+  const sets = active.map((rows) => new Set(rows))
+  return order.filter((row) => sets.every((set) => set.has(row)))
 }
 
 function FacetButtons({
@@ -347,7 +345,7 @@ export function DinoIllustrationArchivePage() {
 
   const filteredRows = useMemo(() => {
     if (!index) return []
-    return intersectRows(index.cropCount, [
+    return intersectRows(index.displayRows ?? Array.from({ length: index.cropCount }, (_, row) => row), [
       rowsForFacet(index.facets.sources, selectedSource),
       rowsForFacet(index.facets.confidenceTiers, selectedTier),
       rowsForFacet(index.facets.aspects, selectedAspect),

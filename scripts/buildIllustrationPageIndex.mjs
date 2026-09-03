@@ -5,7 +5,7 @@ import { createInterface } from 'node:readline'
 const manifestPath = resolve(process.argv[2] ?? '')
 const pageLogPath = resolve(process.argv[3] ?? '')
 const outputDirectory = resolve(process.argv[4] ?? 'public/data/dino1575-page-boxes')
-const textBlockThreshold = 0.19
+const textBlockThreshold = 0.10
 
 if (!process.argv[2] || !process.argv[3]) {
   console.error('Usage: node scripts/buildIllustrationPageIndex.mjs <crop_manifest.jsonl> <page_log.jsonl> [output-directory]')

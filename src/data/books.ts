@@ -17,6 +17,7 @@ export interface BookRecord {
   attribution: string
   license?: string
   language: string[]
+  languageFamily?: 'european' | 'sino_japanese' | 'arabic_persian' | 'other'
   authors: string[]
   shelfmark: string
   illustrationCount: number
@@ -37,6 +38,13 @@ export interface BookCatalogue {
   illustrationCount: number
   missingMetadataCount: number
   sourceCounts: Record<string, number>
+  ordering?: {
+    method: string
+    seed: string
+    languageFamilies: string[]
+    openingLanguageFamilyWeights?: Record<string, number>
+    harvardYenchingPhotographsDeferredUntilSourcePosition?: number
+  }
   books: BookRecord[]
 }
 

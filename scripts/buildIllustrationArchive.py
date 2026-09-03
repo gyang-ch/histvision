@@ -7,7 +7,7 @@ import argparse
 import hashlib
 import json
 import struct
-from collections import defaultdict
+from collections import defaultdict, deque
 from pathlib import Path
 
 import numpy as np
@@ -108,6 +108,7 @@ def main() -> int:
         "book": defaultdict(list),
     }
     confidences: list[float] = []
+    crop_ids: list[str] = []
     geometry_path = args.output_dir / "archive-geometry.bin"
     count = 0
 
@@ -148,7 +149,29 @@ def main() -> int:
             facets["aspect"][aspect].append(row)
             facets["book"][book_key].append(row)
             confidences.append(float(record["confidence"]))
+            crop_ids.append(record["crop_id"])
             count += 1
+
+    book_order = [f"{book['source']}\0{book['sourceItemId']}" for book in book_catalogue["books"]]
+    row_queues = []
+    for key in book_order:
+        rows = facets["book"].get(key, [])
+        rows.sort(key=lambda row: hashlib.sha256(
+            f"phytovision-crop-order-v1\0{crop_ids[row]}".encode("utf-8")
+        ).digest())
+        if rows:
+            row_queues.append(deque(rows))
+
+    display_rows: list[int] = []
+    while row_queues:
+        remaining = []
+        for rows in row_queues:
+            display_rows.append(rows.popleft())
+            if rows:
+                remaining.append(rows)
+        row_queues = remaining
+    if len(display_rows) != count or len(set(display_rows)) != count:
+        raise ValueError("Deterministic display order does not contain every crop exactly once")
 
     confidence_values = np.asarray(confidences, dtype=np.float32)
     histogram_counts, histogram_edges = np.histogram(confidence_values, bins=np.linspace(0.19, 1.0, 18))
@@ -208,6 +231,11 @@ def main() -> int:
             }),
         },
         "bookRows": dict(facets["book"]),
+        "displayRows": display_rows,
+        "displayOrdering": {
+            "method": "book-balanced rounds over deterministic source-and-language-family book order",
+            "seed": "phytovision-balanced-order-v1; phytovision-crop-order-v1",
+        },
         "embeddingMaps": asset_metadata,
     }
 

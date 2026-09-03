@@ -170,6 +170,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
   const [detectionsError, setDetectionsError] = useState(false);
   const [showIllustratedPagesOnly, setShowIllustratedPagesOnly] = useState(false);
   const [showTextBlockPagesOnly, setShowTextBlockPagesOnly] = useState(false);
+  const [textBlockThreshold, setTextBlockThreshold] = useState(0.15);
   const thumbnailsRowRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -205,10 +206,16 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
   );
   const textBlockPageIndexes = useMemo(
     () => [...pageDetections.entries()]
-      .filter(([index, detections]) => index >= 0 && index < tileSources.length && detections.some((detection) => detection.label === 'text_block'))
+      .filter(([index, detections]) => index >= 0 && index < tileSources.length && detections.some((detection) => detection.label === 'text_block' && detection.confidence >= textBlockThreshold))
       .map(([index]) => index)
       .sort((a, b) => a - b),
-    [pageDetections, tileSources.length],
+    [pageDetections, textBlockThreshold, tileSources.length],
+  );
+  const selectedPageDetections = useMemo(
+    () => (pageDetections.get(selectedPageIndex) ?? []).filter((detection) =>
+      detection.label === 'illustration' || detection.confidence >= textBlockThreshold,
+    ),
+    [pageDetections, selectedPageIndex, textBlockThreshold],
   );
   const visiblePageIndexes = useMemo(
     () => {
@@ -847,6 +854,19 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
                     <span>Text-block pages</span>
                     <small>{detectionsLoading ? '…' : textBlockPageIndexes.length.toLocaleString()}</small>
                   </label>}
+                  {book.source !== 'custom' && <label className="text-block-threshold-control">
+                    <span>Text confidence</span>
+                    <select
+                      value={textBlockThreshold}
+                      onChange={(event) => setTextBlockThreshold(Number(event.target.value))}
+                      disabled={detectionsLoading || detectionsError}
+                      aria-label="Minimum text-block confidence"
+                    >
+                      <option value={0.10}>≥ 0.10</option>
+                      <option value={0.15}>≥ 0.15</option>
+                      <option value={0.19}>≥ 0.19</option>
+                    </select>
+                  </label>}
                   <form 
                     className="page-counter-form" 
                     onSubmit={(e) => {
@@ -927,7 +947,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
                 highlightIndex={highlightIndex}
                 onHoverLine={setHighlightIndex}
                 imageSize={imageSize}
-                illustrationBoxes={pageDetections.get(selectedPageIndex) ?? []}
+                illustrationBoxes={selectedPageDetections}
               />
             </div>
           </div>
