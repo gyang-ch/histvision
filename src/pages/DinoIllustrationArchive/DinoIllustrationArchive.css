@@ -135,7 +135,8 @@
 .archive-facet button:focus-visible,
 .archive-card:focus-visible,
 .archive-network-controls button:focus-visible,
-.archive-neighbour-heading button:focus-visible {
+.archive-neighbour-heading button:focus-visible,
+.archive-neighbour-strip > button:focus-visible {
   outline: 2px solid #258363;
   outline-offset: 2px;
 }
@@ -691,12 +692,25 @@
   background: #0d1512;
   padding: 0;
   cursor: pointer;
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.archive-neighbour-strip > button:hover {
+  z-index: 1;
+  border-color: #6ee7b7;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.45);
+  transform: translateY(-3px) scale(1.05);
 }
 
 .archive-neighbour-strip img {
   width: 100%;
   height: 100%;
   object-fit: contain;
+  transition: transform 220ms ease;
+}
+
+.archive-neighbour-strip > button:hover img {
+  transform: scale(1.08);
 }
 
 .archive-neighbour-strip button span {
@@ -708,6 +722,12 @@
   background: rgba(0, 0, 0, 0.74);
   color: #fff;
   font-size: 0.58rem;
+  transition: background 180ms ease, color 180ms ease;
+}
+
+.archive-neighbour-strip > button:hover span {
+  background: #258363;
+  color: #fff;
 }
 
 @media (max-width: 980px) {
@@ -799,7 +819,10 @@
   .archive-card,
   .archive-card-image img,
   .archive-facet button,
-  .archive-network-controls button {
+  .archive-network-controls button,
+  .archive-neighbour-strip > button,
+  .archive-neighbour-strip img,
+  .archive-neighbour-strip button span {
     transition: none;
   }
 }
