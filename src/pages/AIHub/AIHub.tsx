@@ -4,7 +4,9 @@ import { fetchBookCatalogue, type BookRecord } from '../../data/books'
 import { BookReader } from '../../components/BookReader'
 
 let customBookCounter = 0
-type CustomTileSource = { type: 'image'; url: string }
+// `file` carries the original upload: blob: URLs (`url`) only resolve inside
+// this browser tab, so any backend call needs the raw bytes, not the URL.
+type CustomTileSource = { type: 'image'; url: string; file?: File }
 
 const makeCustomBook = (manifestUrl: string, title: string): BookRecord => ({
   id: `custom-${Date.now()}-${customBookCounter++}`,
@@ -92,7 +94,7 @@ export function AIHubPage() {
       } else if (isImage) {
         const objectUrl = URL.createObjectURL(file)
         objectUrlsRef.current.push(objectUrl)
-        setCustomTileSources([{ type: 'image', url: objectUrl }])
+        setCustomTileSources([{ type: 'image', url: objectUrl, file }])
         setCustomBook(makeCustomBook(objectUrl, file.name))
       } else {
         setUploadError('Please upload an image file or a IIIF manifest (.json) file.')

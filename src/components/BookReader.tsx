@@ -716,9 +716,18 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
       setPlantDetections([]);
       setCharacterBoxes([]);
       setOcrDebug(null);
-      const imageUrl = getTileSourceImageUrl(tileSources[selectedPageIndex], '2000,');
+      const currentSource = tileSources[selectedPageIndex];
+      const imageUrl = getTileSourceImageUrl(currentSource, '2000,');
+      const uploadedFile: File | undefined = currentSource?.file;
 
-      const response = await fetch(`${PREDICT_URL}?task=plants&url=${encodeURIComponent(imageUrl)}`);
+      // A locally-uploaded image is a blob: URL — it only resolves inside this
+      // tab, so the backend can't fetch it. Send the bytes directly instead.
+      const response = uploadedFile
+        ? await fetch(`${API_BASE_URL}/api/detect-plants-upload`, {
+            method: 'POST',
+            body: (() => { const fd = new FormData(); fd.append('file', uploadedFile); return fd; })(),
+          })
+        : await fetch(`${PREDICT_URL}?task=plants&url=${encodeURIComponent(imageUrl)}`);
       const result = await response.json();
       
       if (result.status === 'success') {
