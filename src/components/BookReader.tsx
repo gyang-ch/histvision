@@ -96,6 +96,16 @@ function getTileSourceImageUrl(source: any, iiifSize = '1000,'): string {
   return id.replace('info.json', `full/${iiifSize}/0/default.jpg`);
 }
 
+/** Read a local File as a base64 data: URI, for APIs that fetch image_url server-side and can't reach a blob: URL. */
+function fileToDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
+
 export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTileSources }) => {
   const API_BASE_URL = (
     (window as any).APP_CONFIG?.API_URL ||
@@ -557,6 +567,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
       
       const tileSource = tileSources[selectedPageIndex];
       const imageUrl = getTileSourceImageUrl(tileSource);
+      const uploadedFile: File | undefined = tileSource?.file;
 
       setOcrDebug({
         status: "Processing Qwen (Frontend)...",
@@ -583,6 +594,11 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
 
       setOcrDebug(prev => prev ? { ...prev, status: "Waiting for Together API...", lang: langCode } : null);
 
+      // A locally-uploaded image is a blob: URL — it only resolves inside this
+      // tab, so Together AI's servers can't fetch it. Send it as an inline
+      // base64 data URI instead, which their vision models accept directly.
+      const imageUrlForApi = uploadedFile ? await fileToDataUrl(uploadedFile) : imageUrl;
+
       const response = await fetch("https://api.together.xyz/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -596,7 +612,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
               role: "user",
               content: [
                 { type: "text", text: promptText },
-                { type: "image_url", image_url: { url: imageUrl } }
+                { type: "image_url", image_url: { url: imageUrlForApi } }
               ]
             }
           ],
