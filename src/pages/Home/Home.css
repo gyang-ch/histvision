@@ -158,20 +158,20 @@
 .home-donut-legend {
   display: grid;
   width: 100%;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.28rem 0.7rem;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.4rem;
 }
 
 .home-donut-legend > div {
   display: flex;
   min-width: 0;
   align-items: center;
-  gap: 0.38rem;
+  gap: 0.5rem;
 }
 
 .home-donut-legend i {
-  width: 9px;
-  height: 9px;
+  width: 13px;
+  height: 13px;
   flex: 0 0 auto;
   border-radius: 50%;
 }
@@ -179,7 +179,7 @@
 .home-donut-legend span {
   overflow: hidden;
   color: var(--ink-750);
-  font-size: 0.7rem;
+  font-size: 0.88rem;
   line-height: 1.35;
   text-overflow: ellipsis;
   white-space: nowrap;
