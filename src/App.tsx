@@ -77,12 +77,15 @@ function App() {
 
     const tl = gsap.timeline({ delay: 0.1 })
 
-    // Stage 1: the whole headline scatter-flies in as one continuous stagger
-    // (same per-char effect that used to be line 1 only, now covering both lines).
+    // Stage 1: the whole headline scatter-flies in as one tight, unified burst
+    // (same per-char effect that used to be line 1 only). The per-char delay
+    // is scaled down so ~59 characters still fully settle in about the same
+    // ~1.1s that 26-character line 1 alone used to take — a fast single wave,
+    // not a slow cascade down two lines.
     tl.fromTo(chars, scatterFrom, {
       opacity: 1, x: 0, y: 0, rotation: 0, scale: 1,
       duration: 0.65,
-      stagger: { each: 0.018, from: 'start' },
+      stagger: { each: 0.008, from: 'start' },
       ease: 'back.out(1.4)',
       clearProps: 'transform',
     })
