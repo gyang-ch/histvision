@@ -621,6 +621,11 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
           temperature: decodingParams.temperature,
           repetition_penalty: decodingParams.repetition_penalty,
           frequency_penalty: decodingParams.frequency_penalty,
+          // gemma-4-31B-it reasons by default, burning ~120s and nearly its
+          // whole completion budget on hidden chain-of-thought before ever
+          // writing the transcription. This is a straightforward OCR task —
+          // skip reasoning entirely.
+          reasoning_effort: "none",
         })
       });
 
