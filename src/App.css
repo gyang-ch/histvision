@@ -459,16 +459,17 @@
 
 .library-reset {
   padding: 0 1rem;
-  border: 1px solid rgba(148, 163, 184, 0.3);
+  border: 1px solid #c9d8d1;
   border-radius: 7px;
-  background: transparent;
-  color: var(--on-dark-2);
+  background: #edf4f0;
+  color: #304b41;
 }
 
 .library-reset:hover,
 .library-reset:focus-visible {
-  border-color: #7dd3fc;
-  color: #e0f2fe;
+  border-color: #5e9b84;
+  color: #143d2e;
+  background: #deeee7;
 }
 
 .source-filter {
@@ -542,20 +543,26 @@
 .period-controls button,
 .library-section-heading > button {
   min-height: 36px;
-  border: 1px solid rgba(148, 163, 184, 0.22);
+  border: 1px solid #c9d8d1;
   border-radius: 999px;
-  background: transparent;
-  color: var(--on-dark-3);
+  background: #edf4f0;
+  color: #304b41;
   padding: 0.35rem 0.8rem;
 }
 
 .period-controls button:hover,
 .period-controls button:focus-visible,
 .library-section-heading > button:hover,
-.library-section-heading > button:focus-visible,
+.library-section-heading > button:focus-visible {
+  border-color: #5e9b84;
+  color: #143d2e;
+  background: #deeee7;
+}
+
 .period-controls button.active {
-  border-color: #7dd3fc;
-  color: #e0f2fe;
+  border-color: #258363;
+  color: #10372a;
+  background: #cce7dc;
 }
 
 .language-filter {
