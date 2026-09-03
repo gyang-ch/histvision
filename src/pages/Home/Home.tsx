@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './Home.css'
 
 // Video temporarily disabled — presentation video to be re-recorded.
@@ -88,11 +88,14 @@ function CollectionDonut({
   slices,
   total,
   totalLabel,
+  play,
 }: {
   title: string
   slices: DonutSlice[]
   total: number
   totalLabel: string
+  /** Only run the slice entrance animation once this chart has scrolled into view. */
+  play: boolean
 }) {
   const [hovered, setHovered] = useState<number | null>(null)
   const centerX = 80
@@ -126,7 +129,7 @@ function CollectionDonut({
           const translateY = (5 * Math.sin(middle)).toFixed(2)
           const path = donutArc(centerX, centerY, 60, 36, arc.start, arc.end)
           return (
-            <g key={arc.id} className="home-donut-slice" style={{ animationDelay: `${index * 70}ms` }}>
+            <g key={arc.id} className={`home-donut-slice${play ? ' is-visible' : ''}`} style={{ animationDelay: `${index * 70}ms` }}>
               <path
                 d={path}
                 fill={arc.color}
@@ -165,6 +168,8 @@ function CollectionDonut({
 
 function CollectionComposition() {
   const [composition, setComposition] = useState<HomeComposition | null>(null)
+  const [isVisible, setIsVisible] = useState(false)
+  const panelRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     let active = true
@@ -177,6 +182,29 @@ function CollectionComposition() {
       .catch((error) => console.error(error))
     return () => { active = false }
   }, [])
+
+  // Only play the donut entrance once the section actually scrolls into
+  // view — it renders below the fold, so playing it on mount meant nobody
+  // ever saw it.
+  useEffect(() => {
+    if (isVisible) return
+    const el = panelRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true)
+          observer.disconnect()
+        }
+      },
+      // Require a third of the actual chart panel on screen — the section
+      // heading alone can poke into a short viewport without the donuts
+      // themselves being visible yet.
+      { threshold: 0.34 },
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [composition, isVisible])
 
   if (!composition) return <div className="home-composition-loading" aria-live="polite">Loading collection composition…</div>
 
@@ -193,9 +221,9 @@ function CollectionComposition() {
       <div className="home-composition-heading">
         <h2 id="home-composition-title">Collection composition</h2>
       </div>
-      <div className="home-composition-panel">
-        <CollectionDonut title="Books by library" slices={makeSlices('books')} total={composition.totalBooks} totalLabel="books" />
-        <CollectionDonut title="Illustrations by library" slices={makeSlices('illustrations')} total={composition.totalIllustrations} totalLabel="illustrations" />
+      <div className="home-composition-panel" ref={panelRef}>
+        <CollectionDonut title="Books by library" slices={makeSlices('books')} total={composition.totalBooks} totalLabel="books" play={isVisible} />
+        <CollectionDonut title="Illustrations by library" slices={makeSlices('illustrations')} total={composition.totalIllustrations} totalLabel="illustrations" play={isVisible} />
       </div>
     </section>
   )
