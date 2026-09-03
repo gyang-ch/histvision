@@ -214,7 +214,7 @@ function BarPanel({ model, kind, panel, play }: { model: 'YOLO11m' | 'DINO-R50';
   const sub = scaleBand().domain(['old', 'next']).range([0, x.bandwidth()]).padding(.07)
   const [focus, setFocus] = useState<string | null>(null)
   const svgRef = useRef<SVGSVGElement>(null)
-  const bars = data.labels.flatMap((label, index) => (['old', 'next'] as const).map((version) => {
+  const bars = data.labels.flatMap((_, index) => (['old', 'next'] as const).map((version) => {
     const value = data[version][index]
     return { y: y(value), height: y(0) - y(value) }
   }))
