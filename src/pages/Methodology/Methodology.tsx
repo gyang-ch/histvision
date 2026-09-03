@@ -87,7 +87,7 @@ function LearningCurveChart() {
         const currentX = x(images) ?? 0
         const previousX = index === 0 ? margin.left : (x(trainingSizes[index - 1]) ?? currentX)
         const nextX = index === trainingSizes.length - 1 ? width - margin.right : (x(trainingSizes[index + 1]) ?? currentX)
-        return <rect key={images} className="shared-hover-target" role="button" tabIndex={0} aria-label={`${images} training images: YOLO11m AP ${learningCurve[0].values[index][1].toFixed(3)}, DINO-R50 AP ${learningCurve[1].values[index][1].toFixed(3)}`} x={(previousX + currentX) / 2} y={margin.top} width={(nextX - previousX) / 2} height={height - margin.top - margin.bottom} onFocus={() => setFocus(images)} onBlur={() => setFocus(null)} onMouseEnter={() => setFocus(images)} />
+        return <rect key={images} className="shared-hover-target" role="button" tabIndex={0} aria-label={`${images} training images: YOLO11m AP ${learningCurve[0].values[index][1].toFixed(3)}, DINO-R50 AP ${learningCurve[1].values[index][1].toFixed(3)}`} x={(previousX + currentX) / 2} y={margin.top} width={(nextX - previousX) / 2} height={height - margin.top - margin.bottom} onFocus={() => setFocus(images)} onBlur={() => setFocus(null)} onMouseEnter={() => setFocus(images)} onMouseLeave={() => setFocus(null)} />
       })}
     </svg>
   </div>
@@ -179,7 +179,7 @@ function StabilityPanel({ metric }: { metric: 'ari' | 'ami' }) {
       const nextX = index === clusterCounts.length - 1 ? width - margin.right : (x(clusterCounts[index + 1]) ?? currentX)
       const openclip = valuesFor('OpenCLIP')[index][metric]
       const dinov2 = valuesFor('DINOv2')[index][metric]
-      return <rect key={clusterCount} className="shared-hover-target" role="button" tabIndex={0} aria-label={`K ${clusterCount}: OpenCLIP mean ${openclip[1].toFixed(3)}, range ${openclip[0].toFixed(3)} to ${openclip[2].toFixed(3)}; DINOv2 mean ${dinov2[1].toFixed(3)}, range ${dinov2[0].toFixed(3)} to ${dinov2[2].toFixed(3)}`} x={(previousX + currentX) / 2} y={margin.top} width={(nextX - previousX) / 2} height={height - margin.top - margin.bottom} onFocus={() => setFocus(clusterCount)} onBlur={() => setFocus(null)} onMouseEnter={() => setFocus(clusterCount)} />
+      return <rect key={clusterCount} className="shared-hover-target" role="button" tabIndex={0} aria-label={`K ${clusterCount}: OpenCLIP mean ${openclip[1].toFixed(3)}, range ${openclip[0].toFixed(3)} to ${openclip[2].toFixed(3)}; DINOv2 mean ${dinov2[1].toFixed(3)}, range ${dinov2[0].toFixed(3)} to ${dinov2[2].toFixed(3)}`} x={(previousX + currentX) / 2} y={margin.top} width={(nextX - previousX) / 2} height={height - margin.top - margin.bottom} onFocus={() => setFocus(clusterCount)} onBlur={() => setFocus(null)} onMouseEnter={() => setFocus(clusterCount)} onMouseLeave={() => setFocus(null)} />
     })}
   </svg>
 }
