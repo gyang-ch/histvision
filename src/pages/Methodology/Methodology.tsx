@@ -1,6 +1,48 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { area, curveMonotoneX, line, scaleBand, scaleLinear, scalePoint } from 'd3'
+import gsap from 'gsap'
 import './Methodology.css'
+
+/** Keeps returning the last non-null focus value during the exit fade, instead of snapping to null the instant the pointer leaves. */
+function useStickyFocus<T>(focus: T | null): [T | null, () => void] {
+  const [display, setDisplay] = useState<T | null>(focus)
+  // Adjusting state during render (rather than in an effect) avoids an extra
+  // commit — see https://react.dev/learn/you-might-not-need-an-effect.
+  const [prevFocus, setPrevFocus] = useState(focus)
+  if (focus !== prevFocus) {
+    setPrevFocus(focus)
+    if (focus !== null) setDisplay(focus)
+  }
+  return [display, () => setDisplay(null)]
+}
+
+/**
+ * Fades/scales a tooltip card in or out. Positioning stays on the parent <g>
+ * (via its transform attribute) — this only animates the CSS transform, so
+ * it can't fight with that attribute for the same property.
+ */
+function TooltipFade({ open, onExited, children }: { open: boolean; onExited: () => void; children: React.ReactNode }) {
+  const ref = useRef<SVGGElement>(null)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      gsap.set(el, { opacity: open ? 1 : 0, scale: 1, clearProps: open ? 'transform' : undefined })
+      if (!open) onExited()
+      return
+    }
+    gsap.killTweensOf(el)
+    if (open) {
+      gsap.fromTo(el, { opacity: 0, scale: 0.92 }, { opacity: 1, scale: 1, duration: 0.15, ease: 'power2.out', transformOrigin: '50% 50%', clearProps: 'transform' })
+    } else {
+      gsap.to(el, { opacity: 0, scale: 0.92, duration: 0.12, ease: 'power1.in', transformOrigin: '50% 50%', onComplete: onExited })
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open])
+
+  return <g ref={ref}>{children}</g>
+}
 
 type ModelName = 'YOLO11m' | 'DINO-R50' | 'OpenCLIP' | 'DINOv2'
 
@@ -58,6 +100,7 @@ function LearningCurveChart() {
   const makeLine = line<[number, number]>().x((value) => x(value[0]) ?? 0).y((value) => y(value[1])).curve(curveMonotoneX)
   const trainingSizes = [200, 400, 600, 800, 1000, 1152]
   const [focus, setFocus] = useState<number | null>(null)
+  const [displayFocus, clearDisplayFocus] = useStickyFocus(focus)
 
   return <div className="chart-wrap">
     <Legend models={['YOLO11m', 'DINO-R50']} />
@@ -72,17 +115,19 @@ function LearningCurveChart() {
         <path className="chart-line" d={makeLine(series.values as [number, number][]) ?? ''} stroke={colours[series.model]} />
         {series.values.map(([images, value]) => <circle key={images} className={focus === images ? 'shared-point active' : 'shared-point'} cx={x(images)} cy={y(value)} r="6" fill={colours[series.model]} />)}
       </g>)}
-      {focus !== null && <>
-        <line className="shared-hover-line" x1={x(focus)} x2={x(focus)} y1={margin.top} y2={height - margin.bottom} />
-        <g className="shared-tooltip" transform={`translate(${(x(focus) ?? 0) > width * .69 ? (x(focus) ?? 0) - 206 : (x(focus) ?? 0) + 16} ${margin.top + 10})`}>
-          <rect width="190" height="82" rx="8" />
-          <text className="shared-tooltip-title" x="13" y="21">{focus.toLocaleString()} training images</text>
-          {[learningCurve[1], learningCurve[0]].map((series, index) => {
-            const value = series.values.find(([images]) => images === focus)?.[1] ?? 0
-            return <g key={series.model} transform={`translate(0 ${37 + index * 20})`}><circle cx="15" cy="0" r="4" fill={colours[series.model]} /><text className="shared-tooltip-label" x="27" y="4">{series.model}</text><text className="shared-tooltip-value" x="176" y="4">AP {value.toFixed(3)}</text></g>
-          })}
+      {focus !== null && <line className="shared-hover-line" x1={x(focus)} x2={x(focus)} y1={margin.top} y2={height - margin.bottom} />}
+      {displayFocus !== null && (
+        <g className="shared-tooltip" transform={`translate(${(x(displayFocus) ?? 0) > width * .69 ? (x(displayFocus) ?? 0) - 206 : (x(displayFocus) ?? 0) + 16} ${margin.top + 10})`}>
+          <TooltipFade open={focus !== null} onExited={clearDisplayFocus}>
+            <rect width="190" height="82" rx="8" />
+            <text className="shared-tooltip-title" x="13" y="21">{displayFocus.toLocaleString()} training images</text>
+            {[learningCurve[1], learningCurve[0]].map((series, index) => {
+              const value = series.values.find(([images]) => images === displayFocus)?.[1] ?? 0
+              return <g key={series.model} transform={`translate(0 ${37 + index * 20})`}><circle cx="15" cy="0" r="4" fill={colours[series.model]} /><text className="shared-tooltip-label" x="27" y="4">{series.model}</text><text className="shared-tooltip-value" x="176" y="4">AP {value.toFixed(3)}</text></g>
+            })}
+          </TooltipFade>
         </g>
-      </>}
+      )}
       {trainingSizes.map((images, index) => {
         const currentX = x(images) ?? 0
         const previousX = index === 0 ? margin.left : (x(trainingSizes[index - 1]) ?? currentX)
@@ -126,6 +171,7 @@ function HistogramPanel({ dataset }: { dataset: typeof overlapBins[number] }) {
   const y = scaleLinear().domain([0, maximum]).range([height - margin.bottom, margin.top])
   const barWidth = (width - margin.left - margin.right) / 21
   const [focus, setFocus] = useState<number | null>(null)
+  const [displayFocus, clearDisplayFocus] = useStickyFocus(focus)
   return <svg className="research-chart" viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${dataset.title} distribution across 189,764 illustrations`}>
     <text className="chart-panel-title chart-panel-title-centred" x={width / 2} y="20">{dataset.title}</text>
     {yTicks(0, maximum, maximum / 5000 + 1).map((tick) => <g key={tick} className="chart-grid"><line x1={margin.left} x2={width - margin.right} y1={y(tick)} y2={y(tick)} /><text x={margin.left - 10} y={y(tick) + 4}>{tick === 0 ? '0' : `${tick / 1000}k`}</text></g>)}
@@ -133,8 +179,16 @@ function HistogramPanel({ dataset }: { dataset: typeof overlapBins[number] }) {
     <text className="chart-axis-label" x={width / 2} y={height - 13}>Fraction shared</text><text className="chart-axis-label" transform={`translate(17 ${height / 2}) rotate(-90)`}>Illustrations</text>
     {dataset.counts.map((count, index) => {
       const start = index / 21, end = (index + 1) / 21
-      return <g key={index} className="chart-bar" role="button" tabIndex={0} aria-label={`${start.toFixed(2)} to ${end.toFixed(2)} shared, ${count.toLocaleString()} illustrations`} onFocus={() => setFocus(index)} onBlur={() => setFocus(null)} onMouseEnter={() => setFocus(index)} onMouseLeave={() => setFocus(null)}><rect x={margin.left + index * barWidth + .7} y={y(count)} width={Math.max(1, barWidth - 1.4)} height={y(0) - y(count)} fill={dataset.colour} opacity={focus === null || focus === index ? .9 : .38} />{focus === index && <g className="chart-callout" transform={`translate(${Math.min(width - 62, Math.max(62, margin.left + (index + .5) * barWidth))} ${Math.max(32, y(count) - 10)})`}><rect x="-57" y="-25" width="114" height="24" rx="4" /><text>{count.toLocaleString()} images</text></g>}</g>
+      return <g key={index} className="chart-bar" role="button" tabIndex={0} aria-label={`${start.toFixed(2)} to ${end.toFixed(2)} shared, ${count.toLocaleString()} illustrations`} onFocus={() => setFocus(index)} onBlur={() => setFocus(null)} onMouseEnter={() => setFocus(index)} onMouseLeave={() => setFocus(null)}><rect x={margin.left + index * barWidth + .7} y={y(count)} width={Math.max(1, barWidth - 1.4)} height={y(0) - y(count)} fill={dataset.colour} opacity={focus === null || focus === index ? .9 : .38} /></g>
     })}
+    {displayFocus !== null && (
+      <g className="chart-callout" transform={`translate(${Math.min(width - 62, Math.max(62, margin.left + (displayFocus + .5) * barWidth))} ${Math.max(32, y(dataset.counts[displayFocus]) - 10)})`}>
+        <TooltipFade open={focus !== null} onExited={clearDisplayFocus}>
+          <rect x="-57" y="-25" width="114" height="24" rx="4" />
+          <text>{dataset.counts[displayFocus].toLocaleString()} images</text>
+        </TooltipFade>
+      </g>
+    )}
   </svg>
 }
 
@@ -150,6 +204,7 @@ function StabilityPanel({ metric }: { metric: 'ari' | 'ami' }) {
   const y = scaleLinear().domain(domain).range([height - margin.bottom, margin.top])
   const clusterCounts = [50, 100, 200, 400]
   const [focus, setFocus] = useState<number | null>(null)
+  const [displayFocus, clearDisplayFocus] = useStickyFocus(focus)
   const valuesFor = (model: 'OpenCLIP' | 'DINOv2') => stability.filter((value) => value.model === model)
   return <svg className="research-chart" viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${metric === 'ari' ? 'Adjusted Rand index' : 'Adjusted mutual information'} across K-means seeds`}>
     <text className="chart-panel-title chart-panel-title-centred" x={width / 2} y="20">{metric === 'ari' ? 'Partition stability across seeds' : 'Information stability across seeds'}</text>
@@ -162,17 +217,19 @@ function StabilityPanel({ metric }: { metric: 'ari' | 'ami' }) {
       const centre = line<typeof rows[number]>().x((value) => x(value.k) ?? 0).y((value) => y(value[metric][1])).curve(curveMonotoneX)
       return <g key={model}><path d={band(rows) ?? ''} fill={colours[model]} opacity=".14" /><path className="chart-line" d={centre(rows) ?? ''} stroke={colours[model]} />{rows.map((row) => <circle key={row.k} className={focus === row.k ? 'shared-point active' : 'shared-point'} cx={x(row.k)} cy={y(row[metric][1])} r="5" fill={colours[model]} />)}</g>
     })}
-    {focus !== null && <>
-      <line className="shared-hover-line" x1={x(focus)} x2={x(focus)} y1={margin.top} y2={height - margin.bottom} />
-      <g className="shared-tooltip shared-tooltip-compact" transform={`translate(${(x(focus) ?? 0) > width * .62 ? (x(focus) ?? 0) - 201 : (x(focus) ?? 0) + 12} ${margin.top + 8})`}>
-        <rect width="189" height="91" rx="8" />
-        <text className="shared-tooltip-title" x="13" y="20">K = {focus}</text>
-        {(['OpenCLIP', 'DINOv2'] as const).map((model, index) => {
-          const values = valuesFor(model).find((row) => row.k === focus)?.[metric] ?? [0, 0, 0]
-          return <g key={model} transform={`translate(0 ${38 + index * 22})`}><circle cx="15" cy="0" r="4" fill={colours[model]} /><text className="shared-tooltip-label" x="27" y="4">{model}</text><text className="shared-tooltip-value" x="176" y="-2">{values[1].toFixed(3)}</text><text className="shared-tooltip-range" x="176" y="9">{values[0].toFixed(3)}–{values[2].toFixed(3)}</text></g>
-        })}
+    {focus !== null && <line className="shared-hover-line" x1={x(focus)} x2={x(focus)} y1={margin.top} y2={height - margin.bottom} />}
+    {displayFocus !== null && (
+      <g className="shared-tooltip shared-tooltip-compact" transform={`translate(${(x(displayFocus) ?? 0) > width * .62 ? (x(displayFocus) ?? 0) - 201 : (x(displayFocus) ?? 0) + 12} ${margin.top + 8})`}>
+        <TooltipFade open={focus !== null} onExited={clearDisplayFocus}>
+          <rect width="189" height="91" rx="8" />
+          <text className="shared-tooltip-title" x="13" y="20">K = {displayFocus}</text>
+          {(['OpenCLIP', 'DINOv2'] as const).map((model, index) => {
+            const values = valuesFor(model).find((row) => row.k === displayFocus)?.[metric] ?? [0, 0, 0]
+            return <g key={model} transform={`translate(0 ${38 + index * 22})`}><circle cx="15" cy="0" r="4" fill={colours[model]} /><text className="shared-tooltip-label" x="27" y="4">{model}</text><text className="shared-tooltip-value" x="176" y="-2">{values[1].toFixed(3)}</text><text className="shared-tooltip-range" x="176" y="9">{values[0].toFixed(3)}–{values[2].toFixed(3)}</text></g>
+          })}
+        </TooltipFade>
       </g>
-    </>}
+    )}
     {clusterCounts.map((clusterCount, index) => {
       const currentX = x(clusterCount) ?? 0
       const previousX = index === 0 ? margin.left : (x(clusterCounts[index - 1]) ?? currentX)
