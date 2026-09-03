@@ -102,7 +102,8 @@
 }
 
 .archive-search,
-.archive-century {
+.archive-century,
+.archive-cluster-filter {
   display: block;
   margin-top: 1rem;
   color: #52635d;
@@ -112,13 +113,15 @@
 }
 
 .archive-search span,
-.archive-century span {
+.archive-century span,
+.archive-cluster-filter span {
   display: block;
   margin-bottom: 0.4rem;
 }
 
 .archive-search input,
-.archive-century select {
+.archive-century select,
+.archive-cluster-filter select {
   width: 100%;
   min-height: 44px;
   box-sizing: border-box;
@@ -132,6 +135,7 @@
 
 .archive-search input:focus-visible,
 .archive-century select:focus-visible,
+.archive-cluster-filter select:focus-visible,
 .archive-facet button:focus-visible,
 .archive-card:focus-visible,
 .archive-network-controls button:focus-visible,
@@ -139,6 +143,38 @@
 .archive-neighbour-strip > button:focus-visible {
   outline: 2px solid #258363;
   outline-offset: 2px;
+}
+
+.archive-cluster-filters {
+  display: grid;
+  gap: 0.7rem;
+  margin: 1.15rem 0 0;
+  padding: 0;
+  border: 0;
+}
+
+.archive-cluster-filters legend {
+  margin-bottom: -0.25rem;
+  color: #243a32;
+  font-size: 0.76rem;
+  font-weight: 750;
+}
+
+.archive-cluster-filter {
+  margin-top: 0;
+}
+
+.archive-cluster-filter select:disabled {
+  color: #6b7873;
+  cursor: wait;
+  background: #f3f5f4;
+}
+
+.archive-cluster-error {
+  margin: 0;
+  color: #8b3d2f;
+  font-size: 0.74rem;
+  line-height: 1.45;
 }
 
 .archive-facet {
@@ -750,7 +786,8 @@
 
   .archive-filter-heading,
   .archive-search,
-  .archive-century {
+  .archive-century,
+  .archive-cluster-filters {
     grid-column: 1 / -1;
   }
 
@@ -787,7 +824,8 @@
 
   .archive-filter-heading,
   .archive-search,
-  .archive-century {
+  .archive-century,
+  .archive-cluster-filters {
     grid-column: auto;
   }
 

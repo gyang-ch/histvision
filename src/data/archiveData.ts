@@ -70,6 +70,7 @@ let indexPromise: Promise<ArchiveIndex> | null = null
 let geometryPromise: Promise<ArrayBuffer> | null = null
 const itemShardCache = new Map<number, Promise<ArchiveItem[]>>()
 const neighbourRecordCache = new Map<string, Promise<NeighbourRecord>>()
+const clusterLabelCache = new Map<EmbeddingModel, Promise<Int16Array>>()
 
 export function fetchArchiveIndex(): Promise<ArchiveIndex> {
   if (!indexPromise) {
@@ -183,17 +184,31 @@ export async function fetchNeighbours(row: number, model: EmbeddingModel): Promi
 export async function fetchEmbeddingMap(model: EmbeddingModel) {
   const index = await fetchArchiveIndex()
   const config = index.embeddingMaps[model]
-  const [coordinateResponse, clusterResponse] = await Promise.all([
+  const [coordinateResponse, clusters] = await Promise.all([
     fetch(archiveAsset(config.coordinates.url)),
-    fetch(archiveAsset(config.clusters.url)),
+    fetchClusterLabels(model),
   ])
-  if (!coordinateResponse.ok || !clusterResponse.ok) throw new Error('Could not load embedding map')
-  const [coordinateBuffer, clusterBuffer] = await Promise.all([
-    coordinateResponse.arrayBuffer(),
-    clusterResponse.arrayBuffer(),
-  ])
+  if (!coordinateResponse.ok) throw new Error('Could not load embedding map')
+  const coordinateBuffer = await coordinateResponse.arrayBuffer()
   return {
     coordinates: new Float32Array(coordinateBuffer),
-    clusters: new Int16Array(clusterBuffer),
+    clusters,
   }
+}
+
+export function fetchClusterLabels(model: EmbeddingModel): Promise<Int16Array> {
+  let promise = clusterLabelCache.get(model)
+  if (!promise) {
+    promise = fetchArchiveIndex().then(async (index) => {
+      const response = await fetch(archiveAsset(index.embeddingMaps[model].clusters.url))
+      if (!response.ok) throw new Error(`Could not load ${model} cluster labels (${response.status})`)
+      const labels = new Int16Array(await response.arrayBuffer())
+      if (labels.length !== index.cropCount) {
+        throw new Error(`${model} cluster labels do not match the illustration archive`)
+      }
+      return labels
+    })
+    clusterLabelCache.set(model, promise)
+  }
+  return promise
 }

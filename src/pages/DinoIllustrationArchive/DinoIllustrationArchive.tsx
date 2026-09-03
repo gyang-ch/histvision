@@ -8,6 +8,7 @@ import {
   fetchArchiveIndex,
   fetchArchiveItems,
   fetchBookMap,
+  fetchClusterLabels,
   fetchNeighbours,
   pageImageUrl,
   type ArchiveFacet,
@@ -35,6 +36,57 @@ function intersectRows(order: number[], groups: Array<number[] | null>) {
   if (!active.length) return order
   const sets = active.map((rows) => new Set(rows))
   return order.filter((row) => sets.every((set) => set.has(row)))
+}
+
+function rowsForCluster(labels: Int16Array | null, selected: string) {
+  if (selected === 'all') return null
+  if (!labels) return []
+  const clusterId = Number(selected)
+  const rows: number[] = []
+  labels.forEach((label, row) => {
+    if (label === clusterId) rows.push(row)
+  })
+  return rows
+}
+
+function ClusterSelect({
+  label,
+  model,
+  selected,
+  counts,
+  loading,
+  unavailable,
+  onChange,
+}: {
+  label: string
+  model: EmbeddingModel
+  selected: string
+  counts: Record<string, number>
+  loading: boolean
+  unavailable: boolean
+  onChange: (value: string) => void
+}) {
+  const clusters = Object.entries(counts).sort(([left], [right]) => Number(left) - Number(right))
+  return (
+    <label className="archive-cluster-filter">
+      <span>{label}</span>
+      <select
+        value={selected}
+        disabled={loading || unavailable}
+        aria-label={`Filter by ${label}`}
+        onChange={(event) => onChange(event.target.value)}
+      >
+        <option value="all">
+          {unavailable ? 'Cluster filter unavailable' : loading ? 'Loading clusters…' : `All ${label} clusters`}
+        </option>
+        {clusters.map(([clusterId, count]) => (
+          <option key={`${model}-${clusterId}`} value={clusterId}>
+            Cluster {clusterId} ({count.toLocaleString()})
+          </option>
+        ))}
+      </select>
+    </label>
+  )
 }
 
 function FacetButtons({
@@ -454,6 +506,11 @@ export function DinoIllustrationArchivePage() {
   const [selectedTier, setSelectedTier] = useState('all')
   const [selectedAspect, setSelectedAspect] = useState('all')
   const [selectedCentury, setSelectedCentury] = useState('all')
+  const [selectedDinov2Cluster, setSelectedDinov2Cluster] = useState('all')
+  const [selectedOpenclipCluster, setSelectedOpenclipCluster] = useState('all')
+  const [dinov2Clusters, setDinov2Clusters] = useState<Int16Array | null>(null)
+  const [openclipClusters, setOpenclipClusters] = useState<Int16Array | null>(null)
+  const [clusterError, setClusterError] = useState<string | null>(null)
   const [query, setQuery] = useState('')
   const [page, setPage] = useState(1)
   const [selectedRow, setSelectedRow] = useState<number | null>(null)
@@ -464,6 +521,20 @@ export function DinoIllustrationArchivePage() {
     Promise.all([fetchArchiveIndex(), fetchBookMap()])
       .then(([archiveIndex, bookMap]) => { setIndex(archiveIndex); setBooks(bookMap) })
       .catch((reason) => setError(reason instanceof Error ? reason.message : String(reason)))
+  }, [])
+
+  useEffect(() => {
+    let active = true
+    Promise.all([fetchClusterLabels('dinov2'), fetchClusterLabels('openclip')])
+      .then(([dinov2, openclip]) => {
+        if (!active) return
+        setDinov2Clusters(dinov2)
+        setOpenclipClusters(openclip)
+      })
+      .catch((reason) => {
+        if (active) setClusterError(reason instanceof Error ? reason.message : String(reason))
+      })
+    return () => { active = false }
   }, [])
 
   const searchRows = useMemo(() => {
@@ -484,9 +555,11 @@ export function DinoIllustrationArchivePage() {
       rowsForFacet(index.facets.confidenceTiers, selectedTier),
       rowsForFacet(index.facets.aspects, selectedAspect),
       rowsForFacet(index.facets.centuries, selectedCentury),
+      rowsForCluster(dinov2Clusters, selectedDinov2Cluster),
+      rowsForCluster(openclipClusters, selectedOpenclipCluster),
       searchRows,
     ])
-  }, [index, searchRows, selectedAspect, selectedCentury, selectedSource, selectedTier])
+  }, [dinov2Clusters, index, openclipClusters, searchRows, selectedAspect, selectedCentury, selectedDinov2Cluster, selectedOpenclipCluster, selectedSource, selectedTier])
 
   const totalPages = Math.max(1, Math.ceil(filteredRows.length / PAGE_SIZE))
   const pageRows = useMemo(
@@ -520,6 +593,8 @@ export function DinoIllustrationArchivePage() {
     setSelectedTier('all')
     setSelectedAspect('all')
     setSelectedCentury('all')
+    setSelectedDinov2Cluster('all')
+    setSelectedOpenclipCluster('all')
     setQuery('')
     setPage(1)
   }
@@ -554,6 +629,28 @@ export function DinoIllustrationArchivePage() {
           <FacetButtons title="Source library" facets={index.facets.sources} selected={selectedSource} onChange={changeFilter(setSelectedSource)} />
           <FacetButtons title="Detection confidence" facets={index.facets.confidenceTiers} selected={selectedTier} onChange={changeFilter(setSelectedTier)} />
           <FacetButtons title="Crop orientation" facets={index.facets.aspects} selected={selectedAspect} onChange={changeFilter(setSelectedAspect)} />
+          <fieldset className="archive-cluster-filters">
+            <legend>Embedding clusters</legend>
+            <ClusterSelect
+              label="DINOv2"
+              model="dinov2"
+              selected={selectedDinov2Cluster}
+              counts={index.embeddingMaps.dinov2.clusters.counts}
+              loading={!dinov2Clusters && !clusterError}
+              unavailable={Boolean(clusterError)}
+              onChange={changeFilter(setSelectedDinov2Cluster)}
+            />
+            <ClusterSelect
+              label="OpenCLIP"
+              model="openclip"
+              selected={selectedOpenclipCluster}
+              counts={index.embeddingMaps.openclip.clusters.counts}
+              loading={!openclipClusters && !clusterError}
+              unavailable={Boolean(clusterError)}
+              onChange={changeFilter(setSelectedOpenclipCluster)}
+            />
+            {clusterError && <p className="archive-cluster-error" role="status">Cluster filters unavailable: {clusterError}</p>}
+          </fieldset>
           <label className="archive-century">
             <span>Book date</span>
             <select value={selectedCentury} onChange={(event) => changeFilter(setSelectedCentury)(event.target.value)}>
