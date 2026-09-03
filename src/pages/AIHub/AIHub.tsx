@@ -75,7 +75,15 @@ export function AIHubPage() {
     const behavior: ScrollBehavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
     const el = viewerRef.current
 
-    const scroll = () => el.scrollIntoView({ behavior, block: 'start' })
+    // The sticky tab bar overlays the top of the viewport, so aligning the
+    // viewer flush with block: 'start' lets it cover the book title. Give
+    // the target a scroll-margin equal to the bar's current height (it
+    // shrinks slightly once scrolled) plus a little breathing room.
+    const scroll = () => {
+      const tabBarHeight = document.querySelector('.tab-bar-container')?.getBoundingClientRect().height ?? 0
+      el.style.scrollMarginTop = `${tabBarHeight + 16}px`
+      el.scrollIntoView({ behavior, block: 'start' })
+    }
     const raf = requestAnimationFrame(scroll)
 
     const observer = new ResizeObserver(scroll)
