@@ -202,8 +202,9 @@
 .ai-hub-link {
   display: inline-flex;
   align-items: center;
+  gap: 0.5rem;
   justify-content: center;
-  padding: 0.75rem 1.1rem;
+  padding: 0.8rem 1.4rem;
   border-radius: 999px;
   text-decoration: none;
   font-family: "EB Garamond", Georgia, serif;
@@ -211,20 +212,35 @@
   text-transform: uppercase;
   font-weight: 800;
   font-size: 0.85rem;
-  color: rgba(15, 23, 42, 0.9);
-  background: rgba(255, 255, 255, 0.55);
-  border: 1px solid rgba(148, 163, 184, 0.35);
-  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  color: #063d2c;
+  background: linear-gradient(135deg, var(--brand), var(--brand-mid));
+  border: 1px solid transparent;
+  box-shadow: 0 8px 20px -4px rgba(16, 185, 129, 0.5);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.ai-hub-link::after {
+  content: '\2192';
+  transition: transform 0.2s ease;
 }
 
 .ai-hub-link:hover {
-  transform: translateY(-1px);
-  border-color: rgba(99, 102, 241, 0.45);
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, var(--brand-mid), var(--brand-deep));
+  box-shadow: 0 14px 28px -6px rgba(5, 150, 105, 0.55);
+}
+
+.ai-hub-link:hover::after {
+  transform: translateX(3px);
+}
+
+.ai-hub-link:active {
+  transform: translateY(0);
+  box-shadow: 0 6px 14px -4px rgba(5, 150, 105, 0.45);
 }
 
 .ai-hub-link:focus-visible {
-  outline: 2px solid rgba(99, 102, 241, 0.9);
+  outline: 2px solid var(--brand-deep);
   outline-offset: 3px;
 }
 
