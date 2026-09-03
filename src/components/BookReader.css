@@ -228,6 +228,23 @@
   font-weight: 800;
   text-align: center;
 }
+.text-block-page-filter {
+  border-color: rgba(56, 189, 248, 0.48);
+  background: rgba(56, 189, 248, 0.08);
+}
+.text-block-page-filter:hover {
+  border-color: rgba(56, 189, 248, 0.86);
+  background: rgba(56, 189, 248, 0.16);
+}
+.text-block-page-filter:focus-within {
+  outline-color: #38bdf8;
+}
+.text-block-page-filter input {
+  accent-color: #38bdf8;
+}
+.text-block-page-filter small {
+  background: #38bdf8;
+}
 .page-counter-form {
   display: flex;
   align-items: center;

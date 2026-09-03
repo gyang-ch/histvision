@@ -169,6 +169,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
   const [detectionsLoading, setDetectionsLoading] = useState(false);
   const [detectionsError, setDetectionsError] = useState(false);
   const [showIllustratedPagesOnly, setShowIllustratedPagesOnly] = useState(false);
+  const [showTextBlockPagesOnly, setShowTextBlockPagesOnly] = useState(false);
   const thumbnailsRowRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -176,6 +177,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
     setPageDetections(new Map());
     setDetectionsError(false);
     setShowIllustratedPagesOnly(false);
+    setShowTextBlockPagesOnly(false);
     if (book.source === 'custom') return () => { active = false; };
 
     setDetectionsLoading(true);
@@ -201,11 +203,26 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
       .sort((a, b) => a - b),
     [pageDetections, tileSources.length],
   );
+  const textBlockPageIndexes = useMemo(
+    () => [...pageDetections.entries()]
+      .filter(([index, detections]) => index >= 0 && index < tileSources.length && detections.some((detection) => detection.label === 'text_block'))
+      .map(([index]) => index)
+      .sort((a, b) => a - b),
+    [pageDetections, tileSources.length],
+  );
   const visiblePageIndexes = useMemo(
-    () => showIllustratedPagesOnly
-      ? illustratedPageIndexes
-      : Array.from({ length: tileSources.length }, (_, index) => index),
-    [illustratedPageIndexes, showIllustratedPagesOnly, tileSources.length],
+    () => {
+      const allPages = Array.from({ length: tileSources.length }, (_, index) => index);
+      if (!showIllustratedPagesOnly && !showTextBlockPagesOnly) return allPages;
+
+      const illustratedPages = new Set(illustratedPageIndexes);
+      const textBlockPages = new Set(textBlockPageIndexes);
+      return allPages.filter((index) =>
+        (!showIllustratedPagesOnly || illustratedPages.has(index))
+        && (!showTextBlockPagesOnly || textBlockPages.has(index)),
+      );
+    },
+    [illustratedPageIndexes, showIllustratedPagesOnly, showTextBlockPagesOnly, textBlockPageIndexes, tileSources.length],
   );
 
   // Sync pageInput with selectedPageIndex
@@ -225,7 +242,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
         });
       }
     }
-  }, [selectedPageIndex, showIllustratedPagesOnly]);
+  }, [selectedPageIndex, showIllustratedPagesOnly, showTextBlockPagesOnly]);
   
   // Resizing State
   const [sidePanelWidth, setSidePanelWidth] = useState(420);
@@ -819,6 +836,16 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
                     />
                     <span>Illustrated pages</span>
                     <small>{detectionsLoading ? '…' : illustratedPageIndexes.length.toLocaleString()}</small>
+                  </label>}
+                  {book.source !== 'custom' && <label className={`illustration-page-filter text-block-page-filter ${detectionsLoading ? 'loading' : ''}`}>
+                    <input
+                      type="checkbox"
+                      checked={showTextBlockPagesOnly}
+                      disabled={detectionsLoading || detectionsError || textBlockPageIndexes.length === 0}
+                      onChange={(event) => setShowTextBlockPagesOnly(event.target.checked)}
+                    />
+                    <span>Text-block pages</span>
+                    <small>{detectionsLoading ? '…' : textBlockPageIndexes.length.toLocaleString()}</small>
                   </label>}
                   <form 
                     className="page-counter-form" 
