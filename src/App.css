@@ -130,30 +130,70 @@
 
 
 /* AI Hub empty state */
-.ai-hub-empty {
+.ai-hub-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.ai-hub-status {
+  padding: 2.5rem 1.5rem;
+  color: var(--text-2);
+}
+
+.ai-hub-picker {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) 1px minmax(0, 1.15fr);
+  gap: 2rem;
+  align-items: start;
+  padding: 1.5rem 2rem;
   text-align: left;
-  padding: 5rem 1.5rem;
   color: rgba(15, 23, 42, 0.82);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.ai-hub-picker-divider {
+  align-self: stretch;
+  width: 1px;
+  background: rgba(15, 23, 42, 0.12);
+}
+
+.ai-hub-picker-col {
+  min-width: 0;
+}
+
+@media (max-width: 820px) {
+  .ai-hub-picker {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .ai-hub-picker-divider {
+    width: 100%;
+    height: 1px;
+  }
 }
 
 .ai-hub-title {
   font-family: "EB Garamond", Georgia, serif;
-  font-size: 2rem;
+  font-size: 1.6rem;
   font-weight: 600;
   letter-spacing: 0.02em;
-  margin: 0 0 0.75rem;
+  margin: 0 0 0.6rem;
 }
 
 .ai-hub-body {
   margin: 0;
   max-width: 70ch;
-  line-height: 1.7;
+  line-height: 1.6;
   color: var(--text-2);
-  font-size: 1.05rem;
+  font-size: 0.95rem;
 }
 
 .ai-hub-actions {
-  margin-top: 1.75rem;
+  margin-top: 1.25rem;
   display: flex;
   justify-content: flex-start;
 }
@@ -187,41 +227,31 @@
   outline-offset: 3px;
 }
 
-.ai-hub-divider {
-  width: 64px;
-  height: 1px;
-  margin: 3rem 0 2.5rem;
-  background: rgba(15, 23, 42, 0.12);
-}
-
-.ai-hub-custom-section {
-  max-width: 640px;
-}
-
 .ai-hub-custom-title {
   font-family: "EB Garamond", Georgia, serif;
-  font-size: 1.3rem;
+  font-size: 1.15rem;
   font-weight: 600;
   color: rgba(15, 23, 42, 0.9);
-  margin: 0 0 0.6rem;
+  margin: 0 0 0.5rem;
 }
 
 .ai-hub-custom-body {
-  margin: 0 0 1.5rem;
+  margin: 0 0 1.1rem;
   max-width: 58ch;
-  line-height: 1.7;
+  line-height: 1.55;
   color: var(--text-2);
-  font-size: 0.95rem;
+  font-size: 0.85rem;
 }
 
 .ai-hub-dropzone {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.6rem;
+  gap: 0.5rem;
   width: 100%;
-  padding: 1.75rem 1.5rem;
-  border-radius: 16px;
+  box-sizing: border-box;
+  padding: 1.1rem 1.25rem;
+  border-radius: 14px;
   border: 1.5px dashed rgba(148, 163, 184, 0.5);
   background: rgba(255, 255, 255, 0.5);
   color: rgba(15, 23, 42, 0.75);
@@ -256,12 +286,12 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-top: 1.25rem;
+  margin-top: 1rem;
 }
 
 .ai-hub-manifest-input {
-  width: 320px;
-  max-width: 100%;
+  flex: 1;
+  min-width: 0;
   padding: 0.65rem 0.9rem;
   border-radius: 999px;
   border: 1px solid rgba(148, 163, 184, 0.4);

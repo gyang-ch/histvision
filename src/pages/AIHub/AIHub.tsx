@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { fetchBookCatalogue, type BookRecord } from '../../data/books'
 import { BookReader } from '../../components/BookReader'
@@ -118,19 +118,11 @@ export function AIHubPage() {
     if (file) await processFile(file)
   }
 
-  if (customBook) {
-    return (
-      <BookReader
-        book={customBook}
-        initialTileSources={customTileSources}
-        onBack={clearCustomBook}
-      />
-    )
-  }
-
-  if (!bookId) {
-    return (
-      <section className="ai-hub-empty">
+  // Always visible above the viewer, so switching books or opening a new
+  // upload doesn't require navigating away from whatever is currently shown.
+  const picker = (
+    <section className="ai-hub-picker">
+      <div className="ai-hub-picker-col">
         <h2 className="ai-hub-title">Explore</h2>
         <p className="ai-hub-body">
           Explore opens from a selected book. Choose an item in Books to begin.
@@ -140,96 +132,104 @@ export function AIHubPage() {
             Go to Books
           </Link>
         </div>
+      </div>
 
-        <div className="ai-hub-divider" />
+      <div className="ai-hub-picker-divider" aria-hidden="true" />
 
-        <div className="ai-hub-custom-section">
-          <h3 className="ai-hub-custom-title">Or open your own</h3>
-          <p className="ai-hub-custom-body">
-            Upload a book page image or a IIIF manifest file, or paste a IIIF manifest URL, to view it with the same transcription and detection tools.
-          </p>
+      <div className="ai-hub-picker-col ai-hub-custom-section">
+        <h3 className="ai-hub-custom-title">Or open your own</h3>
+        <p className="ai-hub-custom-body">
+          Upload a book page image or a IIIF manifest file, or paste a IIIF manifest URL, to view it with the same transcription and detection tools.
+        </p>
 
-          <div
-            className={`ai-hub-dropzone ${isDragActive ? 'active' : ''}`}
-            role="button"
-            tabIndex={0}
-            onClick={() => fileInputRef.current?.click()}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault()
-                fileInputRef.current?.click()
-              }
-            }}
-            onDragOver={(event) => {
+        <div
+          className={`ai-hub-dropzone ${isDragActive ? 'active' : ''}`}
+          role="button"
+          tabIndex={0}
+          onClick={() => fileInputRef.current?.click()}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
               event.preventDefault()
-              setIsDragActive(true)
-            }}
-            onDragLeave={() => setIsDragActive(false)}
-            onDrop={handleDrop}
-          >
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="17 8 12 3 7 8" />
-              <line x1="12" y1="3" x2="12" y2="15" />
-            </svg>
-            <p className="ai-hub-dropzone-text">
-              Drag and drop an image or manifest (.json), or click to choose a file
-            </p>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*,.json,application/json"
-              onChange={handleFileChange}
-              style={{ display: 'none' }}
-            />
-          </div>
-
-          <form className="ai-hub-manifest-form" onSubmit={handleManifestUrlSubmit}>
-            <input
-              type="url"
-              className="ai-hub-manifest-input"
-              placeholder="Paste a IIIF manifest URL"
-              value={manifestUrlInput}
-              onChange={(event) => setManifestUrlInput(event.target.value)}
-              aria-label="IIIF manifest URL"
-            />
-            <button type="submit" className="ai-hub-manifest-submit" disabled={!manifestUrlInput.trim()}>
-              Open
-            </button>
-          </form>
-
-          {uploadError && <p className="ai-hub-custom-error">{uploadError}</p>}
+              fileInputRef.current?.click()
+            }
+          }}
+          onDragOver={(event) => {
+            event.preventDefault()
+            setIsDragActive(true)
+          }}
+          onDragLeave={() => setIsDragActive(false)}
+          onDrop={handleDrop}
+        >
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="17 8 12 3 7 8" />
+            <line x1="12" y1="3" x2="12" y2="15" />
+          </svg>
+          <p className="ai-hub-dropzone-text">
+            Drag and drop an image or manifest (.json), or click to choose a file
+          </p>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*,.json,application/json"
+            onChange={handleFileChange}
+            style={{ display: 'none' }}
+          />
         </div>
-      </section>
+
+        <form className="ai-hub-manifest-form" onSubmit={handleManifestUrlSubmit}>
+          <input
+            type="url"
+            className="ai-hub-manifest-input"
+            placeholder="Paste a IIIF manifest URL"
+            value={manifestUrlInput}
+            onChange={(event) => setManifestUrlInput(event.target.value)}
+            aria-label="IIIF manifest URL"
+          />
+          <button type="submit" className="ai-hub-manifest-submit" disabled={!manifestUrlInput.trim()}>
+            Open
+          </button>
+        </form>
+
+        {uploadError && <p className="ai-hub-custom-error">{uploadError}</p>}
+      </div>
+    </section>
+  )
+
+  let viewer: ReactNode = null
+  if (customBook) {
+    viewer = (
+      <BookReader
+        book={customBook}
+        initialTileSources={customTileSources}
+        onBack={clearCustomBook}
+      />
     )
-  }
-
-  if (isCatalogueLoading) {
-    return <section className="ai-hub-empty" aria-live="polite"><h2 className="ai-hub-title">Explore</h2><p>Loading book…</p></section>
-  }
-
-  if (!selectedBook) {
-    return (
-      <section className="ai-hub-empty">
-        <h2 className="ai-hub-title">Explore</h2>
-        <p className="ai-hub-body">
+  } else if (bookId) {
+    if (isCatalogueLoading) {
+      viewer = <p className="ai-hub-status" aria-live="polite">Loading book…</p>
+    } else if (!selectedBook) {
+      viewer = (
+        <p className="ai-hub-status">
           This manuscript could not be found. It may have been renamed or removed.
         </p>
-        <div className="ai-hub-actions">
-          <Link className="ai-hub-link" to="/books">
-            Browse Books
-          </Link>
-        </div>
-      </section>
-    )
+      )
+    } else {
+      viewer = (
+        <BookReader
+          book={selectedBook}
+          onBack={() => {
+            navigate('/books')
+          }}
+        />
+      )
+    }
   }
 
   return (
-    <BookReader
-      book={selectedBook}
-      onBack={() => {
-        navigate('/books')
-      }}
-    />
+    <div className="ai-hub-page">
+      {picker}
+      {viewer}
+    </div>
   )
 }
