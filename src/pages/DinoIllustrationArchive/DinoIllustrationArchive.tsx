@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import gsap from 'gsap'
+import OpenSeadragon from 'openseadragon'
 import { Paginator } from '../../components/Paginator'
 import {
   cropImageUrl,
@@ -68,6 +69,150 @@ function FacetButtons({
         </button>
       ))}
     </fieldset>
+  )
+}
+
+// ── Source page viewer (OpenSeadragon, matching the Botanical Case Study) ──
+
+function ArchiveSourceViewer({
+  imageUrl,
+  pageWidth,
+  cropBox,
+  detectorBox,
+}: {
+  imageUrl: string
+  /** Width of the page image that cropBox/detectorBox coordinates are relative to. */
+  pageWidth: number
+  cropBox: [number, number, number, number]
+  detectorBox: [number, number, number, number]
+}) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const osdRef = useRef<OpenSeadragon.Viewer | null>(null)
+  const [isReady, setIsReady] = useState(false)
+  const [, setTick] = useState(0)
+
+  // Init OSD once per mount (component is keyed by crop_id).
+  // Archive page images come through our own blob proxy, not a IIIF tiled
+  // endpoint, so this always uses the "simple image" path — loaded without
+  // CORS and rendered via the HTML drawer to avoid tainted-canvas issues.
+  useEffect(() => {
+    if (!containerRef.current) return
+    const viewer = OpenSeadragon({
+      element: containerRef.current,
+      prefixUrl: 'https://openseadragon.github.io/openseadragon/images/',
+      tileSources: { type: 'image', url: imageUrl },
+      crossOriginPolicy: false,
+      drawer: 'html',
+      showNavigationControl: false,
+      showNavigator: false,
+      defaultZoomLevel: 0,
+      minZoomLevel: 0,
+      maxZoomLevel: 10,
+      gestureSettingsMouse: { scrollToZoom: false },
+      gestureSettingsTouch: { scrollToZoom: false },
+      constrainDuringPan: true,
+      visibilityRatio: 1.0,
+      animationTime: 0.5,
+    })
+    viewer.addHandler('open', () => setIsReady(true))
+    osdRef.current = viewer
+    return () => {
+      viewer.destroy()
+      osdRef.current = null
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Rerender overlay on viewport change
+  useEffect(() => {
+    if (!isReady || !osdRef.current) return
+    const update = () => setTick((t) => t + 1)
+    const v = osdRef.current
+    v.addHandler('animation', update)
+    v.addHandler('canvas-drag', update)
+    v.addHandler('resize', update)
+    return () => {
+      v.removeHandler('animation', update)
+      v.removeHandler('canvas-drag', update)
+      v.removeHandler('resize', update)
+    }
+  }, [isReady])
+
+  const getBoxPath = (box: [number, number, number, number]): string | null => {
+    const v = osdRef.current
+    if (!v?.viewport) return null
+    const [x1, y1, x2, y2] = box
+    try {
+      const corners: [number, number][] = [
+        [x1, y1], [x2, y1], [x2, y2], [x1, y2],
+      ]
+      const pts = corners.map(([x, y]) => {
+        const vp = new OpenSeadragon.Point(x / pageWidth, y / pageWidth)
+        const cp = v.viewport.viewportToViewerElementCoordinates(vp)
+        return `${cp.x},${cp.y}`
+      })
+      return `M ${pts.join(' L ')} Z`
+    } catch {
+      return null
+    }
+  }
+
+  const cropPath = isReady ? getBoxPath(cropBox) : null
+  const detectorPath = isReady ? getBoxPath(detectorBox) : null
+
+  return (
+    <div className="archive-viewer-wrap">
+      <div ref={containerRef} className="archive-viewer-canvas" />
+
+      {/* Minimal controls: zoom in, zoom out, reset */}
+      <div className="archive-viewer-controls">
+        <button
+          type="button"
+          className="archive-viewer-btn"
+          title="Zoom in"
+          onClick={() => osdRef.current?.viewport?.zoomBy(1.5)}
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round">
+            <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          className="archive-viewer-btn"
+          title="Zoom out"
+          onClick={() => osdRef.current?.viewport?.zoomBy(1 / 1.5)}
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round">
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          className="archive-viewer-btn"
+          title="Return to full view"
+          onClick={() => osdRef.current?.viewport?.goHome()}
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+            <path d="M3 3v5h5" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Crop-box / detector-box overlay */}
+      {(cropPath || detectorPath) && (
+        <svg className="archive-viewer-overlay">
+          {cropPath && (
+            <path d={cropPath} className="archive-bbox-path archive-crop-box" vectorEffect="non-scaling-stroke" />
+          )}
+          {detectorPath && (
+            <path d={detectorPath} className="archive-bbox-path archive-detector-box" vectorEffect="non-scaling-stroke" />
+          )}
+        </svg>
+      )}
+
+      <div className="archive-box-key"><span className="crop">Padded crop</span><span className="detector">DINO detection</span></div>
+    </div>
   )
 }
 
@@ -246,24 +391,13 @@ function ArchiveInspector({
           <>
             <div className="archive-inspector-main">
               <div className="archive-source-page">
-                <img src={pageImageUrl(item)} alt={`Original page containing ${item.crop_id}`} />
-                <svg viewBox={`0 0 ${geometry.pageWidth} ${geometry.pageHeight}`} preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-                  <rect
-                    x={geometry.cropBox[0]}
-                    y={geometry.cropBox[1]}
-                    width={geometry.cropBox[2] - geometry.cropBox[0]}
-                    height={geometry.cropBox[3] - geometry.cropBox[1]}
-                    className="archive-crop-box"
-                  />
-                  <rect
-                    x={geometry.detectorBox[0]}
-                    y={geometry.detectorBox[1]}
-                    width={geometry.detectorBox[2] - geometry.detectorBox[0]}
-                    height={geometry.detectorBox[3] - geometry.detectorBox[1]}
-                    className="archive-detector-box"
-                  />
-                </svg>
-                <div className="archive-box-key"><span className="crop">Padded crop</span><span className="detector">DINO detection</span></div>
+                <ArchiveSourceViewer
+                  key={item.crop_id}
+                  imageUrl={pageImageUrl(item)}
+                  pageWidth={geometry.pageWidth}
+                  cropBox={geometry.cropBox}
+                  detectorBox={geometry.detectorBox}
+                />
               </div>
 
               <div className="archive-inspector-meta">
