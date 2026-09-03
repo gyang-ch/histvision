@@ -67,6 +67,57 @@ function useBarGrowth(svgRef: React.RefObject<SVGSVGElement | null>, play: boole
   }, [play, barsKey])
 }
 
+/**
+ * "Draws" a chart's line paths in on scroll, the classic stroke-dasharray /
+ * stroke-dashoffset trick: each path's dash length is set to its own total
+ * length (hiding it entirely), then the offset animates to 0, so the stroke
+ * appears to trace itself from start to end.
+ */
+function useLineDraw(svgRef: React.RefObject<SVGSVGElement | null>, play: boolean, selector = '.chart-line', duration = 1.4) {
+  useLayoutEffect(() => {
+    if (prefersReducedMotion()) return
+    const svg = svgRef.current
+    if (!svg) return
+    svg.querySelectorAll<SVGPathElement>(selector).forEach((path) => {
+      const length = path.getTotalLength()
+      gsap.set(path, { strokeDasharray: length, strokeDashoffset: length })
+    })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    if (!play || prefersReducedMotion()) return
+    const svg = svgRef.current
+    if (!svg) return
+    const paths = svg.querySelectorAll<SVGPathElement>(selector)
+    const tweens = Array.from(paths).map((path) =>
+      gsap.to(path, { strokeDashoffset: 0, duration, ease: 'power2.out', clearProps: 'strokeDasharray,strokeDashoffset' }),
+    )
+    return () => tweens.forEach((tween) => tween.kill())
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [play])
+}
+
+/** Fades matching elements in to a target opacity on scroll, e.g. a chart's shaded ribbon area. */
+function useFadeIn(svgRef: React.RefObject<SVGSVGElement | null>, play: boolean, selector: string, targetOpacity: number, duration = 1.1) {
+  useLayoutEffect(() => {
+    if (prefersReducedMotion()) return
+    const svg = svgRef.current
+    if (!svg) return
+    gsap.set(svg.querySelectorAll(selector), { opacity: 0 })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    if (!play || prefersReducedMotion()) return
+    const svg = svgRef.current
+    if (!svg) return
+    const tween = gsap.to(svg.querySelectorAll(selector), { opacity: targetOpacity, duration, ease: 'power1.out', clearProps: 'opacity' })
+    return () => { tween.kill() }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [play])
+}
+
 /** Keeps returning the last non-null focus value during the exit fade, instead of snapping to null the instant the pointer leaves. */
 function useStickyFocus<T>(focus: T | null): [T | null, () => void] {
   const [display, setDisplay] = useState<T | null>(focus)
@@ -168,10 +219,13 @@ function LearningCurveChart() {
   const trainingSizes = [200, 400, 600, 800, 1000, 1152]
   const [focus, setFocus] = useState<number | null>(null)
   const [displayFocus, clearDisplayFocus] = useStickyFocus(focus)
+  const [wrapRef, visible] = useRevealOnScroll<HTMLDivElement>()
+  const svgRef = useRef<SVGSVGElement>(null)
+  useLineDraw(svgRef, visible)
 
-  return <div className="chart-wrap">
+  return <div className="chart-wrap" ref={wrapRef}>
     <Legend models={['YOLO11m', 'DINO-R50']} />
-    <svg className="research-chart" viewBox={`0 0 ${width} ${height}`} role="img" aria-labelledby="learning-title learning-desc">
+    <svg ref={svgRef} className="research-chart" viewBox={`0 0 ${width} ${height}`} role="img" aria-labelledby="learning-title learning-desc">
       <title id="learning-title">Page-layout detection performance by training-set size</title>
       <desc id="learning-desc">Line chart comparing COCO average precision for YOLO11m and DINO-R50 at six training-set sizes.</desc>
       {yTicks(.50, .70).map((tick) => <g key={tick} className="chart-grid"><line x1={margin.left} x2={width - margin.right} y1={y(tick)} y2={y(tick)} /><text x={margin.left - 12} y={y(tick) + 4}>{tick.toFixed(2)}</text></g>)}
@@ -274,7 +328,9 @@ function OverlapChart() {
   return <div className="paired-chart-grid" ref={wrapRef}>{overlapBins.map((dataset) => <HistogramPanel key={dataset.title} dataset={dataset} play={visible} />)}</div>
 }
 
-function StabilityPanel({ metric }: { metric: 'ari' | 'ami' }) {
+const STABILITY_BAND_OPACITY = 0.14
+
+function StabilityPanel({ metric, play }: { metric: 'ari' | 'ami'; play: boolean }) {
   const width = 450, height = 320
   const margin = { top: 38, right: 18, bottom: 58, left: 68 }
   const domain = metric === 'ari' ? [.48, .63] : [.74, .805]
@@ -284,7 +340,10 @@ function StabilityPanel({ metric }: { metric: 'ari' | 'ami' }) {
   const [focus, setFocus] = useState<number | null>(null)
   const [displayFocus, clearDisplayFocus] = useStickyFocus(focus)
   const valuesFor = (model: 'OpenCLIP' | 'DINOv2') => stability.filter((value) => value.model === model)
-  return <svg className="research-chart" viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${metric === 'ari' ? 'Adjusted Rand index' : 'Adjusted mutual information'} across K-means seeds`}>
+  const svgRef = useRef<SVGSVGElement>(null)
+  useLineDraw(svgRef, play)
+  useFadeIn(svgRef, play, '.chart-band', STABILITY_BAND_OPACITY)
+  return <svg ref={svgRef} className="research-chart" viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${metric === 'ari' ? 'Adjusted Rand index' : 'Adjusted mutual information'} across K-means seeds`}>
     <text className="chart-panel-title chart-panel-title-centred" x={width / 2} y="20">{metric === 'ari' ? 'Partition stability across seeds' : 'Information stability across seeds'}</text>
     {yTicks(domain[0], domain[1], 5).map((tick) => <g key={tick} className="chart-grid"><line x1={margin.left} x2={width - margin.right} y1={y(tick)} y2={y(tick)} /><text x={margin.left - 10} y={y(tick) + 4}>{tick.toFixed(2)}</text></g>)}
     {clusterCounts.map((tick) => <text key={tick} className="chart-tick chart-tick-x" x={x(tick)} y={height - margin.bottom + 24}>{tick}</text>)}
@@ -293,7 +352,7 @@ function StabilityPanel({ metric }: { metric: 'ari' | 'ami' }) {
       const rows = valuesFor(model)
       const band = area<typeof rows[number]>().x((value) => x(value.k) ?? 0).y0((value) => y(value[metric][0])).y1((value) => y(value[metric][2])).curve(curveMonotoneX)
       const centre = line<typeof rows[number]>().x((value) => x(value.k) ?? 0).y((value) => y(value[metric][1])).curve(curveMonotoneX)
-      return <g key={model}><path d={band(rows) ?? ''} fill={colours[model]} opacity=".14" /><path className="chart-line" d={centre(rows) ?? ''} stroke={colours[model]} />{rows.map((row) => <circle key={row.k} className={focus === row.k ? 'shared-point active' : 'shared-point'} cx={x(row.k)} cy={y(row[metric][1])} r="5" fill={colours[model]} />)}</g>
+      return <g key={model}><path className="chart-band" d={band(rows) ?? ''} fill={colours[model]} opacity={STABILITY_BAND_OPACITY} /><path className="chart-line" d={centre(rows) ?? ''} stroke={colours[model]} />{rows.map((row) => <circle key={row.k} className={focus === row.k ? 'shared-point active' : 'shared-point'} cx={x(row.k)} cy={y(row[metric][1])} r="5" fill={colours[model]} />)}</g>
     })}
     {focus !== null && <line className="shared-hover-line" x1={x(focus)} x2={x(focus)} y1={margin.top} y2={height - margin.bottom} />}
     {displayFocus !== null && (
@@ -320,7 +379,8 @@ function StabilityPanel({ metric }: { metric: 'ari' | 'ami' }) {
 }
 
 function StabilityChart() {
-  return <div><Legend models={['OpenCLIP', 'DINOv2']} /><div className="paired-chart-grid"><StabilityPanel metric="ari" /><StabilityPanel metric="ami" /></div></div>
+  const [wrapRef, visible] = useRevealOnScroll<HTMLDivElement>()
+  return <div><Legend models={['OpenCLIP', 'DINOv2']} /><div className="paired-chart-grid" ref={wrapRef}><StabilityPanel metric="ari" play={visible} /><StabilityPanel metric="ami" play={visible} /></div></div>
 }
 
 function ResearchFigure({ number, title, caption, children }: { number: string; title: string; caption: string; children: React.ReactNode }) {
