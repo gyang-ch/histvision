@@ -81,13 +81,10 @@
   white-space: pre;
 }
 
-@keyframes hero-shimmer {
-  to { background-position: 200% center; }
-}
-
 .hero-gradient {
   background: linear-gradient(90deg, var(--sky) 0%, var(--brand-mid) 50%, var(--sky) 100%);
   background-size: 200% auto;
+  background-position: 50% center;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -96,13 +93,6 @@
   filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3));
   padding-bottom: 0.1em;
   margin-bottom: -0.1em;
-  animation: hero-shimmer 8s linear infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hero-gradient {
-    animation: none;
-  }
 }
 
 .subtitle {
