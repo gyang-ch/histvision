@@ -161,6 +161,11 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
   }, [isBackFloating]);
 
   const [tileSources, setTileSources] = useState<any[]>([]);
+  // Bumped every time tileSources is replaced with a genuinely new set (new
+  // book or new upload). IIIFViewer is keyed on this so it fully remounts —
+  // otherwise its OpenSeadragon instance is created once and never told
+  // about the new tile sources, so it keeps showing the previous book/image.
+  const [tileSourcesEpoch, setTileSourcesEpoch] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedPageIndex, setSelectedPageIndex] = useState(0);
@@ -320,8 +325,24 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
   const [ocrDebug, setOcrDebug] = useState<OCRDebugInfo | null>(null);
 
   useEffect(() => {
+    // A new book or upload is loading — forget whatever the previous one
+    // was showing instead of leaving stale page/results state behind.
+    setSelectedPageIndex(0);
+    setPageInput('1');
+    setOcrResults([]);
+    setQwenResults([]);
+    setQwenThinking(null);
+    setCharacterBoxes([]);
+    setPlantDetections([]);
+    setTranslatedText(null);
+    setImageSize(null);
+    setCurrentOcrUrl(null);
+    setOcrDebug(null);
+    setHighlightIndex(null);
+
     if (initialTileSources) {
       setTileSources(initialTileSources);
+      setTileSourcesEpoch((epoch) => epoch + 1);
       setError(null);
       setLoading(false);
       return;
@@ -374,6 +395,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
 
         if (sources.length === 0) throw new Error("No image sources found.");
         setTileSources(sources);
+        setTileSourcesEpoch((epoch) => epoch + 1);
       } catch (err) {
         console.error(err);
         setError("Failed to load manifest.");
@@ -929,8 +951,9 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
             </div>
 
             <div className="seadragon-container">
-              <IIIFViewer 
-                tileSources={tileSources} 
+              <IIIFViewer
+                key={tileSourcesEpoch}
+                tileSources={tileSources}
                 initialPage={selectedPageIndex}
                 onPageChange={(page) => {
                   setSelectedPageIndex(page);
