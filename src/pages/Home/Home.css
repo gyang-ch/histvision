@@ -40,15 +40,66 @@
 /* .content has a 4rem top padding site-wide; pull the home page in closer
    to the navbar without touching that shared padding on other pages. */
 .content:has(> .home) {
-  padding-top: 2.5rem;
+  padding-top: 3rem;
 }
 
 .home {
   background-color: transparent;
   color: inherit;
   font-family: inherit;
-  padding-top: 0.75rem;
+  padding-top: 1.25rem;
   padding-bottom: 4rem;
+}
+
+/* Former site hero: title + subtitle, moved to the top of the Home tab.
+   Same GSAP scatter-in/blur-up entrance, restyled for the white content
+   zone instead of the old full-bleed photo backdrop. */
+.home-title {
+  max-width: 900px;
+  margin: 0 auto 2.75rem;
+  text-align: center;
+}
+
+.home-title h1 {
+  margin: 0 0 1.1rem;
+  color: var(--ink-900);
+  font-family: "EB Garamond", Georgia, serif;
+  font-size: clamp(2.1rem, 4.6vw, 3.4rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.home-title-char {
+  display: inline-block;
+  white-space: pre;
+}
+
+.home-title-gradient {
+  background: linear-gradient(90deg, var(--teal-dark) 0%, var(--brand-deep) 50%, var(--teal-dark) 100%);
+  background-size: 200% auto;
+  background-position: 50% center;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: inline-block;
+  padding-bottom: 0.1em;
+  margin-bottom: -0.1em;
+}
+
+.home-title-subtitle {
+  margin: 0 auto;
+  max-width: 650px;
+  color: var(--ink-650);
+  font-family: "Aptos", "Segoe UI", sans-serif;
+  font-size: 1.15rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 650px) {
+  .home-title {
+    margin-bottom: 2rem;
+  }
 }
 
 .home-intro {

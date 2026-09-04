@@ -1,9 +1,7 @@
-import { useEffect, useLayoutEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { Analytics } from '@vercel/analytics/react'
 import { NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
-import gsap from 'gsap'
 import './App.css'
-import { HeroMosaic } from './components/HeroMosaic'
 
 import { HomePage } from './pages/Home/Home'
 import { LibraryPage } from './pages/Library/Library'
@@ -11,16 +9,6 @@ import { AIHubPage } from './pages/AIHub/AIHub'
 import { IllustrationsPage } from './pages/Illustrations/Illustrations'
 import { DinoIllustrationArchivePage } from './pages/DinoIllustrationArchive/DinoIllustrationArchive'
 import { MethodologyPage } from './pages/Methodology/Methodology'
-
-const prefersReducedMotion = () =>
-  typeof window !== 'undefined' &&
-  window.matchMedia &&
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
-export const scrollToContent = (heroRef: React.RefObject<HTMLElement | null>) => {
-  const top = heroRef.current?.offsetHeight || 0;
-  window.scrollTo({ top, behavior: prefersReducedMotion() ? 'auto' : 'smooth' })
-}
 
 const navItems = [
   { to: '/home', label: 'Home', end: true },
@@ -41,67 +29,16 @@ function App() {
   //   'https://gyang-ch--image-api.modal.run'
   // ).replace(/\/+$/, '')
 
-  const heroTextRef = useRef<HTMLDivElement>(null)
-  const heroSectionRef = useRef<HTMLElement>(null)
   const tabBarRef = useRef<HTMLDivElement>(null)
 
   const pathname = location.pathname
   const isReaderMode = useMemo(() => pathname.startsWith('/explore/') && pathname.split('/').length >= 3, [pathname])
   const isWhiteTheme = pathname === '/home' || pathname === '/' || pathname.startsWith('/books') || pathname.startsWith('/explore') || pathname.startsWith('/illustration-archive') || pathname.startsWith('/botanical-case-study') || pathname.startsWith('/methods-and-findings')
 
-  // Scroll to top on navigation so the hero and its entrance animation are visible
+  // Scroll to top on navigation so each page's entrance animations are visible
   useEffect(() => {
     window.scrollTo({ top: 0 })
   }, [pathname]);
-
-  useLayoutEffect(() => {
-    if (prefersReducedMotion()) return
-    if (!heroTextRef.current) return
-
-    const chars = Array.from(
-      heroTextRef.current.querySelectorAll<HTMLElement>('.hero-char'),
-    )
-    const subtitle = heroTextRef.current.querySelector<HTMLElement>('.subtitle')
-
-    if (chars.length === 0) return
-
-    if (subtitle) gsap.set(subtitle, { opacity: 0, y: 22, filter: 'blur(8px)' })
-
-    const scatterFrom = {
-      opacity: 0,
-      x: () => gsap.utils.random(-90, 90),
-      y: () => gsap.utils.random(-60, 60),
-      rotation: () => gsap.utils.random(-22, 22),
-      scale: 0.6,
-    }
-
-    const tl = gsap.timeline({ delay: 0.1 })
-
-    // Stage 1: the whole headline scatter-flies in as one tight, unified burst
-    // (same per-char effect that used to be line 1 only). The per-char delay
-    // is scaled down so ~59 characters still fully settle in about the same
-    // ~1.1s that 26-character line 1 alone used to take — a fast single wave,
-    // not a slow cascade down two lines.
-    tl.fromTo(chars, scatterFrom, {
-      opacity: 1, x: 0, y: 0, rotation: 0, scale: 1,
-      duration: 0.65,
-      stagger: { each: 0.008, from: 'start' },
-      ease: 'back.out(1.4)',
-      clearProps: 'transform',
-    })
-
-    // Stage 2: subtitle slides up once the headline settles
-    if (subtitle) {
-      tl.to(subtitle, {
-        opacity: 1,
-        y: 0,
-        filter: 'blur(0px)',
-        duration: 0.85,
-        ease: 'power3.out',
-        clearProps: 'transform,filter',
-      }, '+=0.08')
-    }
-  }, [])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -134,24 +71,6 @@ function App() {
       <a className="skip-link" href="#main">
         Skip to content
       </a>
-
-      <header className="hero" ref={heroSectionRef}>
-        <HeroMosaic />
-        <div className="hero-content" ref={heroTextRef}>
-          <h1>
-            {'Computational Analysis of '.split('').map((char, i) => (
-              <span key={i} className="hero-char">{char}</span>
-            ))}
-            <br />
-            <span className="hero-gradient">
-              {'Illustrations in Historical Books'.split('').map((char, i) => (
-                <span key={i} className="hero-char">{char}</span>
-              ))}
-            </span>
-          </h1>
-          <p className="subtitle">Exploring the intersection of visual culture, book history, and digital humanities.</p>
-        </div>
-      </header>
 
       <div className="tab-bar-container" ref={tabBarRef}>
         <div className="tab-bar-wrapper">

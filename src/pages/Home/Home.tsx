@@ -1,6 +1,15 @@
 import { NavLink } from 'react-router-dom'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import gsap from 'gsap'
 import './Home.css'
+
+const prefersReducedMotion = () =>
+  typeof window !== 'undefined' &&
+  window.matchMedia &&
+  window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+const TITLE_LINE_1 = 'Computational Analysis of '
+const TITLE_LINE_2 = 'Illustrations in Historical Books'
 
 // Video temporarily disabled — presentation video to be re-recorded.
 // import { useRef, useState } from 'react'
@@ -237,6 +246,55 @@ function CollectionComposition() {
 }
 
 export function HomePage() {
+  const titleRef = useRef<HTMLDivElement>(null)
+
+  useLayoutEffect(() => {
+    if (prefersReducedMotion()) return
+    if (!titleRef.current) return
+
+    const chars = Array.from(
+      titleRef.current.querySelectorAll<HTMLElement>('.home-title-char'),
+    )
+    const subtitle = titleRef.current.querySelector<HTMLElement>('.home-title-subtitle')
+
+    if (chars.length === 0) return
+
+    if (subtitle) gsap.set(subtitle, { opacity: 0, y: 22, filter: 'blur(8px)' })
+
+    const scatterFrom = {
+      opacity: 0,
+      x: () => gsap.utils.random(-90, 90),
+      y: () => gsap.utils.random(-60, 60),
+      rotation: () => gsap.utils.random(-22, 22),
+      scale: 0.6,
+    }
+
+    const tl = gsap.timeline({ delay: 0.1 })
+
+    // The whole headline scatter-flies in as one tight, unified burst; the
+    // per-char delay is scaled down so ~59 characters still fully settle in
+    // about ~1.1s — a fast single wave, not a slow cascade down two lines.
+    tl.fromTo(chars, scatterFrom, {
+      opacity: 1, x: 0, y: 0, rotation: 0, scale: 1,
+      duration: 0.65,
+      stagger: { each: 0.008, from: 'start' },
+      ease: 'back.out(1.4)',
+      clearProps: 'transform',
+    })
+
+    // Subtitle slides up once the headline settles.
+    if (subtitle) {
+      tl.to(subtitle, {
+        opacity: 1,
+        y: 0,
+        filter: 'blur(0px)',
+        duration: 0.85,
+        ease: 'power3.out',
+        clearProps: 'transform,filter',
+      }, '+=0.08')
+    }
+  }, [])
+
   // Video temporarily disabled — presentation video to be re-recorded.
   // const videoRef = useRef<HTMLVideoElement>(null)
   // const videoWrapperRef = useRef<HTMLDivElement>(null)
@@ -269,6 +327,21 @@ export function HomePage() {
 
   return (
     <section className="home">
+      <div className="home-title" ref={titleRef}>
+        <h1>
+          {TITLE_LINE_1.split('').map((char, i) => (
+            <span key={i} className="home-title-char">{char}</span>
+          ))}
+          <br />
+          <span className="home-title-gradient">
+            {TITLE_LINE_2.split('').map((char, i) => (
+              <span key={i} className="home-title-char">{char}</span>
+            ))}
+          </span>
+        </h1>
+        <p className="home-title-subtitle">Exploring the intersection of visual culture, book history, and digital humanities.</p>
+      </div>
+
       <div className="home-intro">
         <p>
           HistVision explores visual culture through digitised historical books, 
