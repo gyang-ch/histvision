@@ -255,11 +255,8 @@ export function HomePage() {
     const chars = Array.from(
       titleRef.current.querySelectorAll<HTMLElement>('.home-title-char'),
     )
-    const subtitle = titleRef.current.querySelector<HTMLElement>('.home-title-subtitle')
 
     if (chars.length === 0) return
-
-    if (subtitle) gsap.set(subtitle, { opacity: 0, y: 22, filter: 'blur(8px)' })
 
     const scatterFrom = {
       opacity: 0,
@@ -269,30 +266,17 @@ export function HomePage() {
       scale: 0.6,
     }
 
-    const tl = gsap.timeline({ delay: 0.1 })
-
     // The whole headline scatter-flies in as one tight, unified burst; the
     // per-char delay is scaled down so ~59 characters still fully settle in
     // about ~1.1s — a fast single wave, not a slow cascade down two lines.
-    tl.fromTo(chars, scatterFrom, {
+    gsap.fromTo(chars, scatterFrom, {
       opacity: 1, x: 0, y: 0, rotation: 0, scale: 1,
       duration: 0.65,
+      delay: 0.1,
       stagger: { each: 0.008, from: 'start' },
       ease: 'back.out(1.4)',
       clearProps: 'transform',
     })
-
-    // Subtitle slides up once the headline settles.
-    if (subtitle) {
-      tl.to(subtitle, {
-        opacity: 1,
-        y: 0,
-        filter: 'blur(0px)',
-        duration: 0.85,
-        ease: 'power3.out',
-        clearProps: 'transform,filter',
-      }, '+=0.08')
-    }
   }, [])
 
   // Video temporarily disabled — presentation video to be re-recorded.
@@ -339,15 +323,12 @@ export function HomePage() {
             ))}
           </span>
         </h1>
-        <p className="home-title-subtitle">Exploring the intersection of visual culture, book history, and digital humanities.</p>
       </div>
 
       <div className="home-intro">
         <p>
-          HistVision explores visual culture through digitised historical books, 
-          investigating how computer vision and multimodal methods can support 
-          the large-scale discovery and analysis of illustrations across diverse 
-          historical collections.
+          HistVision applies computer vision and multimodal methods to explore
+          visual culture in digitised historical books at scale.
         </p>
       </div>
 

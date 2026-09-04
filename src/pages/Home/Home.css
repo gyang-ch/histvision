@@ -61,7 +61,7 @@
 }
 
 .home-title h1 {
-  margin: 0 0 1.1rem;
+  margin: 0;
   color: var(--ink-900);
   font-family: "EB Garamond", Georgia, serif;
   font-size: clamp(2.1rem, 4.6vw, 3.4rem);
@@ -76,24 +76,28 @@
 }
 
 .home-title-gradient {
-  background: linear-gradient(90deg, var(--teal-dark) 0%, var(--brand-deep) 50%, var(--teal-dark) 100%);
+  background: linear-gradient(90deg, var(--blue) 0%, var(--brand-mid) 50%, var(--blue) 100%);
   background-size: 200% auto;
-  background-position: 50% center;
+  background-position: 0% center;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   display: inline-block;
   padding-bottom: 0.1em;
   margin-bottom: -0.1em;
+  animation: home-title-gradient-shift 6s ease-in-out infinite;
 }
 
-.home-title-subtitle {
-  margin: 0 auto;
-  max-width: 650px;
-  color: var(--ink-650);
-  font-family: "Aptos", "Segoe UI", sans-serif;
-  font-size: 1.15rem;
-  line-height: 1.5;
+@keyframes home-title-gradient-shift {
+  0% { background-position: 0% center; }
+  50% { background-position: 100% center; }
+  100% { background-position: 0% center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-title-gradient {
+    animation: none;
+  }
 }
 
 @media (max-width: 650px) {
