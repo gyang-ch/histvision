@@ -103,7 +103,8 @@
 
 .archive-search,
 .archive-century,
-.archive-cluster-filter {
+.archive-cluster-filter,
+.archive-human-filters label {
   display: block;
   margin-top: 1rem;
   color: #52635d;
@@ -114,14 +115,16 @@
 
 .archive-search span,
 .archive-century span,
-.archive-cluster-filter span {
+.archive-cluster-filter span,
+.archive-human-filters label span {
   display: block;
   margin-bottom: 0.4rem;
 }
 
 .archive-search input,
 .archive-century select,
-.archive-cluster-filter select {
+.archive-cluster-filter select,
+.archive-human-filters select {
   width: 100%;
   min-height: 44px;
   box-sizing: border-box;
@@ -136,6 +139,7 @@
 .archive-search input:focus-visible,
 .archive-century select:focus-visible,
 .archive-cluster-filter select:focus-visible,
+.archive-human-filters select:focus-visible,
 .archive-facet button:focus-visible,
 .archive-card:focus-visible,
 .archive-network-controls button:focus-visible,
@@ -143,6 +147,30 @@
 .archive-neighbour-strip > button:focus-visible {
   outline: 2px solid #258363;
   outline-offset: 2px;
+}
+
+.archive-human-filters {
+  display: grid;
+  gap: 0.7rem;
+  margin: 1.15rem 0 0;
+  padding: 0;
+  border: 0;
+}
+
+.archive-human-filters legend {
+  color: #243a32;
+  font-size: 0.76rem;
+  font-weight: 750;
+}
+
+.archive-human-filters label {
+  margin-top: 0;
+}
+
+.archive-human-filters select:disabled {
+  color: #6b7873;
+  cursor: wait;
+  background: #f3f5f4;
 }
 
 .archive-cluster-filters {
@@ -330,6 +358,29 @@
   text-overflow: ellipsis;
   text-transform: uppercase;
   white-space: nowrap;
+}
+
+.archive-card-human {
+  display: flex;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+  margin-top: 0.45rem;
+}
+
+.archive-card-human span {
+  border: 1px solid #b8d9cc;
+  border-radius: 999px;
+  background: #edf8f3;
+  color: #17694e;
+  padding: 0.18rem 0.42rem;
+  font-size: 0.58rem;
+  line-height: 1.15;
+}
+
+.archive-card-human span:first-child {
+  background: #17694e;
+  border-color: #17694e;
+  color: #fff;
 }
 
 .archive-card h3 {
@@ -674,6 +725,48 @@
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
+}
+
+.archive-human-summary {
+  margin: 1rem 0;
+  padding: 0.85rem;
+  border: 1px solid rgba(125, 211, 181, 0.28);
+  border-radius: 7px;
+  background: rgba(125, 211, 181, 0.07);
+}
+
+.archive-human-summary .archive-kicker {
+  margin: 0 0 0.55rem;
+}
+
+.archive-human-labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.archive-human-labels span {
+  border: 1px solid rgba(125, 211, 181, 0.36);
+  border-radius: 999px;
+  padding: 0.24rem 0.5rem;
+  color: #d9f4ea;
+  font-size: 0.65rem;
+}
+
+.archive-human-labels span.domain {
+  border-color: rgba(125, 172, 211, 0.4);
+  color: #d7eafb;
+}
+
+.archive-human-labels span.unusable {
+  border-color: rgba(240, 151, 128, 0.45);
+  color: #ffc7b8;
+}
+
+.archive-quality-flags {
+  margin: 0.65rem 0 0;
+  color: #aebcb7;
+  font-size: 0.67rem;
 }
 
 .archive-inspector-links a {

@@ -9,6 +9,7 @@ import {
   fetchArchiveItems,
   fetchBookMap,
   fetchClusterLabels,
+  fetchHumanAnnotationIndex,
   fetchNeighbours,
   pageImageUrl,
   type ArchiveFacet,
@@ -16,6 +17,8 @@ import {
   type ArchiveIndex,
   type ArchiveItem,
   type EmbeddingModel,
+  type HumanAnnotationIndex,
+  type HumanAnnotationRecord,
 } from '../../data/archiveData'
 import type { BookRecord } from '../../data/books'
 import { DinoIllustrationNetwork } from './DinoIllustrationNetwork'
@@ -47,6 +50,30 @@ function rowsForCluster(labels: Int16Array | null, selected: string) {
     if (label === clusterId) rows.push(row)
   })
   return rows
+}
+
+function rowsForHumanStatus(annotations: HumanAnnotationIndex | null, selected: string, cropCount: number) {
+  if (selected === 'all') return null
+  if (!annotations) return []
+  const annotated = new Set(annotations.records.map((record) => record.row_index))
+  if (selected === 'not_annotated') {
+    return Array.from({ length: cropCount }, (_, row) => row).filter((row) => !annotated.has(row))
+  }
+  return annotations.records
+    .filter((record) => selected === 'annotated' || record.disposition === selected)
+    .map((record) => record.row_index)
+}
+
+function rowsForHumanLabel(annotations: HumanAnnotationIndex | null, axis: 'subject' | 'domain', selected: string) {
+  if (selected === 'all') return null
+  if (!annotations) return []
+  return annotations.records
+    .filter((record) => (axis === 'subject' ? record.subject_form_labels : record.domain_labels).includes(selected))
+    .map((record) => record.row_index)
+}
+
+function humanLabel(label: string) {
+  return label.split('_').map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(' ')
 }
 
 function ClusterSelect({
@@ -270,10 +297,12 @@ function ArchiveSourceViewer({
 
 function ArchiveInspector({
   row,
+  annotation,
   onClose,
   onSelectRow,
 }: {
   row: number
+  annotation?: HumanAnnotationRecord
   onClose: () => void
   onSelectRow: (row: number) => void
 }) {
@@ -466,6 +495,17 @@ function ArchiveInspector({
                   <div><dt>Detection box</dt><dd>{geometry.detectorBox.map((value) => Math.round(value)).join(', ')}</dd></div>
                   <div><dt>Crop box</dt><dd>{geometry.cropBox.join(', ')}</dd></div>
                 </dl>
+                {annotation && (
+                  <section className="archive-human-summary" aria-label="Human classification">
+                    <p className="archive-kicker">Human classification</p>
+                    <div className="archive-human-labels">
+                      {annotation.subject_form_labels.map((label) => <span key={`subject-${label}`}>{humanLabel(label)}</span>)}
+                      {annotation.domain_labels.map((label) => <span className="domain" key={`domain-${label}`}>{humanLabel(label)}</span>)}
+                      {annotation.disposition === 'exclude_unusable_crop' && <span className="unusable">Unusable crop</span>}
+                    </div>
+                    {annotation.quality_flags.length > 0 && <p className="archive-quality-flags">{annotation.quality_flags.map(humanLabel).join(' · ')}</p>}
+                  </section>
+                )}
                 <div className="archive-inspector-links">
                   {book?.museumUrl && <a href={book.museumUrl} target="_blank" rel="noreferrer">Library record ↗</a>}
                   {book?.manifestUrl && <a href={book.manifestUrl} target="_blank" rel="noreferrer">IIIF manifest ↗</a>}
@@ -502,12 +542,16 @@ export function DinoIllustrationArchivePage() {
   const [index, setIndex] = useState<ArchiveIndex | null>(null)
   const [books, setBooks] = useState<Map<string, BookRecord>>(new Map())
   const [items, setItems] = useState<ArchiveItem[]>([])
+  const [humanAnnotations, setHumanAnnotations] = useState<HumanAnnotationIndex | null>(null)
   const [selectedSource, setSelectedSource] = useState('all')
   const [selectedTier, setSelectedTier] = useState('all')
   const [selectedAspect, setSelectedAspect] = useState('all')
   const [selectedCentury, setSelectedCentury] = useState('all')
   const [selectedDinov2Cluster, setSelectedDinov2Cluster] = useState('all')
   const [selectedOpenclipCluster, setSelectedOpenclipCluster] = useState('all')
+  const [selectedHumanStatus, setSelectedHumanStatus] = useState('all')
+  const [selectedSubject, setSelectedSubject] = useState('all')
+  const [selectedDomain, setSelectedDomain] = useState('all')
   const [dinov2Clusters, setDinov2Clusters] = useState<Int16Array | null>(null)
   const [openclipClusters, setOpenclipClusters] = useState<Int16Array | null>(null)
   const [clusterError, setClusterError] = useState<string | null>(null)
@@ -522,6 +566,19 @@ export function DinoIllustrationArchivePage() {
       .then(([archiveIndex, bookMap]) => { setIndex(archiveIndex); setBooks(bookMap) })
       .catch((reason) => setError(reason instanceof Error ? reason.message : String(reason)))
   }, [])
+
+  useEffect(() => {
+    let active = true
+    fetchHumanAnnotationIndex()
+      .then((annotations) => { if (active) setHumanAnnotations(annotations) })
+      .catch(() => { if (active) setHumanAnnotations(null) })
+    return () => { active = false }
+  }, [])
+
+  const annotationsByRow = useMemo(
+    () => new Map(humanAnnotations?.records.map((record) => [record.row_index, record]) ?? []),
+    [humanAnnotations],
+  )
 
   useEffect(() => {
     let active = true
@@ -557,9 +614,12 @@ export function DinoIllustrationArchivePage() {
       rowsForFacet(index.facets.centuries, selectedCentury),
       rowsForCluster(dinov2Clusters, selectedDinov2Cluster),
       rowsForCluster(openclipClusters, selectedOpenclipCluster),
+      rowsForHumanStatus(humanAnnotations, selectedHumanStatus, index.cropCount),
+      rowsForHumanLabel(humanAnnotations, 'subject', selectedSubject),
+      rowsForHumanLabel(humanAnnotations, 'domain', selectedDomain),
       searchRows,
     ])
-  }, [dinov2Clusters, index, openclipClusters, searchRows, selectedAspect, selectedCentury, selectedDinov2Cluster, selectedOpenclipCluster, selectedSource, selectedTier])
+  }, [dinov2Clusters, humanAnnotations, index, openclipClusters, searchRows, selectedAspect, selectedCentury, selectedDinov2Cluster, selectedDomain, selectedHumanStatus, selectedOpenclipCluster, selectedSource, selectedSubject, selectedTier])
 
   const totalPages = Math.max(1, Math.ceil(filteredRows.length / PAGE_SIZE))
   const pageRows = useMemo(
@@ -595,6 +655,9 @@ export function DinoIllustrationArchivePage() {
     setSelectedCentury('all')
     setSelectedDinov2Cluster('all')
     setSelectedOpenclipCluster('all')
+    setSelectedHumanStatus('all')
+    setSelectedSubject('all')
+    setSelectedDomain('all')
     setQuery('')
     setPage(1)
   }
@@ -629,6 +692,37 @@ export function DinoIllustrationArchivePage() {
           <FacetButtons title="Source library" facets={index.facets.sources} selected={selectedSource} onChange={changeFilter(setSelectedSource)} />
           <FacetButtons title="Detection confidence" facets={index.facets.confidenceTiers} selected={selectedTier} onChange={changeFilter(setSelectedTier)} />
           <FacetButtons title="Crop orientation" facets={index.facets.aspects} selected={selectedAspect} onChange={changeFilter(setSelectedAspect)} />
+          <fieldset className="archive-human-filters">
+            <legend>Human classification</legend>
+            <label>
+              <span>Status</span>
+              <select value={selectedHumanStatus} disabled={!humanAnnotations} onChange={(event) => changeFilter(setSelectedHumanStatus)(event.target.value)}>
+                <option value="all">All illustrations</option>
+                <option value="annotated">Human annotated ({humanAnnotations?.recordCount.toLocaleString() ?? '…'})</option>
+                <option value="not_annotated">Not annotated</option>
+                <option value="include">Usable</option>
+                <option value="exclude_unusable_crop">Unusable crop</option>
+              </select>
+            </label>
+            <label>
+              <span>Subject / form</span>
+              <select value={selectedSubject} disabled={!humanAnnotations} onChange={(event) => changeFilter(setSelectedSubject)(event.target.value)}>
+                <option value="all">All subjects / forms</option>
+                {humanAnnotations?.labels.subjectForm.filter((label) => label.count > 0).map((label) => (
+                  <option key={label.id} value={label.id}>{label.label} ({label.count.toLocaleString()})</option>
+                ))}
+              </select>
+            </label>
+            <label>
+              <span>Knowledge domain</span>
+              <select value={selectedDomain} disabled={!humanAnnotations} onChange={(event) => changeFilter(setSelectedDomain)(event.target.value)}>
+                <option value="all">All domains</option>
+                {humanAnnotations?.labels.domain.filter((label) => label.count > 0).map((label) => (
+                  <option key={label.id} value={label.id}>{label.label} ({label.count.toLocaleString()})</option>
+                ))}
+              </select>
+            </label>
+          </fieldset>
           <fieldset className="archive-cluster-filters">
             <legend>Embedding clusters</legend>
             <ClusterSelect
@@ -672,10 +766,12 @@ export function DinoIllustrationArchivePage() {
             <div className="archive-grid">
               {items.map((item) => {
                 const book = books.get(bookKey(item.source, item.item_id))
+                const annotation = annotationsByRow.get(item.row_index)
                 return (
                   <button key={item.crop_id} type="button" className="archive-card" onClick={() => setSelectedRow(item.row_index)}>
                     <div className="archive-card-image"><img src={cropImageUrl(item)} alt={`Illustration from ${book?.title ?? item.item_id}`} loading="lazy" /></div>
                     <div className="archive-card-tags"><span>{book?.sourceLabel ?? item.source}</span><span>{Math.round(item.confidence * 100)}%</span></div>
+                    {annotation && <div className="archive-card-human"><span>Human reviewed</span>{annotation.subject_form_labels.slice(0, 2).map((label) => <span key={label}>{humanLabel(label)}</span>)}</div>}
                     <h3>{book?.title ?? item.item_id}</h3>
                   </button>
                 )
@@ -689,7 +785,7 @@ export function DinoIllustrationArchivePage() {
 
       <DinoIllustrationNetwork onSelectRow={setSelectedRow} />
 
-      {selectedRow != null && <ArchiveInspector key={selectedRow} row={selectedRow} onClose={() => setSelectedRow(null)} onSelectRow={setSelectedRow} />}
+      {selectedRow != null && <ArchiveInspector key={selectedRow} row={selectedRow} annotation={annotationsByRow.get(selectedRow)} onClose={() => setSelectedRow(null)} onSelectRow={setSelectedRow} />}
     </div>
   )
 }

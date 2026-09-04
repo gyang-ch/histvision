@@ -63,10 +63,39 @@ export interface NeighbourRecord {
   cross_book_top_50_scores?: number[]
 }
 
+export interface HumanAnnotationRecord {
+  row_index: number
+  crop_id: string
+  review_status: string
+  disposition: string
+  subject_form_labels: string[]
+  domain_labels: string[]
+  quality_flags: string[]
+  taxonomy_version: string
+}
+
+export interface HumanAnnotationLabel {
+  id: string
+  label: string
+  count: number
+}
+
+export interface HumanAnnotationIndex {
+  schemaVersion: string
+  recordCount: number
+  verifiedCount: number
+  labels: {
+    subjectForm: HumanAnnotationLabel[]
+    domain: HumanAnnotationLabel[]
+  }
+  records: HumanAnnotationRecord[]
+}
+
 const archiveAsset = (file: string) => `${import.meta.env.BASE_URL}data/archive/${file}`
 const assetProxy = import.meta.env.VITE_SEARCH_BOTANY_IMAGE_PROXY || '/api/search-botany-blob'
 
 let indexPromise: Promise<ArchiveIndex> | null = null
+let humanAnnotationPromise: Promise<HumanAnnotationIndex> | null = null
 let geometryPromise: Promise<ArrayBuffer> | null = null
 const itemShardCache = new Map<number, Promise<ArchiveItem[]>>()
 const neighbourRecordCache = new Map<string, Promise<NeighbourRecord>>()
@@ -80,6 +109,16 @@ export function fetchArchiveIndex(): Promise<ArchiveIndex> {
     })
   }
   return indexPromise
+}
+
+export function fetchHumanAnnotationIndex(): Promise<HumanAnnotationIndex> {
+  if (!humanAnnotationPromise) {
+    humanAnnotationPromise = fetch(archiveAsset('human-annotations-index.json')).then((response) => {
+      if (!response.ok) throw new Error(`Could not load human annotations (${response.status})`)
+      return response.json() as Promise<HumanAnnotationIndex>
+    })
+  }
+  return humanAnnotationPromise
 }
 
 export function searchBotanyAssetUrl(path: string): string {
