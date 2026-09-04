@@ -532,3 +532,54 @@
 .home-entry-card:hover .home-entry-card-arrow {
   transform: translateX(4px);
 }
+
+/* Accessibility fallback for glass surfaces: users who've turned on
+   high-contrast mode need solid, high-contrast panels rather than a
+   translucent blur over a busy photograph. */
+@media (prefers-contrast: high) {
+  .home-hero,
+  .home-composition-panel,
+  .home-entry-card {
+    background: rgba(255, 255, 255, 0.96);
+    border-color: rgba(15, 23, 42, 0.7);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .home-entry-card:hover {
+    background: rgba(255, 255, 255, 0.96);
+  }
+
+  .app-container:has(> .content > .home) .site-footer {
+    background: rgba(255, 255, 255, 0.96);
+    border-top-color: rgba(15, 23, 42, 0.7);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+/* Safari ties backdrop-filter rendering to the OS-level "Reduce Transparency"
+   accessibility setting and silently falls back to flat alpha-compositing
+   (no blur) when it's on — Chromium browsers generally keep blurring
+   regardless. We can't force Safari to blur against that setting, so make
+   the no-blur fallback a deliberate, well-contrasted look instead of an
+   accidental one. */
+@media (prefers-reduced-transparency: reduce) {
+  .home-hero,
+  .home-composition-panel,
+  .home-entry-card {
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .home-entry-card:hover {
+    background: rgba(255, 255, 255, 0.88);
+  }
+
+  .app-container:has(> .content > .home) .site-footer {
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
