@@ -311,25 +311,27 @@ export function HomePage() {
 
   return (
     <section className="home">
-      <div className="home-title" ref={titleRef}>
-        <h1>
-          {TITLE_LINE_1.split('').map((char, i) => (
-            <span key={i} className="home-title-char">{char}</span>
-          ))}
-          <br />
-          <span className="home-title-gradient">
-            {TITLE_LINE_2.split('').map((char, i) => (
+      <div className="home-hero">
+        <div className="home-title" ref={titleRef}>
+          <h1>
+            {TITLE_LINE_1.split('').map((char, i) => (
               <span key={i} className="home-title-char">{char}</span>
             ))}
-          </span>
-        </h1>
-      </div>
+            <br />
+            <span className="home-title-gradient">
+              {TITLE_LINE_2.split('').map((char, i) => (
+                <span key={i} className="home-title-char">{char}</span>
+              ))}
+            </span>
+          </h1>
+        </div>
 
-      <div className="home-intro">
-        <p>
-          HistVision applies computer vision and multimodal methods to explore
-          visual culture in digitised historical books at scale.
-        </p>
+        <div className="home-intro">
+          <p>
+            HistVision applies computer vision and multimodal methods to explore
+            visual culture in digitised historical books at scale.
+          </p>
+        </div>
       </div>
 
       <CollectionComposition />

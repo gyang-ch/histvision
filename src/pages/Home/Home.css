@@ -41,6 +41,45 @@
    to the navbar without touching that shared padding on other pages. */
 .content:has(> .home) {
   padding-top: 3rem;
+  /* .content itself is capped at 1200px and centered — its own white fill
+     would blot out the full-bleed background painted on .app-container
+     below, leaving pale margins either side. Let it show through instead. */
+  background-color: transparent;
+}
+
+/* Background image is scoped to this selector so it only ever shows behind
+   the Home tab — every other tab's .app-container keeps no image at all,
+   and .content keeps the plain white surface. Painted on .app-container
+   (full viewport width) rather than .content (max-width: 1200px) so the
+   image runs edge-to-edge instead of being boxed in with white margins,
+   and so it extends behind the footer too. */
+.app-container:has(> .content > .home) {
+  background-image:
+    linear-gradient(180deg, rgba(250, 248, 242, 0.55) 0%, rgba(250, 248, 242, 0.72) 55%, rgba(250, 248, 242, 0.85) 100%),
+    url('/c2.jpeg');
+  background-size: cover;
+  background-position: top center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+@media (max-width: 860px) {
+  /* Fixed backgrounds can jank on mobile scrolling — fall back to scroll. */
+  .app-container:has(> .content > .home) {
+    background-attachment: scroll;
+  }
+}
+
+/* Footer sits below .content with no background of its own, so it was
+   showing the page's plain white canvas even on Home. Give it a frosted
+   glass treatment — consistent with the nav bar's own blur — instead of
+   just making it transparent, since plain-transparent would put the
+   already-faint footer text directly over the busy illustration. */
+.app-container:has(> .content > .home) .site-footer {
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(18px) saturate(180%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  border-top: 1px solid rgba(255, 255, 255, 0.5);
 }
 
 .home {
@@ -51,12 +90,33 @@
   padding-bottom: 4rem;
 }
 
+/* Glassmorphism hero card: wraps the headline + intro paragraph so the text
+   stays readable while still letting the background image show through. */
+.home-hero {
+  max-width: 900px;
+  margin: 0 auto 3rem;
+  padding: 2.5rem 2.75rem 2.25rem;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.38);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 30px 80px -36px rgba(15, 23, 42, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(18px) saturate(180%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+}
+
+@media (max-width: 650px) {
+  .home-hero {
+    padding: 1.85rem 1.5rem 1.6rem;
+    border-radius: 18px;
+  }
+}
+
 /* Former site hero: title + subtitle, moved to the top of the Home tab.
    Same GSAP scatter-in/blur-up entrance, restyled for the white content
    zone instead of the old full-bleed photo backdrop. */
 .home-title {
   max-width: 900px;
-  margin: 0 auto 2.75rem;
+  margin: 0 auto 1.6rem;
   text-align: center;
 }
 
@@ -102,12 +162,12 @@
 
 @media (max-width: 650px) {
   .home-title {
-    margin-bottom: 2rem;
+    margin-bottom: 1.25rem;
   }
 }
 
 .home-intro {
-  margin-bottom: 1.75rem;
+  margin-bottom: 0;
   max-width: 850px;
   margin-left: auto;
   margin-right: auto;
@@ -147,10 +207,12 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1.8rem 2.6rem;
   padding: 1.7rem 2rem;
-  border: 1px solid rgba(39, 55, 48, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: 1.6rem;
-  background: rgba(255, 255, 255, 0.74);
-  box-shadow: 0 30px 80px -36px rgba(15, 23, 42, 0.38);
+  background: rgba(255, 255, 255, 0.38);
+  box-shadow: 0 30px 80px -36px rgba(15, 23, 42, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(18px) saturate(180%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
 }
 
 .home-donut {
@@ -407,14 +469,17 @@
   text-decoration: none;
   cursor: pointer;
   color: inherit;
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(39, 55, 48, 0.14);
-  box-shadow: 0 18px 44px -28px rgba(15, 23, 42, 0.3);
-  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  background: rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 0 18px 44px -28px rgba(15, 23, 42, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease, background-color 0.25s ease;
 }
 
 .home-entry-card:hover {
   transform: translateY(-4px);
+  background: rgba(255, 255, 255, 0.42);
   border-color: rgba(16, 185, 129, 0.45);
   box-shadow: 0 22px 52px -26px rgba(15, 23, 42, 0.36);
 }
