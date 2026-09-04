@@ -12,20 +12,27 @@ const entries = [
   {
     to: '/books',
     title: 'Books',
-    side: 'High-resolution book images are retrieved via IIIF directly from museum and library servers, supporting decentralised access to digital cultural resources.',
-    align: 'left',
+    description: 'High-resolution book images retrieved live via IIIF from museum and library servers.',
   },
   {
     to: '/explore',
     title: 'Explore',
-    side: 'Transcription is handled by Kraken and Qwen-VL, a vision-language model reflecting the multimodal turn in Digital Humanities.',
-    align: 'right',
+    description: 'Transcribed with Kraken and the Qwen-VL vision-language model.',
   },
   {
     to: '/illustration-archive',
     title: 'Illustration Archive',
-    side: 'Explore 189,764 illustration crops detected across 3,358 books, with page provenance, visual similarity, and two embedding-space maps.',
-    align: 'left',
+    description: '189,764 illustration crops across 3,358 books, with provenance and similarity search.',
+  },
+  {
+    to: '/botanical-case-study',
+    title: 'Botanical Case Study',
+    description: 'A focused set of botanical illustrations, each linked back to its source page.',
+  },
+  {
+    to: '/methods-and-findings',
+    title: 'Methods & Findings',
+    description: 'Evaluation charts for page-layout detection and illustration similarity models.',
   },
 ] as const
 
@@ -316,19 +323,14 @@ export function HomePage() {
 
       <div className="home-entries">
         {entries.map((entry) => (
-          <div key={entry.to} className={`home-entry home-entry--${entry.align}`}>
-            <NavLink 
-              to={entry.to} 
-              className={`home-card home-card--${entry.to.replace('/', '')}`}
-            >
-              <div className="home-card-title">{entry.title}</div>
-              <div className="home-card-foot" aria-hidden="true">
-                <span>Open</span>
-                <span className="home-card-arrow">→</span>
-              </div>
-            </NavLink>
-            <p className="home-entry-text">{entry.side}</p>
-          </div>
+          <NavLink key={entry.to} to={entry.to} className="home-entry-card">
+            <h3 className="home-entry-card-title">{entry.title}</h3>
+            <p className="home-entry-card-text">{entry.description}</p>
+            <span className="home-entry-card-foot" aria-hidden="true">
+              <span>Open</span>
+              <span className="home-entry-card-arrow">→</span>
+            </span>
+          </NavLink>
         ))}
       </div>
     </section>

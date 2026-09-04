@@ -31,22 +31,28 @@
 }
 
 .white-theme-mode .home-intro p,
-.white-theme-mode .home-entry-text,
+.white-theme-mode .home-entry-card-text,
 .white-theme-mode .home-video-caption {
   color: var(--ink-750);
 }
 
 /* ── Home page layout ────────────────────────────────────────────────────── */
+/* .content has a 4rem top padding site-wide; pull the home page in closer
+   to the navbar without touching that shared padding on other pages. */
+.content:has(> .home) {
+  padding-top: 2.5rem;
+}
+
 .home {
   background-color: transparent;
   color: inherit;
   font-family: inherit;
-  padding-top: 2.5rem;
+  padding-top: 0.75rem;
   padding-bottom: 4rem;
 }
 
 .home-intro {
-  margin-bottom: 3rem;
+  margin-bottom: 1.75rem;
   max-width: 850px;
   margin-left: auto;
   margin-right: auto;
@@ -317,132 +323,92 @@
   background: rgba(0, 0, 0, 0.75);
 }
 
+/* ── Home entry cards: uniform grid, wraps and centers a partial last row ─── */
 .home-entries {
   display: flex;
-  flex-direction: column;
-  gap: 3.5rem;
-  max-width: 1000px;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.75rem;
+  max-width: 1080px;
   margin: 0 auto;
 }
 
-.home-entry {
-  display: flex;
-  align-items: center;
-  gap: 5rem;
-}
-
-.home-entry--right {
-  flex-direction: row-reverse;
-}
-
-@media (max-width: 600px) {
-  .home-entry,
-  .home-entry--right {
-    flex-direction: column;
-    align-items: stretch;
+@media (max-width: 860px) {
+  .home-entry-card {
+    flex-basis: 100%;
+    max-width: 480px;
   }
 }
 
-.home-entry-text {
-  font-family: "Times New Roman", Times, serif;
-  font-size: 1.25rem;
-  line-height: 1.8;
-  font-weight: 320;
-  margin: 0;
-  opacity: 0.85;
-  flex: 1;
-}
-
-/* ── Home cards ──────────────────────────────────────────────────────────── */
-.home-card {
+.home-entry-card {
   position: relative;
   display: flex;
   flex-direction: column;
-  padding: 2.5rem;
-  width: 320px;
-  min-width: 320px;
-  min-height: 200px;
-  border-radius: 16px;
+  flex: 1 1 300px;
+  max-width: 330px;
+  padding: 2rem 1.85rem;
+  min-height: 220px;
+  border-radius: 14px;
   text-decoration: none;
   cursor: pointer;
-  transition: all 0.3s ease-in-out;
-  overflow: hidden;
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-  color: var(--surface);
+  color: inherit;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(39, 55, 48, 0.14);
+  box-shadow: 0 18px 44px -28px rgba(15, 23, 42, 0.3);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
-.home-card:hover {
-  transform: translateY(-5px) scale(1.02);
-  border-color: rgba(255, 255, 255, 0.4);
-  box-shadow:
-    0 12px 40px 0 rgba(31, 38, 135, 0.45),
-    inset 0 0 15px rgba(255, 255, 255, 0.2);
+.home-entry-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(16, 185, 129, 0.45);
+  box-shadow: 0 22px 52px -26px rgba(15, 23, 42, 0.36);
 }
 
-.home-card:focus-visible {
+.home-entry-card:focus-visible {
   outline: 2px solid rgba(16, 185, 129, 0.9);
   outline-offset: 3px;
 }
 
-/* Card-specific gradient themes */
-.home-card--books {
-  background: linear-gradient(135deg, rgba(26, 26, 46, 0.88) 0%, rgba(22, 33, 62, 0.92) 100%);
-}
-.home-card--books:hover {
-  background: linear-gradient(135deg, rgba(36, 36, 62, 0.92) 0%, rgba(28, 42, 78, 0.95) 100%);
-}
-
-.home-card--explore {
-  background: linear-gradient(135deg, rgba(78, 84, 200, 0.82) 0%, rgba(143, 148, 251, 0.72) 100%);
-}
-.home-card--explore:hover {
-  background: linear-gradient(135deg, rgba(90, 96, 215, 0.88) 0%, rgba(155, 160, 255, 0.80) 100%);
-}
-
-.home-card--illustration-archive {
-  background: linear-gradient(135deg, rgba(17, 153, 142, 0.82) 0%, rgba(56, 239, 125, 0.72) 100%);
-}
-.home-card--illustration-archive:hover {
-  background: linear-gradient(135deg, rgba(20, 168, 156, 0.88) 0%, rgba(70, 250, 138, 0.80) 100%);
-}
-
-.home-card-title {
-  color: var(--surface);
-  font-family: "Aptos", "Segoe UI", sans-serif;
-  font-size: 1.75rem;
-  font-weight: 700;
-  margin-bottom: 1.5rem;
-  letter-spacing: -0.03em;
-  line-height: 1.1;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.home-card-foot {
-  color: var(--surface);
+.home-entry-card-title {
+  margin: 0 0 0.75rem;
+  color: var(--ink-900);
+  font-family: "EB Garamond", Georgia, serif;
+  font-size: 1.5rem;
   font-weight: 600;
-  font-size: 0.8rem;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+}
+
+.home-entry-card-text {
+  margin: 0;
+  color: var(--ink-750);
+  font-family: "Times New Roman", Times, serif;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  font-weight: 350;
+  opacity: 0.85;
+  flex: 1;
+}
+
+.home-entry-card-foot {
+  color: var(--brand-deep);
+  font-weight: 600;
+  font-size: 0.78rem;
   text-transform: uppercase;
-  letter-spacing: 0.15em;
-  margin-top: auto;
+  letter-spacing: 0.14em;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(39, 55, 48, 0.12);
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  opacity: 0.9;
-  transition: opacity 0.3s ease;
+  gap: 0.5rem;
 }
 
-.home-card-arrow {
+.home-entry-card-arrow {
   display: inline-block;
-  transition: transform 0.3s ease;
+  transition: transform 0.25s ease;
 }
 
-.home-card:hover .home-card-foot {
-  opacity: 1;
-}
-
-.home-card:hover .home-card-arrow {
-  transform: translateX(5px);
+.home-entry-card:hover .home-entry-card-arrow {
+  transform: translateX(4px);
 }
