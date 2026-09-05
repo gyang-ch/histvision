@@ -561,7 +561,9 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
         modelLang = "Chinese";
       }
 
-      const imageUrl = getTileSourceImageUrl(tileSources[selectedPageIndex]);
+      const currentSource = tileSources[selectedPageIndex];
+      const imageUrl = getTileSourceImageUrl(currentSource);
+      const uploadedFile: File | undefined = currentSource?.file;
 
       setOcrDebug({
         status: "Processing...",
@@ -569,7 +571,14 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
         lang: modelLang,
       });
 
-      const response = await fetch(`${PREDICT_URL}?task=iiif&url=${encodeURIComponent(imageUrl)}&lang=${encodeURIComponent(modelLang)}`);
+      // A locally-uploaded image is a blob: URL — it only resolves inside this
+      // tab, so the backend can't fetch it. Send the bytes directly instead.
+      const response = uploadedFile
+        ? await fetch(`${API_BASE_URL}/api/transcribe-upload?lang=${encodeURIComponent(modelLang)}`, {
+            method: 'POST',
+            body: (() => { const fd = new FormData(); fd.append('file', uploadedFile); return fd; })(),
+          })
+        : await fetch(`${PREDICT_URL}?task=iiif&url=${encodeURIComponent(imageUrl)}&lang=${encodeURIComponent(modelLang)}`);
       const result = await response.json();
       
       if (result.status === 'success') {
