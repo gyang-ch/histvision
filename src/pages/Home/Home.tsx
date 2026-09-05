@@ -234,10 +234,8 @@ function CollectionComposition() {
 
   return (
     <section className="home-composition" aria-labelledby="home-composition-title">
-      <div className="home-composition-heading">
-        <h2 id="home-composition-title">Collection composition</h2>
-      </div>
       <div className="home-composition-panel" ref={panelRef}>
+        <h2 id="home-composition-title" className="home-composition-title">Collection composition</h2>
         <CollectionDonut title="Books by library" slices={makeSlices('books')} total={composition.totalBooks} totalLabel="books" play={isVisible} />
         <CollectionDonut title="Illustrations by library" slices={makeSlices('illustrations')} total={composition.totalIllustrations} totalLabel="illustrations" play={isVisible} />
       </div>

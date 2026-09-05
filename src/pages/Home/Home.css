@@ -189,19 +189,6 @@
   margin: 0 auto 5rem;
 }
 
-.home-composition-heading {
-  margin-bottom: 1rem;
-  text-align: center;
-}
-
-.home-composition-heading h2 {
-  margin: 0;
-  color: var(--ink-900);
-  font-family: "EB Garamond", Georgia, serif;
-  font-size: clamp(1.9rem, 3.5vw, 2.45rem);
-  font-weight: 500;
-}
-
 .home-composition-panel {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -213,6 +200,16 @@
   box-shadow: 0 30px 80px -36px rgba(15, 23, 42, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(18px) saturate(180%);
   -webkit-backdrop-filter: blur(18px) saturate(180%);
+}
+
+.home-composition-title {
+  grid-column: 1 / -1;
+  margin: 0 0 0.3rem;
+  color: var(--ink-900);
+  font-family: "EB Garamond", Georgia, serif;
+  font-size: clamp(1.9rem, 3.5vw, 2.45rem);
+  font-weight: 500;
+  text-align: center;
 }
 
 .home-donut {
