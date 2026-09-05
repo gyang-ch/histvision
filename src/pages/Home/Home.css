@@ -40,7 +40,7 @@
 /* .content has a 4rem top padding site-wide; pull the home page in closer
    to the navbar without touching that shared padding on other pages. */
 .content:has(> .home) {
-  padding-top: 3rem;
+  padding-top: 1.5rem;
   /* .content itself is capped at 1200px and centered — its own white fill
      would blot out the full-bleed background painted on .app-container
      below, leaving pale margins either side. Let it show through instead. */
@@ -86,7 +86,7 @@
   background-color: transparent;
   color: inherit;
   font-family: inherit;
-  padding-top: 1.25rem;
+  padding-top: 0.5rem;
   padding-bottom: 4rem;
 }
 
@@ -94,8 +94,8 @@
    stays readable while still letting the background image show through. */
 .home-hero {
   max-width: 900px;
-  margin: 0 auto 3rem;
-  padding: 2.5rem 2.75rem 2.25rem;
+  margin: 0 auto 1.5rem;
+  padding: 1.5rem 1.15rem 0.5rem;
   border-radius: 22px;
   background: rgba(255, 255, 255, 0.58);
   border: 1px solid rgba(255, 255, 255, 0.5);
@@ -106,7 +106,7 @@
 
 @media (max-width: 650px) {
   .home-hero {
-    padding: 1.85rem 1.5rem 1.6rem;
+    padding: 1.1rem 0.85rem 0.45rem;
     border-radius: 18px;
   }
 }
