@@ -744,7 +744,7 @@
 }
 
 .book-card:hover {
-  transform: translateY(-8px) scale(1.01);
+  transform: translateY(-4px) scale(1.01);
   box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5), 0 0 20px -5px rgba(212, 175, 55, 0.3);
 }
 

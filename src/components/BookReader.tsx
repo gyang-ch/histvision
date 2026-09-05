@@ -1085,7 +1085,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
                 </button>
               </Tippy>
 
-              <Tippy content="Detect plants" placement="top" delay={0} animation={false}>
+              <Tippy content="Detect illustration" placement="top" delay={0} animation={false}>
                 <button
                   className={`glow-btn-group detect-btn-new ${isDetecting ? 'loading' : ''}`}
                   onMouseEnter={(e) => {
