@@ -210,30 +210,40 @@ export const BookDetail: React.FC<BookDetailProps> = ({ books, period, onSelectB
               <div className="spacer" style={{ flexGrow: 1 }}></div>
               
                 <div className="book-footer">
-                <p className="attribution-text">{book.attribution}</p>
-                <div className="footer-actions">
+                <div className="book-footer-links">
+                  {book.museumUrl && (
+                    <a
+                      href={book.museumUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="book-footer-link"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      Library record ↗
+                    </a>
+                  )}
                   <a
-                    href={book.museumUrl || book.manifestUrl}
+                    href={book.manifestUrl}
                     target="_blank"
-                    rel="noopener noreferrer" 
-                    className="source-link"
+                    rel="noopener noreferrer"
+                    className="book-footer-link"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    Source
+                    IIIF manifest ↗
                   </a>
-                  {onSelectBook && (
-                    <button
-                      type="button"
-                      className="explore-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onSelectBook(book);
-                      }}
-                    >
-                      Explore book
-                    </button>
-                  )}
                 </div>
+                {onSelectBook && (
+                  <button
+                    type="button"
+                    className="explore-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSelectBook(book);
+                    }}
+                  >
+                    Explore book
+                  </button>
+                )}
               </div>
             </div>
           </article>

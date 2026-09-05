@@ -865,16 +865,24 @@
   gap: 1rem;
 }
 
-.attribution-text {
-  font-size: 0.65rem;
+.book-footer-links {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.book-footer-link {
   color: var(--on-dark-3);
-  margin: 0;
-  font-style: italic;
-  flex: 1;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  font-size: 0.76rem;
+  font-weight: 500;
+  text-underline-offset: 3px;
+  transition: color 0.2s ease;
+  white-space: nowrap;
+}
+
+.book-footer-link:hover {
+  color: var(--blue-3);
 }
 
 .manifest-link {
@@ -894,13 +902,6 @@
   color: var(--surface);
   border-color: rgba(255, 255, 255, 0.6);
   background: rgba(255, 255, 255, 0.08);
-}
-
-.footer-actions {
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-  margin-left: auto;
 }
 
 .explore-btn {
@@ -923,24 +924,6 @@
 
 .explore-btn:active {
   transform: translateY(0);
-}
-
-.source-link {
-  color: var(--on-dark-3) !important;
-  text-decoration: underline !important;
-  text-underline-offset: 3px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  transition: all 0.2s;
-  background: none;
-  border: none;
-  padding: 0;
-  white-space: nowrap;
-}
-
-.source-link:hover {
-  color: var(--blue-3) !important;
-  text-decoration-color: var(--blue-3);
 }
 
 /* Book Reader Styles */
