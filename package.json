@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "start": "node server.mjs",
     "catalogue:build": "node scripts/buildBookCatalogue.mjs",
     "archive:build": "python3 scripts/buildIllustrationArchive.py",
     "prebuild": "node scripts/downloadManifests.js && node scripts/generateHeroTiles.js",
@@ -28,6 +29,7 @@
     "@visx/tooltip": "^3.12.0",
     "array-move": "^4.0.0",
     "d3": "^7.9.0",
+    "express": "^5.2.1",
     "graphology": "^0.26.0",
     "graphology-layout-forceatlas2": "^0.10.1",
     "graphology-types": "^0.24.8",

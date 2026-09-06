@@ -20,6 +20,26 @@ The deployed site retrieves representative crop images through a read-only Verce
 
 Do not prefix either variable with `VITE_`. A `VITE_` variable is compiled into browser JavaScript and would expose the storage credential. For local development, `VITE_SEARCH_BOTANY_IMAGE_PROXY` may point at a compatible local proxy; otherwise the application uses `/api/search-botany-blob`.
 
+## Deploying to Render
+
+The repository includes a Render Blueprint in `render.yaml`. It creates one Node web service that builds the Vite application, serves the production files with React Router fallback support, and hosts the existing `/api/search-botany-blob` proxy on the same origin.
+
+In the Render Dashboard, choose **New > Blueprint**, connect this GitHub repository, and select the branch to deploy. Render will read `render.yaml` and prompt for these secret values:
+
+- `SEARCH_BOTANY_CONTAINER_URL`
+- `SEARCH_BOTANY_SAS_TOKEN`
+- `VITE_AZURE_BLOB_BASE`
+- `VITE_AZURE_SAS_TOKEN`
+- `VITE_AZURE_TRANSLATION_KEY`
+- `VITE_AZURE_TRANSLATION_REGION`
+- `VITE_TOGETHER_API_KEY`
+
+The first two values stay on the server and power the DINO-1575 archive proxy. The `VITE_` values support existing legacy browser features and are embedded in the JavaScript bundle by Vite, so only use credentials that are deliberately scoped for public-client use. They can be omitted if those legacy features are not needed.
+
+The service uses `npm ci && npm run build`, starts with `npm start`, listens on Render's `PORT`, and exposes `/healthz` for health checks. Pushes to the selected branch deploy automatically.
+
+If configuring a Web Service manually instead of using the Blueprint, use Node as the runtime, `npm ci && npm run build` as the build command, `npm start` as the start command, and `/healthz` as the health-check path. Add the two server-only environment variables above in the service's Environment settings.
+
 ## DINO-1575 Illustration Archive
 
 The Illustration Archive presents all 189,764 retained DINO-1575 crops. The browser downloads a compact static index, binary crop geometry, precomputed UMAP coordinates, and K-means labels. Crop records, images, source pages, and nearest-neighbour records are requested from Azure only when needed through the same server-side proxy. This keeps the SAS credential out of browser code and avoids sending the complete corpus metadata or 22 GB image collection to every visitor.

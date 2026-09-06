@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: histvision
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /healthz
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: SEARCH_BOTANY_CONTAINER_URL
+        sync: false
+      - key: SEARCH_BOTANY_SAS_TOKEN
+        sync: false
+      # The legacy botanical case study still compiles these values into the browser.
+      - key: VITE_AZURE_BLOB_BASE
+        sync: false
+      - key: VITE_AZURE_SAS_TOKEN
+        sync: false
+      - key: VITE_AZURE_TRANSLATION_KEY
+        sync: false
+      - key: VITE_AZURE_TRANSLATION_REGION
+        sync: false
+      - key: VITE_TOGETHER_API_KEY
+        sync: false
