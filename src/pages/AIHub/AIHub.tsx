@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { gsap } from 'gsap'
 import { fetchBookCatalogue, type BookRecord } from '../../data/books'
 import { BookReader } from '../../components/BookReader'
 
@@ -163,8 +164,39 @@ export function AIHubPage() {
           Explore opens from a selected book. Choose an item in Books to begin.
         </p>
         <div className="ai-hub-actions">
-          <Link className="ai-hub-link" to="/books">
-            Go to Books
+          <Link
+            className="ai-hub-link"
+            to="/books"
+            onMouseEnter={(event) => {
+              const link = event.currentTarget
+              const fill = link.querySelector('.ai-hub-link-fill')
+              if (!fill) return
+              gsap.killTweensOf(fill)
+              const rect = link.getBoundingClientRect()
+              const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+              gsap.fromTo(fill,
+                { x: event.clientX < rect.left + rect.width / 2 ? '-100%' : '100%' },
+                { x: '0%', duration: reduced ? 0 : 0.4, ease: 'power3.out' }
+              )
+            }}
+            onMouseLeave={(event) => {
+              const link = event.currentTarget
+              const fill = link.querySelector('.ai-hub-link-fill')
+              if (!fill) return
+              gsap.killTweensOf(fill)
+              const rect = link.getBoundingClientRect()
+              gsap.to(fill, {
+                x: event.clientX < rect.left + rect.width / 2 ? '-100%' : '100%',
+                duration: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 0.4,
+                ease: 'power3.out',
+              })
+            }}
+          >
+            <span className="ai-hub-link-fill" aria-hidden="true" />
+            <span className="ai-hub-link-content">
+              Go to Books
+              <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M5 12h14m-6-6 6 6-6 6" /></svg>
+            </span>
           </Link>
         </div>
       </div>
