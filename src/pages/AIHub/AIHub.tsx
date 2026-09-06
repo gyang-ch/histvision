@@ -161,7 +161,7 @@ export function AIHubPage() {
       <div className="ai-hub-picker-col">
         <h2 className="ai-hub-title">Explore</h2>
         <p className="ai-hub-body">
-          Explore opens from a selected book. Choose an item in Books to begin.
+          Choose a book to explore its pages, transcribe text, and detect illustrations.
         </p>
         <div className="ai-hub-actions">
           <Link
@@ -204,9 +204,9 @@ export function AIHubPage() {
       <div className="ai-hub-picker-divider" aria-hidden="true" />
 
       <div className="ai-hub-picker-col ai-hub-custom-section">
-        <h3 className="ai-hub-custom-title">Or open your own</h3>
+        <h3 className="ai-hub-custom-title">Open your own</h3>
         <p className="ai-hub-custom-body">
-          Upload a book page image or a IIIF manifest file, or paste a IIIF manifest URL, to view it with the same transcription and detection tools.
+          Use the same tools with your own page image or IIIF manifest.
         </p>
 
         <div
@@ -233,7 +233,7 @@ export function AIHubPage() {
             <line x1="12" y1="3" x2="12" y2="15" />
           </svg>
           <p className="ai-hub-dropzone-text">
-            Drag and drop an image or manifest (.json), or click to choose a file
+            Drop a page image or IIIF manifest (.json), or click to browse
           </p>
           <input
             ref={fileInputRef}
