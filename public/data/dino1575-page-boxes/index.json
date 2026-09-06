@@ -1,12 +1,17 @@
 {
-  "schemaVersion": "dino1575-page-boxes-v1",
+  "schemaVersion": "dino1575-page-boxes-v2",
   "sourceManifest": "crop_manifest.jsonl",
-  "sourcePageLog": "page_log.jsonl",
+  "sourcePageLog": "merged_page_log.jsonl",
+  "sourceBookCatalogue": "books.catalog.json",
   "textBlockThreshold": 0.1,
   "shardCount": 256,
   "bookCount": 3358,
-  "indexedPageCount": 143873,
-  "illustratedPageCount": 114126,
-  "illustrationDetectionCount": 189764,
-  "textBlockDetectionCount": 731001
+  "processedPageCount": 540367,
+  "indexedPageCount": 519801,
+  "illustratedPageCount": 143460,
+  "cropIllustrationDetectionCount": 189764,
+  "overlayIllustrationDetectionCount": 43751,
+  "illustrationDetectionCount": 233515,
+  "textBlockDetectionCount": 1680829,
+  "excludedPageLogRecordCount": 3074
 }
