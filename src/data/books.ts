@@ -1,3 +1,8 @@
+import {
+  cropPathToThumbnailPath,
+  publicSearchBotanyAssetUrl,
+} from './searchBotanyAssets'
+
 export interface BookRecord {
   id: string
   source: string
@@ -64,6 +69,7 @@ export function fetchBookCatalogue(): Promise<BookCatalogue> {
 }
 
 export function getBookThumbnailUrl(book: BookRecord): string {
-  const proxy = import.meta.env.VITE_SEARCH_BOTANY_IMAGE_PROXY || '/api/search-botany-blob'
-  return `${proxy}?path=${encodeURIComponent(book.representativeCropBlobPath)}`
+  return publicSearchBotanyAssetUrl(
+    cropPathToThumbnailPath(book.representativeCropBlobPath),
+  )
 }

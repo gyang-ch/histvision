@@ -13,12 +13,16 @@ npm run catalogue:build -- \
   --output "public/data/books.catalog.json"
 ```
 
-The deployed site retrieves representative crop images through a read-only Vercel function. Configure these server-side environment variables in Vercel:
+The deployed site retrieves public illustration crops and 512-pixel WebP thumbnails directly from the `histvision-web-assets` Azure container. The default public base URL is built into the client because it contains no credential. It can be overridden at build time with:
+
+- `VITE_SEARCH_BOTANY_PUBLIC_ASSET_BASE`: for example, `https://phytovision.blob.core.windows.net/histvision-web-assets`
+
+Private source-page images and compact archive data continue to use the read-only server function. Configure these server-side environment variables in Vercel:
 
 - `SEARCH_BOTANY_CONTAINER_URL`: the container URL ending in `/search-botany`
 - `SEARCH_BOTANY_SAS_TOKEN`: a read-only SAS query, with or without its leading `?`
 
-Do not prefix either variable with `VITE_`. A `VITE_` variable is compiled into browser JavaScript and would expose the storage credential. For local development, `VITE_SEARCH_BOTANY_IMAGE_PROXY` may point at a compatible local proxy; otherwise the application uses `/api/search-botany-blob`.
+Do not prefix either secret variable with `VITE_`. A `VITE_` variable is compiled into browser JavaScript and would expose the storage credential. `VITE_SEARCH_BOTANY_PUBLIC_ASSET_BASE` is safe because it is only a public container URL. For local development, `VITE_SEARCH_BOTANY_IMAGE_PROXY` may point at a compatible local proxy; otherwise the application uses `/api/search-botany-blob`.
 
 ## Deploying to Render
 
@@ -42,7 +46,7 @@ If configuring a Web Service manually instead of using the Blueprint, use Node a
 
 ## DINO-1575 Illustration Archive
 
-The Illustration Archive presents all 189,764 retained DINO-1575 crops. The browser downloads a compact static index, binary crop geometry, precomputed UMAP coordinates, and K-means labels. Crop records, images, source pages, and nearest-neighbour records are requested from Azure only when needed through the same server-side proxy. This keeps the SAS credential out of browser code and avoids sending the complete corpus metadata or 22 GB image collection to every visitor.
+The Illustration Archive presents all 189,764 retained DINO-1575 crops. The browser downloads a compact static index, binary crop geometry, precomputed UMAP coordinates, and K-means labels. Public WebP thumbnails and full-resolution crops are requested directly from Azure only when needed. Private crop records, source pages, and nearest-neighbour records continue to use the server-side proxy. This keeps the SAS credential out of browser code, removes high-volume image traffic from the website host, and avoids sending the complete corpus metadata or 22 GB image collection to every visitor.
 
 The previous 5,958-image botanical archive is retained at `/botanical-case-study`. To rebuild the compact archive assets from a later detector run, use:
 

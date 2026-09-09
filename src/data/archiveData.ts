@@ -1,4 +1,9 @@
 import { fetchBookCatalogue, type BookRecord } from './books'
+import {
+  cropPathToThumbnailPath,
+  privateSearchBotanyAssetUrl,
+  publicSearchBotanyAssetUrl,
+} from './searchBotanyAssets'
 
 export type EmbeddingModel = 'dinov2' | 'openclip'
 
@@ -92,7 +97,6 @@ export interface HumanAnnotationIndex {
 }
 
 const archiveAsset = (file: string) => `${import.meta.env.BASE_URL}data/archive/${file}`
-const assetProxy = import.meta.env.VITE_SEARCH_BOTANY_IMAGE_PROXY || '/api/search-botany-blob'
 
 let indexPromise: Promise<ArchiveIndex> | null = null
 let humanAnnotationPromise: Promise<HumanAnnotationIndex> | null = null
@@ -122,18 +126,17 @@ export function fetchHumanAnnotationIndex(): Promise<HumanAnnotationIndex> {
 }
 
 export function searchBotanyAssetUrl(path: string): string {
-  return `${assetProxy}?path=${encodeURIComponent(path)}`
+  return privateSearchBotanyAssetUrl(path)
 }
 
 export function cropImageUrl(item: ArchiveItem): string {
-  return searchBotanyAssetUrl(item.crop_blob_name)
+  return publicSearchBotanyAssetUrl(item.crop_blob_name)
 }
 
 export function cropThumbnailUrl(item: ArchiveItem): string {
-  const thumbnailPath = item.crop_blob_name
-    .replace('/crops/', '/web_thumbnails_512/')
-    .replace(/\.jpe?g$/i, '.webp')
-  return searchBotanyAssetUrl(thumbnailPath)
+  return publicSearchBotanyAssetUrl(
+    cropPathToThumbnailPath(item.crop_blob_name),
+  )
 }
 
 export function pageImageUrl(item: ArchiveItem): string {
