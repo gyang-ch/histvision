@@ -68,7 +68,18 @@ export default async function handler(request, response) {
     }
 
     response.setHeader('Content-Type', azureResponse.headers.get('content-type') || 'application/octet-stream')
-    response.setHeader('Cache-Control', 'public, max-age=86400, s-maxage=604800, immutable')
+    response.setHeader(
+      'Cache-Control',
+      'public, max-age=31536000, immutable',
+    )
+    response.setHeader(
+      'CDN-Cache-Control',
+      'public, max-age=31536000, immutable',
+    )
+    response.setHeader(
+      'Vercel-CDN-Cache-Control',
+      'public, max-age=31536000, immutable',
+    )
     const etag = azureResponse.headers.get('etag')
     if (etag) response.setHeader('ETag', etag)
 
