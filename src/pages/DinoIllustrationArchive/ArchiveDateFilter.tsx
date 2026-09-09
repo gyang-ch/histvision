@@ -53,8 +53,8 @@ export function ArchiveDateFilter({ data, value, onChange }: {
   }), [data, value])
   const invalid = value.mode === 'range' && value.from !== '' && value.to !== '' && Number(value.from) > Number(value.to)
   return <fieldset className="archive-date-filter">
-    <legend>Book date</legend>
-    <p className="archive-date-caption">Illustrations by book date · whole collection</p>
+    <legend>Date</legend>
+    <p className="archive-date-caption">Illustrations by date · whole collection</p>
     {data.bins.length > 0 ? <>
       <div className="archive-date-chart" role="group" aria-label={`Illustration counts in ${data.step}-year intervals. Select a bar to filter its period.`}>
         {data.bins.map((bin, i) => {
