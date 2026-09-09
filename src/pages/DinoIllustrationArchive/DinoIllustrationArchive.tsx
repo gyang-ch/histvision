@@ -4,6 +4,7 @@ import OpenSeadragon from 'openseadragon'
 import { Paginator } from '../../components/Paginator'
 import {
   cropImageUrl,
+  cropThumbnailUrl,
   fetchArchiveGeometry,
   fetchArchiveIndex,
   fetchArchiveItems,
@@ -524,7 +525,7 @@ function ArchiveInspector({
               <div className="archive-neighbour-strip">
                 {neighbours.map(({ item: neighbour, score }) => (
                   <button key={neighbour.crop_id} type="button" onClick={() => onSelectRow(neighbour.row_index)} title={`Similarity ${score.toFixed(3)}`}>
-                    <img src={cropImageUrl(neighbour)} alt={`Nearest illustration, similarity ${score.toFixed(3)}`} loading="lazy" />
+                    <img src={cropThumbnailUrl(neighbour)} alt={`Nearest illustration, similarity ${score.toFixed(3)}`} loading="lazy" />
                     <span>{score.toFixed(3)}</span>
                   </button>
                 ))}
@@ -769,7 +770,7 @@ export function DinoIllustrationArchivePage() {
                 const annotation = annotationsByRow.get(item.row_index)
                 return (
                   <button key={item.crop_id} type="button" className="archive-card" onClick={() => setSelectedRow(item.row_index)}>
-                    <div className="archive-card-image"><img src={cropImageUrl(item)} alt={`Illustration from ${book?.title ?? item.item_id}`} loading="lazy" /></div>
+                    <div className="archive-card-image"><img src={cropThumbnailUrl(item)} alt={`Illustration from ${book?.title ?? item.item_id}`} loading="lazy" /></div>
                     <div className="archive-card-tags"><span>{book?.sourceLabel ?? item.source}</span><span>{Math.round(item.confidence * 100)}%</span></div>
                     {annotation && <div className="archive-card-human"><span>Human reviewed</span>{annotation.subject_form_labels.slice(0, 2).map((label) => <span key={label}>{humanLabel(label)}</span>)}</div>}
                     <h3>{book?.title ?? item.item_id}</h3>

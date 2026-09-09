@@ -1,5 +1,7 @@
 const CROP_PREFIX =
   'derived/illustration_similarity/dino1575/20260829T190102Z_dino1575/v1/crops/'
+const THUMBNAIL_PREFIX =
+  'derived/illustration_similarity/dino1575/20260829T190102Z_dino1575/v1/web_thumbnails_512/'
 const WEB_DATA_PREFIX =
   'derived/illustration_similarity/dino1575/20260829T190102Z_dino1575/v1/annotation_web_data/'
 const SOURCE_IDS = '(bodleian_new|gallica|harvard_yenching|mdz|ndl|pul|rmda|wellcome)'
@@ -7,6 +9,7 @@ const SOURCE_IDS = '(bodleian_new|gallica|harvard_yenching|mdz|ndl|pul|rmda|well
 function isAllowedPath(path) {
   if (path.includes('..') || path.includes('\\')) return false
   if (path.startsWith(CROP_PREFIX) && /\.jpe?g$/i.test(path)) return true
+  if (path.startsWith(THUMBNAIL_PREFIX) && /\.webp$/i.test(path)) return true
   if (new RegExp(`^illustrations/${SOURCE_IDS}/[^/]+/page_[^/]+\\.(jpe?g|png|webp)$`, 'i').test(path)) return true
   if (
     path.startsWith(`${WEB_DATA_PREFIX}items/`) &&

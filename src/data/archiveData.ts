@@ -129,6 +129,13 @@ export function cropImageUrl(item: ArchiveItem): string {
   return searchBotanyAssetUrl(item.crop_blob_name)
 }
 
+export function cropThumbnailUrl(item: ArchiveItem): string {
+  const thumbnailPath = item.crop_blob_name
+    .replace('/crops/', '/web_thumbnails_512/')
+    .replace(/\.jpe?g$/i, '.webp')
+  return searchBotanyAssetUrl(thumbnailPath)
+}
+
 export function pageImageUrl(item: ArchiveItem): string {
   return searchBotanyAssetUrl(`illustrations/${item.source}/${item.item_id}/${item.page_filename}`)
 }
