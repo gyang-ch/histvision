@@ -6,12 +6,12 @@
   "textBlockThreshold": 0.1,
   "shardCount": 256,
   "bookCount": 3358,
-  "processedPageCount": 540367,
-  "indexedPageCount": 519801,
-  "illustratedPageCount": 143460,
+  "processedPageCount": 688751,
+  "indexedPageCount": 664968,
+  "illustratedPageCount": 157081,
   "cropIllustrationDetectionCount": 189764,
-  "overlayIllustrationDetectionCount": 43751,
-  "illustrationDetectionCount": 233515,
-  "textBlockDetectionCount": 1680829,
+  "overlayIllustrationDetectionCount": 63298,
+  "illustrationDetectionCount": 253062,
+  "textBlockDetectionCount": 1925337,
   "excludedPageLogRecordCount": 3074
 }
