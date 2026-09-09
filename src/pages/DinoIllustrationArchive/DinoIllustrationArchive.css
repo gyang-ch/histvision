@@ -957,3 +957,25 @@
     transition: none;
   }
 }
+
+/* A compact, illustration-weighted date distribution in the filter rail. */
+.archive-date-filter { min-width: 0; margin: 1.25rem 0 0; padding: 0; border: 0; color: #344d43; }
+.archive-date-filter legend { font-size: 0.85rem; font-weight: 700; }
+.archive-date-caption, .archive-date-detail { font-size: 0.75rem; line-height: 1.5; margin: 0.5rem 0; }
+.archive-date-chart { display: flex; gap: 3px; height: 112px; border-bottom: 1px solid #8caaa0; }
+.archive-date-chart button { flex: 1; position: relative; min-width: 0; height: 100%; border: 0; padding: 0; background: transparent; cursor: pointer; }
+.archive-date-bar { position: absolute; bottom: 0; left: 0; width: 100%; background: #d5dfda; border-radius: 2px 2px 0 0; pointer-events: none; }
+.archive-date-bar.selected { background: #287a5b; }
+.archive-date-chart button:hover { background: #eaf2ed; }
+.archive-date-chart button[aria-pressed="true"] { box-shadow: inset 0 0 0 1px #287a5b; }
+.archive-date-axis { display: flex; justify-content: space-between; font-size: 0.7rem; padding-top: 4px; }
+.archive-date-detail { min-height: 3em; }
+.archive-date-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+.archive-date-inputs label { min-width: 0; font-size: 0.8rem; }
+.archive-date-inputs input { box-sizing: border-box; width: 100%; min-height: 44px; margin-top: 5px; padding: 0.4rem; background: #fff; color: #17231f; border: 1px solid #cad4cf; border-radius: 6px; font-size: 1rem; }
+.archive-date-options { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.6rem; }
+.archive-date-options button { min-height: 44px; padding: 0.4rem 0.6rem; border: 1px solid #cad4cf; border-radius: 6px; background: #fff; color: #344d43; cursor: pointer; font-size: 0.75rem; }
+.archive-date-options button[aria-pressed="true"] { background: #e0eee6; border-color: #287a5b; color: #124c33; }
+.archive-date-options span { font-variant-numeric: tabular-nums; }
+.archive-date-filter button:focus-visible, .archive-date-filter input:focus-visible { outline: 2px solid #258363; outline-offset: 2px; }
+.archive-date-error { color: #a12c2c; font-size: 0.8rem; }

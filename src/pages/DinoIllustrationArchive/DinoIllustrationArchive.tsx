@@ -24,6 +24,7 @@ import {
 import type { BookRecord } from '../../data/books'
 import { DinoIllustrationNetwork } from './DinoIllustrationNetwork'
 import './DinoIllustrationArchive.css'
+import { ArchiveDateFilter, ALL_DATES, buildDateDistribution, rowsForDate, type DateSelection } from './ArchiveDateFilter'
 
 const PAGE_SIZE = 20
 
@@ -545,7 +546,8 @@ export function DinoIllustrationArchivePage() {
   const [items, setItems] = useState<ArchiveItem[]>([])
   const [humanAnnotations, setHumanAnnotations] = useState<HumanAnnotationIndex | null>(null)
   const [selectedSource, setSelectedSource] = useState('all')
-  const [selectedCentury, setSelectedCentury] = useState('all')
+  const [dateSelection, setDateSelection] = useState<DateSelection>(ALL_DATES)
+  const dateDistribution = useMemo(() => index ? buildDateDistribution(index, books) : null, [index, books])
   const [selectedDinov2Cluster, setSelectedDinov2Cluster] = useState('all')
   const [selectedOpenclipCluster, setSelectedOpenclipCluster] = useState('all')
   const [selectedHumanStatus, setSelectedHumanStatus] = useState('all')
@@ -608,7 +610,7 @@ export function DinoIllustrationArchivePage() {
     if (!index) return []
     return intersectRows(index.displayRows ?? Array.from({ length: index.cropCount }, (_, row) => row), [
       rowsForFacet(index.facets.sources, selectedSource),
-      rowsForFacet(index.facets.centuries, selectedCentury),
+      dateDistribution ? rowsForDate(dateDistribution, dateSelection) : null,
       rowsForCluster(dinov2Clusters, selectedDinov2Cluster),
       rowsForCluster(openclipClusters, selectedOpenclipCluster),
       rowsForHumanStatus(humanAnnotations, selectedHumanStatus, index.cropCount),
@@ -616,7 +618,7 @@ export function DinoIllustrationArchivePage() {
       rowsForHumanLabel(humanAnnotations, 'domain', selectedDomain),
       searchRows,
     ])
-  }, [dinov2Clusters, humanAnnotations, index, openclipClusters, searchRows, selectedCentury, selectedDinov2Cluster, selectedDomain, selectedHumanStatus, selectedOpenclipCluster, selectedSource, selectedSubject])
+  }, [dinov2Clusters, humanAnnotations, index, openclipClusters, searchRows, dateDistribution, dateSelection, selectedDinov2Cluster, selectedDomain, selectedHumanStatus, selectedOpenclipCluster, selectedSource, selectedSubject])
 
   const totalPages = Math.max(1, Math.ceil(filteredRows.length / PAGE_SIZE))
   const pageRows = useMemo(
@@ -647,7 +649,7 @@ export function DinoIllustrationArchivePage() {
 
   const reset = () => {
     setSelectedSource('all')
-    setSelectedCentury('all')
+    setDateSelection(ALL_DATES)
     setSelectedDinov2Cluster('all')
     setSelectedOpenclipCluster('all')
     setSelectedHumanStatus('all')
@@ -738,15 +740,7 @@ export function DinoIllustrationArchivePage() {
             />
             {clusterError && <p className="archive-cluster-error" role="status">Cluster filters unavailable: {clusterError}</p>}
           </fieldset>
-          <label className="archive-century">
-            <span>Book date</span>
-            <select value={selectedCentury} onChange={(event) => changeFilter(setSelectedCentury)(event.target.value)}>
-              <option value="all">All recorded dates</option>
-              {[...index.facets.centuries]
-                .sort((a, b) => a.id === 'unknown' ? 1 : b.id === 'unknown' ? -1 : Number(a.id) - Number(b.id))
-                .map((facet) => <option key={facet.id} value={facet.id}>{facet.id === 'unknown' ? facet.label : `${facet.id}s`} ({facet.count.toLocaleString()})</option>)}
-            </select>
-          </label>
+          {dateDistribution && <ArchiveDateFilter data={dateDistribution} value={dateSelection} onChange={value => { setDateSelection(value); setPage(1) }} />}
         </aside>
 
         <main className="archive-results">
