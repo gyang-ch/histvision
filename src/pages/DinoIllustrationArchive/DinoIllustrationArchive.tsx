@@ -545,8 +545,6 @@ export function DinoIllustrationArchivePage() {
   const [items, setItems] = useState<ArchiveItem[]>([])
   const [humanAnnotations, setHumanAnnotations] = useState<HumanAnnotationIndex | null>(null)
   const [selectedSource, setSelectedSource] = useState('all')
-  const [selectedTier, setSelectedTier] = useState('all')
-  const [selectedAspect, setSelectedAspect] = useState('all')
   const [selectedCentury, setSelectedCentury] = useState('all')
   const [selectedDinov2Cluster, setSelectedDinov2Cluster] = useState('all')
   const [selectedOpenclipCluster, setSelectedOpenclipCluster] = useState('all')
@@ -610,8 +608,6 @@ export function DinoIllustrationArchivePage() {
     if (!index) return []
     return intersectRows(index.displayRows ?? Array.from({ length: index.cropCount }, (_, row) => row), [
       rowsForFacet(index.facets.sources, selectedSource),
-      rowsForFacet(index.facets.confidenceTiers, selectedTier),
-      rowsForFacet(index.facets.aspects, selectedAspect),
       rowsForFacet(index.facets.centuries, selectedCentury),
       rowsForCluster(dinov2Clusters, selectedDinov2Cluster),
       rowsForCluster(openclipClusters, selectedOpenclipCluster),
@@ -620,7 +616,7 @@ export function DinoIllustrationArchivePage() {
       rowsForHumanLabel(humanAnnotations, 'domain', selectedDomain),
       searchRows,
     ])
-  }, [dinov2Clusters, humanAnnotations, index, openclipClusters, searchRows, selectedAspect, selectedCentury, selectedDinov2Cluster, selectedDomain, selectedHumanStatus, selectedOpenclipCluster, selectedSource, selectedSubject, selectedTier])
+  }, [dinov2Clusters, humanAnnotations, index, openclipClusters, searchRows, selectedCentury, selectedDinov2Cluster, selectedDomain, selectedHumanStatus, selectedOpenclipCluster, selectedSource, selectedSubject])
 
   const totalPages = Math.max(1, Math.ceil(filteredRows.length / PAGE_SIZE))
   const pageRows = useMemo(
@@ -651,8 +647,6 @@ export function DinoIllustrationArchivePage() {
 
   const reset = () => {
     setSelectedSource('all')
-    setSelectedTier('all')
-    setSelectedAspect('all')
     setSelectedCentury('all')
     setSelectedDinov2Cluster('all')
     setSelectedOpenclipCluster('all')
@@ -691,8 +685,6 @@ export function DinoIllustrationArchivePage() {
             <input value={query} onChange={(event) => { setQuery(event.target.value); setPage(1) }} type="search" placeholder="Title, author, subject, or item ID" />
           </label>
           <FacetButtons title="Source library" facets={index.facets.sources} selected={selectedSource} onChange={changeFilter(setSelectedSource)} />
-          <FacetButtons title="Detection confidence" facets={index.facets.confidenceTiers} selected={selectedTier} onChange={changeFilter(setSelectedTier)} />
-          <FacetButtons title="Crop orientation" facets={index.facets.aspects} selected={selectedAspect} onChange={changeFilter(setSelectedAspect)} />
           <fieldset className="archive-human-filters">
             <legend>Human classification</legend>
             <label>
