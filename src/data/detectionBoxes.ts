@@ -1,4 +1,5 @@
 import type { BookRecord } from './books'
+import { publicSearchBotanyAssetUrl } from './searchBotanyAssets'
 
 export type DetectionLabel = 'illustration' | 'text_block'
 
@@ -17,6 +18,7 @@ type DetectionShard = {
 }
 
 const shardCache = new Map<string, Promise<DetectionShard>>()
+const PAGE_BOX_PREFIX = 'data/dino1575-page-boxes'
 
 function bookKey(book: BookRecord): string {
   return `${book.source}\0${book.sourceItemId}`
@@ -33,7 +35,7 @@ function shardFor(key: string): string {
 async function fetchShard(shard: string): Promise<DetectionShard> {
   let pending = shardCache.get(shard)
   if (!pending) {
-    const url = `${import.meta.env.BASE_URL}data/dino1575-page-boxes/${shard}.json`
+    const url = publicSearchBotanyAssetUrl(`${PAGE_BOX_PREFIX}/${shard}.json`)
     pending = fetch(url).then(async (response) => {
       if (!response.ok) throw new Error(`Could not load detection boxes (${response.status})`)
       return response.json() as Promise<DetectionShard>
