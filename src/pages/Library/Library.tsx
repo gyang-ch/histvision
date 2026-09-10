@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ParentSize } from '@visx/responsive'
 import { useNavigate } from 'react-router-dom'
+import { useBrowseState } from '../../hooks/useBrowseState'
 
 import { fetchBookCatalogue, type BookCatalogue, type BookRecord } from '../../data/books'
 import { Timeline } from '../../components/Timeline'
@@ -46,13 +47,17 @@ export function LibraryPage() {
   const navigate = useNavigate()
   const [catalogue, setCatalogue] = useState<BookCatalogue | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
-  const [selectedPeriod, setSelectedPeriod] = useState('All Time')
-  const [selectedLanguage, setSelectedLanguage] = useState('All')
-  const [selectedSource, setSelectedSource] = useState('All')
-  const [searchInput, setSearchInput] = useState('')
+  const [view, updateView] = useBrowseState('histvision-books', { period: 'All Time', language: 'All', source: 'All', query: '', page: 1, expanded: true })
+  const { period: selectedPeriod, language: selectedLanguage, source: selectedSource, query: searchInput } = view
+  const setSelectedPeriod = (period: string) => updateView({ period, page: 1 })
+  const setSelectedLanguage = (language: string) => updateView({ language, page: 1 })
+  const setSelectedSource = (source: string) => updateView({ source, page: 1 })
+  const setSearchInput = (query: string) => updateView({ query, page: 1 })
+  const [retry, setRetry] = useState(0)
 
   useEffect(() => {
     let active = true
+    setLoadError(null)
     fetchBookCatalogue()
       .then((result) => {
         if (active) setCatalogue(result)
@@ -63,7 +68,7 @@ export function LibraryPage() {
     return () => {
       active = false
     }
-  }, [])
+  }, [retry])
 
   const bookData = useMemo(() => catalogue?.books ?? [], [catalogue])
   const searchQuery = searchInput.trim()
@@ -114,7 +119,7 @@ export function LibraryPage() {
   }
 
   if (loadError) {
-    return <section className="library-status" role="alert"><h2>Books</h2><p>{loadError}</p></section>
+    return <section className="library-status" role="alert"><h2>Books</h2><p>{loadError}</p><button type="button" onClick={() => setRetry(n => n + 1)}>Retry catalogue</button></section>
   }
   if (!catalogue) {
     return <section className="library-status" aria-live="polite"><h2>Books</h2><p>Loading the research catalogue…</p></section>
@@ -178,7 +183,8 @@ export function LibraryPage() {
         </div>
       </section>
 
-      <section className="timeline-section">
+      <details className="timeline-section library-filter-disclosure" open={view.expanded} onToggle={event => { if (event.currentTarget.open !== view.expanded) updateView({ expanded: event.currentTarget.open }) }}>
+        <summary>Date and language <span>{selectedPeriod === 'All Time' ? 'All dates' : selectedPeriod} · {selectedLanguage === 'All' ? 'All languages' : selectedLanguage}</span></summary>
         <div className="library-section-heading">
           <h3>Temporal distribution</h3>
           <div className="period-controls">
@@ -200,7 +206,7 @@ export function LibraryPage() {
               <Timeline
                 data={sourceAndSearchBooks}
                 width={width}
-                height={height || 400}
+                height={height || 160}
                 onSelectPeriod={(_books, period) => setSelectedPeriod(period)}
                 selectedPeriod={selectedPeriod}
               />
@@ -229,7 +235,7 @@ export function LibraryPage() {
             ))}
           </div>
         </div>
-      </section>
+      </details>
 
       <section className="detail-section library-results">
         <p className="library-result-context" aria-live="polite">
@@ -238,6 +244,8 @@ export function LibraryPage() {
         <BookDetail
           books={displayedBooks}
           period={selectedPeriod}
+          page={Math.max(1, Math.trunc(view.page))}
+          onPageChange={page => updateView({ page })}
           onSelectBook={(book) => navigate(`/explore/${encodeURIComponent(book.id)}`)}
         />
       </section>

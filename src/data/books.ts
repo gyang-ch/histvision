@@ -63,7 +63,7 @@ export function fetchBookCatalogue(): Promise<BookCatalogue> {
         throw new Error(`Could not load the book catalogue (${response.status})`)
       }
       return response.json() as Promise<BookCatalogue>
-    })
+    }).catch(error => { cataloguePromise = null; throw error })
   }
   return cataloguePromise
 }

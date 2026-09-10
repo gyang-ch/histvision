@@ -47,6 +47,9 @@ export function AIHubPage() {
   const [isDragActive, setIsDragActive] = useState(false)
   const [selectedBook, setSelectedBook] = useState<BookRecord | null>(null)
   const [isCatalogueLoading, setIsCatalogueLoading] = useState(Boolean(bookId))
+  const [catalogueError, setCatalogueError] = useState<string | null>(null)
+  const [retry, setRetry] = useState(0)
+  const [pickerOpen, setPickerOpen] = useState(false)
   const objectUrlsRef = useRef<string[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
   const viewerRef = useRef<HTMLDivElement>(null)
@@ -54,15 +57,18 @@ export function AIHubPage() {
   useEffect(() => {
     let active = true
     if (!bookId) return
+    setIsCatalogueLoading(true)
+    setCatalogueError(null)
     fetchBookCatalogue()
       .then((catalogue) => {
         if (active) setSelectedBook(catalogue.books.find((book) => book.id === bookId) ?? null)
       })
+      .catch(() => { if (active) setCatalogueError('Could not load this book. Please try again.') })
       .finally(() => {
         if (active) setIsCatalogueLoading(false)
       })
     return () => { active = false }
-  }, [bookId])
+  }, [bookId, retry])
 
   // Scroll the viewer into view whenever a *new* book actually opens (not on
   // every re-render). Deferred a frame so it runs after App's own
@@ -72,6 +78,7 @@ export function AIHubPage() {
   // short window instead of scrolling once against a still-short page.
   const viewingId = customBook?.id ?? (selectedBook && bookId ? selectedBook.id : null)
   useEffect(() => {
+    setPickerOpen(false)
     if (!viewingId || !viewerRef.current) return
     const behavior: ScrollBehavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
     const el = viewerRef.current
@@ -275,6 +282,8 @@ export function AIHubPage() {
   } else if (bookId) {
     if (isCatalogueLoading) {
       viewer = <p className="ai-hub-status" aria-live="polite">Loading book…</p>
+    } else if (catalogueError) {
+      viewer = <div className="ai-hub-status" role="alert"><p>{catalogueError}</p><button type="button" onClick={() => setRetry(n => n + 1)}>Retry book</button></div>
     } else if (!selectedBook) {
       viewer = (
         <p className="ai-hub-status">
@@ -295,7 +304,10 @@ export function AIHubPage() {
 
   return (
     <div className="ai-hub-page">
-      {picker}
+      {viewingId ? <details className="ai-hub-picker-disclosure" open={pickerOpen} onToggle={event => setPickerOpen(event.currentTarget.open)}>
+        <summary>Change book or open your own</summary>
+        {picker}
+      </details> : picker}
       <div ref={viewerRef}>{viewer}</div>
     </div>
   )

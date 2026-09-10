@@ -9,6 +9,8 @@ gsap.registerPlugin(ScrollTrigger);
 interface BookDetailProps {
   books: BookRecord[];
   period: string;
+  page?: number;
+  onPageChange?: (page: number) => void;
   onSelectBook?: (book: BookRecord) => void;
   aiHubPathForBook?: (book: BookRecord) => string;
 }
@@ -66,8 +68,10 @@ const SmartImage: React.FC<{ src: string; alt: string; className?: string }> = (
 
 const BOOKS_PER_PAGE = 18;
 
-export const BookDetail: React.FC<BookDetailProps> = ({ books, period, onSelectBook }) => {
-  const [currentPage, setCurrentPage] = useState(1);
+export const BookDetail: React.FC<BookDetailProps> = ({ books, period, onSelectBook, page, onPageChange }) => {
+  const [localPage, setLocalPage] = useState(1);
+  const setCurrentPage = onPageChange ?? setLocalPage;
+  const currentPage = Math.min(Math.max(1, page ?? localPage), Math.max(1, Math.ceil(books.length / BOOKS_PER_PAGE)));
   const gridRef = useRef<HTMLDivElement>(null);
   const ctxRef = useRef<gsap.Context | null>(null);
 
@@ -75,7 +79,7 @@ export const BookDetail: React.FC<BookDetailProps> = ({ books, period, onSelectB
 
   // Reset to page 1 whenever the book list changes (filter/period change)
   useEffect(() => {
-    setCurrentPage(1);
+    if (page === undefined) setLocalPage(1);
     if (ctxRef.current) {
       ctxRef.current.revert();
       ctxRef.current = null;

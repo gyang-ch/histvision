@@ -24,6 +24,7 @@ import {
 import type { BookRecord } from '../../data/books'
 import { DinoIllustrationNetwork } from './DinoIllustrationNetwork'
 import './DinoIllustrationArchive.css'
+import { useBrowseState } from '../../hooks/useBrowseState'
 import { ArchiveDateFilter, ALL_DATES, buildDateDistribution, rowsForDate, type DateSelection } from './ArchiveDateFilter'
 
 const PAGE_SIZE = 20
@@ -314,6 +315,8 @@ function ArchiveInspector({
   const [model, setModel] = useState<EmbeddingModel>('dinov2')
   const [neighbours, setNeighbours] = useState<Array<{ item: ArchiveItem; score: number }>>([])
   const [error, setError] = useState<string | null>(null)
+  const [retry, setRetry] = useState(0)
+  const [neighbourError, setNeighbourError] = useState(false)
 
   const backdropRef = useRef<HTMLDivElement>(null)
   const cardRef = useRef<HTMLDivElement>(null)
@@ -435,6 +438,7 @@ function ArchiveInspector({
 
   useEffect(() => {
     let active = true
+    setError(null)
     Promise.all([fetchArchiveItems([row]), fetchBookMap(), fetchArchiveGeometry(row)])
       .then(([items, books, geometryResult]) => {
         if (!active || !items[0]) return
@@ -444,10 +448,11 @@ function ArchiveInspector({
       })
       .catch((reason) => { if (active) setError(reason instanceof Error ? reason.message : String(reason)) })
     return () => { active = false }
-  }, [row])
+  }, [row, retry])
 
   useEffect(() => {
     let active = true
+    setNeighbourError(false)
     fetchNeighbours(row, model)
       .then(async (record) => {
         const indices = record.cross_book_top_50_indices?.slice(0, 12) ?? record.top_200_indices.slice(0, 12)
@@ -455,9 +460,9 @@ function ArchiveInspector({
         const items = await fetchArchiveItems(indices)
         if (active) setNeighbours(items.map((candidate, index) => ({ item: candidate, score: scores[index] ?? 0 })))
       })
-      .catch(() => { if (active) setNeighbours([]) })
+      .catch(() => { if (active) { setNeighbours([]); setNeighbourError(true) } })
     return () => { active = false }
-  }, [model, row])
+  }, [model, row, retry])
 
   return (
     <div
@@ -469,7 +474,7 @@ function ArchiveInspector({
         <button type="button" className="archive-inspector-close" onClick={animatedClose} aria-label="Close illustration details">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
         </button>
-        {error && <p className="archive-error" role="alert">{error}</p>}
+        {error && <div className="archive-error" role="alert"><p>Could not load illustration details. {error}</p><button type="button" onClick={() => setRetry(n => n + 1)}>Retry details</button></div>}
         {!item || !geometry ? <p className="archive-inspector-loading">Loading illustration details…</p> : (
           <>
             <div className="archive-inspector-main">
@@ -530,7 +535,7 @@ function ArchiveInspector({
                     <span>{score.toFixed(3)}</span>
                   </button>
                 ))}
-                {!neighbours.length && <p>Loading neighbours…</p>}
+                {neighbourError ? <div className="archive-error" role="alert"><p>Similar illustrations could not be loaded.</p><button type="button" onClick={() => setRetry(n => n + 1)}>Retry similar illustrations</button></div> : !neighbours.length && <p>Loading neighbours…</p>}
               </div>
             </section>
           </>
@@ -545,28 +550,43 @@ export function DinoIllustrationArchivePage() {
   const [books, setBooks] = useState<Map<string, BookRecord>>(new Map())
   const [items, setItems] = useState<ArchiveItem[]>([])
   const [humanAnnotations, setHumanAnnotations] = useState<HumanAnnotationIndex | null>(null)
-  const [selectedSource, setSelectedSource] = useState('all')
-  const [dateSelection, setDateSelection] = useState<DateSelection>(ALL_DATES)
+  const [view, updateView] = useBrowseState('histvision-archive', { source: 'all', dateMode: 'all', from: '', to: '', dinov2: 'all', openclip: 'all', status: 'all', subject: 'all', domain: 'all', query: '', page: 1, row: -1 })
+  const selectedSource = view.source
+  const setSelectedSource = (source: string) => updateView({ source })
+  const dateSelection = useMemo<DateSelection>(() => ({ mode: view.dateMode === 'range' || view.dateMode === 'unknown' ? view.dateMode : 'all', from: view.from, to: view.to }), [view.dateMode, view.from, view.to])
+  const setDateSelection = (date: DateSelection) => updateView({ dateMode: date.mode, from: date.from, to: date.to })
   const dateDistribution = useMemo(() => index ? buildDateDistribution(index, books) : null, [index, books])
-  const [selectedDinov2Cluster, setSelectedDinov2Cluster] = useState('all')
-  const [selectedOpenclipCluster, setSelectedOpenclipCluster] = useState('all')
-  const [selectedHumanStatus, setSelectedHumanStatus] = useState('all')
-  const [selectedSubject, setSelectedSubject] = useState('all')
-  const [selectedDomain, setSelectedDomain] = useState('all')
+  const selectedDinov2Cluster = view.dinov2
+  const setSelectedDinov2Cluster = (dinov2: string) => updateView({ dinov2 })
+  const selectedOpenclipCluster = view.openclip
+  const setSelectedOpenclipCluster = (openclip: string) => updateView({ openclip })
+  const selectedHumanStatus = view.status
+  const setSelectedHumanStatus = (status: string) => updateView({ status })
+  const selectedSubject = view.subject
+  const setSelectedSubject = (subject: string) => updateView({ subject })
+  const selectedDomain = view.domain
+  const setSelectedDomain = (domain: string) => updateView({ domain })
   const [dinov2Clusters, setDinov2Clusters] = useState<Int16Array | null>(null)
   const [openclipClusters, setOpenclipClusters] = useState<Int16Array | null>(null)
   const [clusterError, setClusterError] = useState<string | null>(null)
-  const [query, setQuery] = useState('')
-  const [page, setPage] = useState(1)
-  const [selectedRow, setSelectedRow] = useState<number | null>(null)
+  const query = view.query
+  const setQuery = (query: string) => updateView({ query })
+  const page = Math.max(1, Math.trunc(view.page))
+  const setPage = (page: number) => updateView({ page })
+  const selectedRow = view.row >= 0 ? Math.trunc(view.row) : null
+  const setSelectedRow = (row: number | null) => updateView({ row: row ?? -1 })
   const [loadedPageKey, setLoadedPageKey] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [retry, setRetry] = useState(0)
+  const [pageError, setPageError] = useState<string | null>(null)
+  const [pageRetry, setPageRetry] = useState(0)
 
   useEffect(() => {
+    setError(null)
     Promise.all([fetchArchiveIndex(), fetchBookMap()])
       .then(([archiveIndex, bookMap]) => { setIndex(archiveIndex); setBooks(bookMap) })
       .catch((reason) => setError(reason instanceof Error ? reason.message : String(reason)))
-  }, [])
+  }, [retry])
 
   useEffect(() => {
     let active = true
@@ -622,8 +642,8 @@ export function DinoIllustrationArchivePage() {
 
   const totalPages = Math.max(1, Math.ceil(filteredRows.length / PAGE_SIZE))
   const pageRows = useMemo(
-    () => filteredRows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
-    [filteredRows, page],
+    () => filteredRows.slice((Math.min(page, totalPages) - 1) * PAGE_SIZE, Math.min(page, totalPages) * PAGE_SIZE),
+    [filteredRows, page, totalPages],
   )
   const pageKey = pageRows.join(',')
   const pageLoading = pageKey !== loadedPageKey
@@ -631,6 +651,7 @@ export function DinoIllustrationArchivePage() {
   useEffect(() => {
     if (!index) return
     let active = true
+    setPageError(null)
     fetchArchiveItems(pageRows, index)
       .then((result) => {
         if (active) {
@@ -638,9 +659,9 @@ export function DinoIllustrationArchivePage() {
           setLoadedPageKey(pageKey)
         }
       })
-      .catch((reason) => { if (active) setError(reason instanceof Error ? reason.message : String(reason)) })
+      .catch((reason) => { if (active) setPageError(reason instanceof Error ? reason.message : String(reason)) })
     return () => { active = false }
-  }, [index, pageKey, pageRows])
+  }, [index, pageKey, pageRows, pageRetry])
 
   const changeFilter = (setter: (value: string) => void) => (value: string) => {
     setter(value)
@@ -659,7 +680,7 @@ export function DinoIllustrationArchivePage() {
     setPage(1)
   }
 
-  if (error) return <div className="archive-error" role="alert">Failed to load Illustration Archive: {error}</div>
+  if (error) return <section className="archive-page"><h1>Illustration Archive</h1><div className="archive-error" role="alert"><p>Could not load the archive. {error}</p><button type="button" onClick={() => setRetry(n => n + 1)}>Retry archive</button></div></section>
   if (!index) return <div className="archive-loading" aria-live="polite">Loading Illustration Archive…</div>
 
   return (
@@ -749,7 +770,7 @@ export function DinoIllustrationArchivePage() {
             <div><span>Page {page.toLocaleString()} of {totalPages.toLocaleString()}</span></div>
           </div>
 
-          {pageLoading ? <div className="archive-grid-loading">Loading this group of illustrations…</div> : (
+          {pageError ? <div className="archive-error" role="alert"><p>Could not load these illustrations. Your filters are still selected.</p><button type="button" onClick={() => { setPageError(null); setPageRetry(n => n + 1) }}>Retry illustrations</button></div> : pageLoading ? <div className="archive-grid-loading">Loading this group of illustrations…</div> : (
             <div className="archive-grid">
               {items.map((item) => {
                 const book = books.get(bookKey(item.source, item.item_id))
@@ -765,8 +786,8 @@ export function DinoIllustrationArchivePage() {
               })}
             </div>
           )}
-          {!pageLoading && !items.length && <p className="archive-empty">No illustrations match these filters.</p>}
-          <Paginator currentPage={page} totalPages={totalPages} onPageChange={(next) => { setPage(next); window.scrollTo({ top: 540, behavior: 'smooth' }) }} />
+          {!pageError && !pageLoading && !items.length && <p className="archive-empty">No illustrations match these filters.</p>}
+          <Paginator currentPage={Math.min(page, totalPages)} totalPages={totalPages} onPageChange={(next) => { setPage(next); window.scrollTo({ top: 540, behavior: 'smooth' }) }} />
         </main>
       </div>
 

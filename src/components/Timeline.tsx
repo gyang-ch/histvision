@@ -245,10 +245,12 @@ export const Timeline: React.FC<TimelineProps> = ({
       }
     });
 
+    const labelLimit = Math.max(2, Math.floor((width - margin.left - margin.right) / 65));
+    const labelStride = Math.max(1, Math.ceil((binnedData.length - 1) / (labelLimit - 1)));
     svg
       .append('g')
       .selectAll('text.x-axis')
-      .data(binnedData)
+      .data(binnedData.filter((_, i) => i % labelStride === 0 || i === binnedData.length - 1))
       .join('text')
       .attr('class', 'x-axis')
       .attr('text-anchor', 'middle')
@@ -257,7 +259,7 @@ export const Timeline: React.FC<TimelineProps> = ({
       .style('font-weight', '500')
       .attr('x', (d) => (x(d.period) || 0) + x.bandwidth() / 2)
       .attr('y', margin.top + plotHeight + 16)
-      .text((d) => d.period);
+      .text((d) => width < 650 ? d.period.split('-')[0] : d.period);
 
     return () => {
       bars.on('pointerenter', null).on('pointerleave', null).on('click', null).on('keydown', null);

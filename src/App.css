@@ -1412,3 +1412,34 @@
 .legend-item.active:hover .legend-bar-inner {
   filter: brightness(1.05) saturate(1.2);
 }
+
+/* Compact browsing controls keep the first books close to the introduction. */
+.library-intro { margin-bottom: 1rem; }
+.library-intro h2 { font-size: clamp(1.8rem, 3vw, 2.5rem); max-width: 32ch; }
+.library-intro-row { gap: 1.5rem; }
+.library-filter-disclosure { max-width: 1180px; margin: 0 auto 1.5rem; border: 1px solid #cad4cf; border-radius: 10px; padding: 0.75rem 1rem; }
+.library-filter-disclosure > summary, .ai-hub-picker-disclosure > summary { min-height: 44px; align-content: center; cursor: pointer; color: #244b3d; font-weight: 600; }
+.library-filter-disclosure > summary span { margin-left: 1rem; font-size: 0.85rem; font-weight: 400; }
+.library-filter-disclosure .timeline-wrapper { height: 160px; padding: 0.25rem; box-shadow: none; }
+.library-filter-disclosure .library-section-heading { margin-top: 0.75rem; }
+.library-filter-disclosure .library-section-heading h3 { font-size: 1.15rem; }
+.library-filter-disclosure .language-filter { margin-top: 1rem; }
+.library-filter-disclosure summary:focus-visible, .ai-hub-picker-disclosure summary:focus-visible { outline: 2px solid #258363; outline-offset: 3px; }
+.ai-hub-picker-disclosure { padding: 0.25rem 1rem; border: 1px solid #d3dfd9; border-radius: 12px; background: rgba(255,255,255,0.6); }
+.ai-hub-picker-disclosure[open] { padding-bottom: 1rem; }
+.library-status button, .archive-error button, .ai-hub-status button, .reader-service-error button { min-height: 44px; padding: 0.5rem 1rem; border: 1px solid currentColor; border-radius: 6px; background: transparent; color: inherit; cursor: pointer; }
+.reader-service-error { padding: 0.75rem; margin-top: 0.5rem; border: 1px solid #d7a388; border-radius: 6px; color: #ffe0cb; font-size: 0.9rem; line-height: 1.5; }
+.reader-service-error p { color: inherit; margin: 0 0 0.5rem; }
+@media (max-width: 600px) {
+  .library-filter-disclosure > summary span { display: block; margin-left: 1rem; }
+}
+
+.library-controls { margin-top: 1.15rem; }
+.library-results { margin-top: 1.25rem; }
+.library-results .period-title { margin-bottom: 1rem; }
+@media (min-width: 1100px) { .source-filter { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+
+@media (max-width: 600px) {
+  .source-filter { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .source-filter button { min-height: 44px; gap: 0.3rem; padding: 0.5rem; font-size: 0.75rem; }
+}

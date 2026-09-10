@@ -302,6 +302,8 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
 
   // OCR States
   const [isTranscribing, setIsTranscribing] = useState(false);
+  const [serviceError, setServiceError] = useState<{ tool: string; message: string } | null>(null);
+  const [manifestRetry, setManifestRetry] = useState(0);
   const [isQwenTranscribing, setIsQwenTranscribing] = useState(false);
   const [qwenThinking, setQwenThinking] = useState<string | null>(null);
   const [qwenResults, setQwenResults] = useState<string[]>([]);
@@ -325,6 +327,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
   useEffect(() => {
     // A new book or upload is loading — forget whatever the previous one
     // was showing instead of leaving stale page/results state behind.
+    setServiceError(null);
     setSelectedPageIndex(0);
     setPageInput('1');
     setOcrResults([]);
@@ -349,7 +352,9 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
     const fetchManifest = async () => {
       try {
         setLoading(true);
+        setError(null);
         const response = await fetch(book.manifestUrl);
+        if (!response.ok) throw new Error(`Manifest request failed (${response.status})`);
         const manifest = await response.json();
         
         const sources: any[] = [];
@@ -402,9 +407,12 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
       }
     };
     fetchManifest();
-  }, [book.manifestUrl, initialTileSources]);
+  }, [book.manifestUrl, initialTileSources, manifestRetry]);
+
+  useEffect(() => { setServiceError(null); }, [selectedPageIndex]);
 
   const handleTranslate = async () => {
+    setServiceError(null);
     const textToTranslate = (qwenResults.length > 0 ? qwenResults.join('\n') : ocrResults.map((line) => line.text).join('\n')).trim();
     if (!textToTranslate) return;
 
@@ -440,7 +448,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
 
     if (!key) {
       console.error('Azure translation key missing. Set VITE_AZURE_TRANSLATION_KEY in frontend/.env.');
-      alert('Translation is not configured (missing Azure key).');
+      setServiceError({ tool: 'translation', message: 'Translation is currently unavailable. Please try again later.' });
       setIsTranslating(false);
       return;
     }
@@ -522,7 +530,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
       setTranslatedText(translatedChunks.join('\n'));
     } catch (error) {
       console.error("Azure Translation Error:", error);
-      alert("Translation failed.");
+      setServiceError({ tool: 'translation', message: 'Translation could not be completed. Please try again.' });
     } finally {
       setIsTranslating(false);
     }
@@ -541,6 +549,7 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
   };
 
   const handleTranscribe = async () => {
+    setServiceError(null);
     if (!tileSources[selectedPageIndex]) return;
     
     try {
@@ -596,17 +605,18 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
           lang: result.lang
         });
       } else {
-        alert("Transcription failed: " + (result.detail || "Unknown error"));
+        setServiceError({ tool: 'kraken', message: 'Kraken could not transcribe this page. Please try again.' });
       }
     } catch (err) {
       console.error(err);
-      alert("Error connecting to backend transcription service.");
+      setServiceError({ tool: 'kraken', message: 'Could not connect to Kraken. Please try again.' });
     } finally {
       setIsTranscribing(false);
     }
   };
 
   const handleQwenTranscribe = async () => {
+    setServiceError(null);
     if (!tileSources[selectedPageIndex]) return;
     
     try {
@@ -777,13 +787,15 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
       
     } catch (err) {
       console.error(err);
-      alert("Error executing Qwen transcription on frontend.");
+      setServiceError({ tool: 'qwen', message: 'Qwen could not transcribe this page. Please try again.' });
+      setQwenThinking(null);
     } finally {
       setIsQwenTranscribing(false);
     }
   };
 
   const handleDetectPlants = async () => {
+    setServiceError(null);
     if (!tileSources[selectedPageIndex]) return;
     try {
       setIsDetecting(true);
@@ -809,11 +821,11 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
         setImageSize({ width: result.width, height: result.height });
         setCurrentOcrUrl(imageUrl);
       } else {
-        alert("Detection failed: " + (result.detail || "Unknown error"));
+        setServiceError({ tool: 'yolo', message: 'Page layout detection failed. Please try again.' });
       }
     } catch (err) {
       console.error(err);
-      alert("Error connecting to detection service.");
+      setServiceError({ tool: 'yolo', message: 'Could not connect to the detection service. Please try again.' });
     } finally {
       setIsDetecting(false);
     }
@@ -834,7 +846,8 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
       <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#fc8181" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.8 }}>
         <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
       </svg>
-      <p style={{ color: '#94a3b8', fontSize: '1rem', margin: 0 }}>No images found.</p>
+      <p role="alert" style={{ color: '#94a3b8', fontSize: '1rem', margin: 0 }}>{error || 'No images found.'}</p>
+      <button type="button" onClick={() => setManifestRetry(n => n + 1)}>Retry page images</button>
       <button onClick={onBack} style={{ padding: '0.65rem 2rem', fontSize: '0.95rem', fontWeight: 700, borderRadius: '8px', border: '1px solid #475569', background: '#1e293b', color: '#e2e8f0', cursor: 'pointer', letterSpacing: '0.03em' }}>← Back to Books</button>
     </div>
   );
@@ -1058,9 +1071,11 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
                       <span>{tool.running ? `${tool.name}…` : tool.name}</span>
                     </span>
                   </button>
+                  {serviceError?.tool === tool.id && <div className="reader-service-error" role="alert"><p>{serviceError.message}</p><button type="button" disabled={isTranscribing || isDetecting || isQwenTranscribing} onClick={tool.onRun}>Retry {tool.name}</button></div>}
                 </section>
               ))}
             </section>
+            {serviceError?.tool === 'translation' && <div className="reader-service-error" role="alert"><p>{serviceError.message}</p><button type="button" disabled={isTranslating} onClick={handleTranslate}>Retry translation</button></div>}
             <h3 className="reader-results-heading">Results <span>Page {selectedPageIndex + 1}</span></h3>
 
             {(ocrResults.length > 0 || qwenResults.length > 0 || plantDetections.length > 0 || qwenThinking !== null || isQwenTranscribing) ? (

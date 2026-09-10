@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import { Analytics } from '@vercel/analytics/react'
 import { NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import './App.css'
+import { BrowseScroll } from './components/BrowseScroll'
 
 import { HomePage } from './pages/Home/Home'
 import { LibraryPage } from './pages/Library/Library'
@@ -35,10 +36,7 @@ function App() {
   const isReaderMode = useMemo(() => pathname.startsWith('/explore/') && pathname.split('/').length >= 3, [pathname])
   const isWhiteTheme = pathname === '/home' || pathname === '/' || pathname.startsWith('/books') || pathname.startsWith('/explore') || pathname.startsWith('/illustration-archive') || pathname.startsWith('/botanical-case-study') || pathname.startsWith('/methods-and-findings')
 
-  // Scroll to top on navigation so each page's entrance animations are visible
-  useEffect(() => {
-    window.scrollTo({ top: 0 })
-  }, [pathname]);
+
 
   useEffect(() => {
     const handleScroll = () => {
@@ -68,6 +66,7 @@ function App() {
 
   return (
     <div className="app-container">
+      <BrowseScroll />
       <a className="skip-link" href="#main">
         Skip to content
       </a>

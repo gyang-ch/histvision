@@ -110,7 +110,7 @@ export function fetchArchiveIndex(): Promise<ArchiveIndex> {
     indexPromise = fetch(archiveAsset('archive-index.json')).then((response) => {
       if (!response.ok) throw new Error(`Could not load archive index (${response.status})`)
       return response.json() as Promise<ArchiveIndex>
-    })
+    }).catch(error => { indexPromise = null; throw error })
   }
   return indexPromise
 }
@@ -161,7 +161,7 @@ async function fetchItemShard(first: number, index: ArchiveIndex): Promise<Archi
     promise = fetch(searchBotanyAssetUrl(path)).then((response) => {
       if (!response.ok) throw new Error(`Could not load illustration records (${response.status})`)
       return response.json() as Promise<ArchiveItem[]>
-    })
+    }).catch(error => { itemShardCache.delete(first); throw error })
     itemShardCache.set(first, promise)
   }
   return promise
@@ -199,7 +199,7 @@ export async function fetchArchiveGeometry(row: number): Promise<ArchiveGeometry
     geometryPromise = fetch(archiveAsset(index.geometry.url)).then((response) => {
       if (!response.ok) throw new Error(`Could not load archive geometry (${response.status})`)
       return response.arrayBuffer()
-    })
+    }).catch(error => { geometryPromise = null; throw error })
   }
   const buffer = await geometryPromise
   const offset = row * index.geometry.recordBytes
@@ -222,7 +222,7 @@ export async function fetchNeighbours(row: number, model: EmbeddingModel): Promi
     promise = fetch(`${searchBotanyAssetUrl(path)}&row=${row}`).then((response) => {
       if (!response.ok) throw new Error(`Could not load ${model} neighbours (${response.status})`)
       return response.json() as Promise<NeighbourRecord>
-    })
+    }).catch(error => { neighbourRecordCache.delete(key); throw error })
     neighbourRecordCache.set(key, promise)
   }
   const record = await promise
