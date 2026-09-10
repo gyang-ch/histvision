@@ -617,8 +617,7 @@ export function IllustrationsPage() {
       <div className="illus-header">
         <h2 className="illus-heading">Botanical Case Study</h2>
         <p className="illus-subheading">
-          {totalCount.toLocaleString()} botanical illustrations from the earlier focused collection.
-          Click any image to inspect its source page.
+          This collection brings together 5,958 botanical illustrations to explore how images helped describe, identify, and classify plants across different visual traditions. As a focused case study within HistVision, it invites closer comparison of plant forms and conventions of depiction. Select any image to view its original page, read its source details, and explore visually similar illustrations.
         </p>
       </div>
 
