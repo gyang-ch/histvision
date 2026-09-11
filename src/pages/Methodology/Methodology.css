@@ -10,25 +10,43 @@
   margin-bottom: 4.5rem;
   padding-bottom: 2rem;
   border-bottom: 1px solid var(--research-line);
+  text-align: center;
 }
 
 .research-header h1 {
   margin: 0;
   font-family: "EB Garamond", Georgia, serif;
-  font-size: clamp(2.8rem, 6vw, 5.4rem);
+  font-size: clamp(2.25rem, 4.5vw, 4rem);
   font-weight: 500;
   letter-spacing: -.035em;
   line-height: .95;
 }
 
+.research-intro,
+.research-section-intro {
+  max-width: 70ch;
+  color: var(--research-muted);
+  font-size: .94rem;
+  line-height: 1.7;
+}
+
+.research-intro {
+  margin: -1.4rem auto 5.5rem;
+  color: var(--research-ink);
+  font-size: 1.05rem;
+  line-height: 1.6;
+  text-align: center;
+}
+
 .research-section + .research-section { margin-top: 7rem; }
 
 .research-section-label {
-  display: grid;
-  grid-template-columns: 44px minmax(0, 1fr);
-  gap: 1rem;
-  align-items: baseline;
+  display: flex;
+  flex-direction: column;
+  gap: .55rem;
+  align-items: center;
   margin-bottom: 2.4rem;
+  text-align: center;
 }
 
 .research-section-label span {
@@ -45,13 +63,17 @@
   font-weight: 500;
 }
 
+.research-section-intro { margin: -1rem auto 2.8rem; text-align: center; }
+
 .research-figure { margin: 0 0 5rem; }
 
 .research-figure-heading {
   display: flex;
   gap: .8rem;
   align-items: center;
+  justify-content: center;
   margin: 0 0 1rem;
+  text-align: center;
 }
 
 .research-figure-heading > span {
@@ -85,10 +107,40 @@
 
 .research-figure figcaption {
   max-width: 88ch;
-  margin: .85rem 0 0;
+  margin: .85rem auto 0;
   color: var(--research-muted);
   font-size: .78rem;
   line-height: 1.6;
+  text-align: center;
+}
+
+.research-note {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: .3rem;
+  max-width: 70ch;
+  margin: -.8rem 0 0 60px;
+  padding: 1.1rem 1.25rem;
+  border-left: 3px solid #8cad9b;
+  background: rgba(226, 235, 229, .52);
+  text-align: center;
+}
+
+.research-note-label {
+  color: #287159;
+  font-size: .67rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.research-note p {
+  margin: 0;
+  color: #43554d;
+  font-size: .86rem;
+  line-height: 1.6;
+  text-align: center;
 }
 
 .chart-wrap, .refinement-wrap { position: relative; }
@@ -236,8 +288,10 @@
 
 @media (max-width: 760px) {
   .research-header { margin-bottom: 3rem; }
+  .research-intro { margin: -1rem 0 4rem; }
+  .research-section-intro, .research-note { margin-left: auto; margin-right: auto; }
   .research-section + .research-section { margin-top: 5rem; }
-  .research-section-label { grid-template-columns: 32px minmax(0, 1fr); gap: .6rem; }
+  .research-section-label { gap: .45rem; }
   .refinement-grid, .paired-chart-grid { grid-template-columns: 1fr; }
   .research-figure { margin-bottom: 3.8rem; }
   .research-figure-canvas { margin-inline: -1rem; border-radius: 6px; padding: .45rem; }

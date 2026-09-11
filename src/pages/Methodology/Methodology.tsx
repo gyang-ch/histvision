@@ -390,15 +390,19 @@ function ResearchFigure({ number, title, caption, children }: { number: string; 
 export function MethodologyPage() {
   return <article className="research-page">
     <header className="research-header"><h1>Methods &amp; Findings</h1></header>
+    <p className="research-intro">HistVision combines page-layout detection with image similarity analysis. These results show how model choice, training data, and archival provenance shape what becomes visible in the corpus.</p>
     <section className="research-section" aria-labelledby="layout-detection-heading">
       <div className="research-section-label"><span>01</span><h2 id="layout-detection-heading">Page-layout detection</h2></div>
-      <ResearchFigure number="1" title="Learning across training-set sizes" caption="Test-set COCO AP on the fixed 263-image evaluation set. DINO-R50 exceeded YOLO11m at every training-set size; each point is the validation-selected checkpoint from seed 20260822."><LearningCurveChart /></ResearchFigure>
-      <ResearchFigure number="2" title="Effect of dataset refinement" caption="Paired evaluation on the same 263-image version-three test set. The 1,511-image models continued from the earlier 1,152-image checkpoints, so every old/new comparison uses the same annotations and evaluator."><RefinementChart /></ResearchFigure>
+      <p className="research-section-intro">Two detectors were trained on the same annotated pages and evaluated on a fixed test set. The experiment asks how performance changes with training-set size and whether deployment-informed annotation refinement improves practical page routing.</p>
+      <ResearchFigure number="1" title="Learning across training-set sizes" caption="DINO-R50 achieved higher overall AP at every training-set size and improved more consistently as data increased. YOLO11m peaked at 600 images, showing that more data does not automatically improve aggregate performance."><LearningCurveChart /></ResearchFigure>
+      <ResearchFigure number="2" title="Effect of dataset refinement" caption="Refinement improved DINO-R50 most clearly, while YOLO11m improved overall but lost some illustration AP. Hard-negative review reduced false positives but also made detection more conservative."><RefinementChart /></ResearchFigure>
     </section>
     <section className="research-section" aria-labelledby="visual-similarity-heading">
       <div className="research-section-label"><span>02</span><h2 id="visual-similarity-heading">Illustration similarity</h2></div>
-      <ResearchFigure number="3" title="Agreement between embedding models" caption="Distribution across all 189,764 crops of the fraction of top-20 neighbour identities shared by OpenCLIP and DINOv2. Cross-book retrieval removes neighbours from the query crop's own book and produces lower overlap."><OverlapChart /></ResearchFigure>
-      <ResearchFigure number="4" title="K-means stability across seeds" caption="Mean agreement across the three pairwise comparisons formed by seeds 42, 271828, and 314159. Ribbons show the minimum-to-maximum range. ARI measures partition agreement; AMI measures shared information after chance correction."><StabilityChart /></ResearchFigure>
+      <p className="research-section-intro">The final corpus contains 189,764 candidate illustration crops from eight collections. OpenCLIP and DINOv2 examine how different visual representations organise the same material.</p>
+      <ResearchFigure number="3" title="Agreement between embedding models" caption="At top-20, the two models shared 23.7% of unrestricted neighbours and 15.3% after same-book neighbours were removed. Their partial agreement suggests that visual similarity depends on the representation used."><OverlapChart /></ResearchFigure>
+      <ResearchFigure number="4" title="K-means stability across seeds" caption="Both embedding spaces produced reasonably stable partitions across random seeds. They agreed less with each other than repeated runs within either model, so clusters are exploratory views rather than definitive historical categories."><StabilityChart /></ResearchFigure>
+      <aside className="research-note" aria-label="Interpretive note"><span className="research-note-label">Interpretive note</span><p>These results are prompts for historical inquiry, not historical conclusions. Read them with each crop's page context, provenance, and bibliographical record.</p></aside>
     </section>
   </article>
 }
