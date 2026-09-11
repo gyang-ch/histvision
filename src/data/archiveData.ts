@@ -96,7 +96,8 @@ export interface HumanAnnotationIndex {
   records: HumanAnnotationRecord[]
 }
 
-const archiveAsset = (file: string) => `${import.meta.env.BASE_URL}data/archive/${file}`
+/** Public, compact archive files live alongside the other Azure web assets. */
+const archiveAsset = (file: string) => publicSearchBotanyAssetUrl(`data/archive/${file}`)
 
 let indexPromise: Promise<ArchiveIndex> | null = null
 let humanAnnotationPromise: Promise<HumanAnnotationIndex> | null = null

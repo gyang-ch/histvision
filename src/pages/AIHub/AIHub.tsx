@@ -211,7 +211,7 @@ export function AIHubPage() {
       <div className="ai-hub-picker-divider" aria-hidden="true" />
 
       <div className="ai-hub-picker-col ai-hub-custom-section">
-        <h3 className="ai-hub-custom-title">Open your own</h3>
+        <h3 className="ai-hub-custom-title">Or open your own</h3>
         <p className="ai-hub-custom-body">
           Use the same tools with your own page image or IIIF manifest.
         </p>
@@ -261,7 +261,12 @@ export function AIHubPage() {
             aria-label="IIIF manifest URL"
           />
           <button type="submit" className="ai-hub-manifest-submit" disabled={!manifestUrlInput.trim()}>
-            Open
+            <span>Open manifest</span>
+            <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 3h7v7" />
+              <path d="M10 14 21 3" />
+              <path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5" />
+            </svg>
           </button>
         </form>
 

@@ -1,4 +1,6 @@
-const ILLUSTRATIONS_URL = '/data/illustrations.public.jsonl'
+import { publicSearchBotanyAssetUrl } from './searchBotanyAssets'
+
+const ILLUSTRATIONS_URL = publicSearchBotanyAssetUrl('data/illustrations.public.jsonl')
 
 export interface IllustrationRecord {
   illustration_id: string

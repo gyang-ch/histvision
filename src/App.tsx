@@ -23,12 +23,13 @@ const navItems = [
 function App() {
   const navigate = useNavigate()
   const location = useLocation()
-  // const apiBaseUrl = (
-  //   (window as any).APP_CONFIG?.API_URL ||
-  //   import.meta.env.VITE_API_URL ||
-  //   import.meta.env.VITE_API_BASE_URL ||
-  //   'https://gyang-ch--image-api.modal.run'
-  // ).replace(/\/+$/, '')
+  const runtimeConfig = (window as Window & { APP_CONFIG?: { API_URL?: string } }).APP_CONFIG
+  const apiBaseUrl = (
+    runtimeConfig?.API_URL ||
+    import.meta.env.VITE_API_URL ||
+    import.meta.env.VITE_API_BASE_URL ||
+    'https://gyang-ch--image-api-2.modal.run'
+  ).replace(/\/+$/, '')
 
   const tabBarRef = useRef<HTMLDivElement>(null)
 
@@ -50,19 +51,19 @@ function App() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // useEffect(() => {
-  //   const controller = new AbortController()
+  useEffect(() => {
+    const controller = new AbortController()
 
-  //   fetch(`${apiBaseUrl}/healthz`, {
-  //     method: 'GET',
-  //     cache: 'no-store',
-  //     signal: controller.signal,
-  //   }).catch(() => {
-  //     // Ignore warm-up failures. The first real backend request can still proceed normally.
-  //   })
+    fetch(`${apiBaseUrl}/healthz`, {
+      method: 'GET',
+      cache: 'no-store',
+      signal: controller.signal,
+    }).catch(() => {
+      // Ignore warm-up failures. The first real backend request can still proceed normally.
+    })
 
-  //   return () => controller.abort()
-  // }, [apiBaseUrl])
+    return () => controller.abort()
+  }, [apiBaseUrl])
 
   return (
     <div className="app-container">

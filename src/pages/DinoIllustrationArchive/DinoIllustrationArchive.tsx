@@ -690,7 +690,7 @@ export function DinoIllustrationArchivePage() {
           <h1>Illustration Archive</h1>
           <p>
             Explore {index.cropCount.toLocaleString()} illustration crops from {index.bookCount.toLocaleString()} books
-            across eight digital libraries. Organization reflects provenance and detector evidence, not unverified subject labels.
+            across eight digital libraries. Organisation reflects provenance and detector evidence, not unverified subject labels.
           </p>
         </div>
         <dl>
@@ -702,7 +702,7 @@ export function DinoIllustrationArchivePage() {
 
       <div className="archive-shell">
         <aside className="archive-sidebar" aria-label="Illustration filters">
-          <div className="archive-filter-heading"><h2>Organize the corpus</h2><button type="button" onClick={reset}>Reset</button></div>
+          <div className="archive-filter-heading"><h2>Organise the corpus</h2><button type="button" className="archive-reset" onClick={reset}>Reset</button></div>
           <label className="archive-search">
             <span>Search book metadata</span>
             <input value={query} onChange={(event) => { setQuery(event.target.value); setPage(1) }} type="search" placeholder="Title, author, subject, or item ID" />

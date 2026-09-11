@@ -6,6 +6,12 @@ import { useBrowseState } from '../../hooks/useBrowseState'
 import { fetchBookCatalogue, type BookCatalogue, type BookRecord } from '../../data/books'
 import { Timeline } from '../../components/Timeline'
 import { BookDetail } from '../../components/BookDetail'
+import {
+  canonicalLanguages,
+  hasNoLinguisticContent,
+  hasUnspecifiedLanguage,
+  LANGUAGE_UNSPECIFIED,
+} from '../../utils/canonicalLanguages'
 
 const SOURCE_ORDER = [
   'bodleian_new',
@@ -41,6 +47,10 @@ function bookMatchesSearch(book: BookRecord, query: string) {
     book.sourceItemId,
   ].join(' ').toLocaleLowerCase()
   return haystack.includes(query.toLocaleLowerCase())
+}
+
+function filterFillWidth(count: number, maximum: number) {
+  return `${Math.min(100, Math.max(5, count / maximum * 100))}%`
 }
 
 export function LibraryPage() {
@@ -83,8 +93,7 @@ export function LibraryPage() {
   const languageStats = useMemo(() => {
     const counts = new Map<string, number>()
     sourceAndSearchBooks.forEach((book) => {
-      const languages = book.language.length ? book.language : ['Not recorded']
-      languages.forEach((language) => counts.set(language, (counts.get(language) || 0) + 1))
+      canonicalLanguages(book.language).forEach((language) => counts.set(language, (counts.get(language) || 0) + 1))
     })
     return [...counts.entries()]
       .map(([language, count]) => ({ language, count }))
@@ -92,12 +101,23 @@ export function LibraryPage() {
       .slice(0, 12)
   }, [sourceAndSearchBooks])
 
+  const languageFilterMaximum = languageStats[0]?.count ?? 1
+
+  const languageMetadataCounts = useMemo(() => ({
+    unspecified: sourceAndSearchBooks.filter((book) => hasUnspecifiedLanguage(book.language)).length,
+    noLinguisticContent: sourceAndSearchBooks.filter((book) => hasNoLinguisticContent(book.language)).length,
+  }), [sourceAndSearchBooks])
+
   const displayedBooks = useMemo(() => {
     let books = sourceAndSearchBooks
     if (selectedLanguage !== 'All') {
       books = books.filter((book) => {
-        if (selectedLanguage === 'Not recorded') return book.language.length === 0
-        return book.language.includes(selectedLanguage)
+        // Retain compatibility with an existing saved browse state from before
+        // language facets were canonicalised.
+        if (selectedLanguage === LANGUAGE_UNSPECIFIED || selectedLanguage === 'Not recorded') {
+          return hasUnspecifiedLanguage(book.language)
+        }
+        return canonicalLanguages(book.language).includes(selectedLanguage)
       })
     }
     if (selectedPeriod === 'Date unknown') {
@@ -124,6 +144,8 @@ export function LibraryPage() {
   if (!catalogue) {
     return <section className="library-status" aria-live="polite"><h2>Books</h2><p>Loading the research catalogue…</p></section>
   }
+
+  const sourceFilterMaximum = Math.max(...Object.values(catalogue.sourceCounts), 1)
 
   return (
     <>
@@ -167,6 +189,7 @@ export function LibraryPage() {
             aria-pressed={selectedSource === 'All'}
             onClick={() => { setSelectedSource('All'); setSelectedPeriod('All Time') }}
           >
+            <i className="library-filter-fill" aria-hidden="true" style={{ width: '100%' }} />
             <span>All libraries</span><strong>{catalogue.bookCount.toLocaleString()}</strong>
           </button>
           {SOURCE_ORDER.map((source) => (
@@ -175,8 +198,9 @@ export function LibraryPage() {
               type="button"
               className={selectedSource === source ? 'active' : ''}
               aria-pressed={selectedSource === source}
-              onClick={() => { setSelectedSource(source); setSelectedPeriod('All Time') }}
-            >
+            onClick={() => { setSelectedSource(source); setSelectedPeriod('All Time') }}
+          >
+              <i className="library-filter-fill" aria-hidden="true" style={{ width: filterFillWidth(catalogue.sourceCounts[source], sourceFilterMaximum) }} />
               <span>{sourceShortLabel[source]}</span><strong>{catalogue.sourceCounts[source].toLocaleString()}</strong>
             </button>
           ))}
@@ -217,7 +241,7 @@ export function LibraryPage() {
         <div className="language-filter">
           <div className="library-section-heading">
             <h3>Most represented languages</h3>
-            <button type="button" onClick={() => setSelectedLanguage('All')}>
+            <button type="button" className="library-language-reset" onClick={() => setSelectedLanguage('All')}>
               {selectedLanguage === 'All' ? 'Showing all' : 'Clear language filter'}
             </button>
           </div>
@@ -230,10 +254,15 @@ export function LibraryPage() {
                 aria-pressed={selectedLanguage === language}
                 onClick={() => setSelectedLanguage(selectedLanguage === language ? 'All' : language)}
               >
+                <i className="library-filter-fill" aria-hidden="true" style={{ width: filterFillWidth(count, languageFilterMaximum) }} />
                 <span>{language}</span><strong>{count.toLocaleString()}</strong>
               </button>
             ))}
           </div>
+          <p className="library-language-note">
+            {languageMetadataCounts.unspecified.toLocaleString()} books have no recorded language metadata
+            {languageMetadataCounts.noLinguisticContent > 0 && `; ${languageMetadataCounts.noLinguisticContent.toLocaleString()} have no linguistic content`}.
+          </p>
         </div>
       </details>
 

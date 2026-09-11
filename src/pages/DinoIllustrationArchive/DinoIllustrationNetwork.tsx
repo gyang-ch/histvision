@@ -186,7 +186,7 @@ export function DinoIllustrationNetwork({ onSelectRow }: { onSelectRow: (row: nu
             <button type="button" className={colourMode === 'source' ? 'active' : ''} onClick={() => setColourMode('source')}>Library colour</button>
             <button type="button" className={colourMode === 'cluster' ? 'active' : ''} onClick={() => setColourMode('cluster')}>K-means colour</button>
           </div>
-          <button type="button" onClick={resetView}>Reset view</button>
+          <button type="button" className="archive-network-reset" onClick={resetView}>Reset view</button>
         </div>
       </div>
 

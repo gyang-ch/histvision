@@ -17,7 +17,7 @@ The deployed site retrieves public illustration crops and 512-pixel WebP thumbna
 
 - `VITE_SEARCH_BOTANY_PUBLIC_ASSET_BASE`: for example, `https://phytovision.blob.core.windows.net/histvision-web-assets`
 
-Private source-page images and compact archive data continue to use the read-only server function. Configure these server-side environment variables in Vercel:
+Private source-page images, crop-record shards, and nearest-neighbour records continue to use the read-only server function. The compact Archive files and page-overlay shards are public Azure assets. Configure these server-side environment variables in Vercel:
 
 - `SEARCH_BOTANY_CONTAINER_URL`: the container URL ending in `/search-botany`
 - `SEARCH_BOTANY_SAS_TOKEN`: a read-only SAS query, with or without its leading `?`
@@ -46,7 +46,7 @@ If configuring a Web Service manually instead of using the Blueprint, use Node a
 
 ## DINO-1575 Illustration Archive
 
-The Illustration Archive presents all 189,764 retained DINO-1575 crops. The browser downloads a compact static index, binary crop geometry, precomputed UMAP coordinates, and K-means labels. Public WebP thumbnails and full-resolution crops are requested directly from Azure only when needed. Private crop records, source pages, and nearest-neighbour records continue to use the server-side proxy. This keeps the SAS credential out of browser code, removes high-volume image traffic from the website host, and avoids sending the complete corpus metadata or 22 GB image collection to every visitor.
+The Illustration Archive presents all 189,764 retained DINO-1575 crops. The browser downloads its compact static index, annotation index, binary crop geometry, precomputed UMAP coordinates, and K-means labels directly from the public Azure container. Public WebP thumbnails and full-resolution crops are also requested directly from Azure only when needed. Private crop records, source pages, and nearest-neighbour records continue to use the server-side proxy. This keeps the SAS credential out of browser code, removes high-volume image traffic and static archive data from the website host, and avoids sending the complete corpus metadata or 22 GB image collection to every visitor.
 
 The DINO-1575 page-overlay index and its 256 JSON shards are also served directly from the public Azure container at `data/dino1575-page-boxes/`. Azure Blob Storage CORS must allow `GET` and `HEAD` requests from the deployed website origin. These generated files are intentionally excluded from the Vercel deployment.
 

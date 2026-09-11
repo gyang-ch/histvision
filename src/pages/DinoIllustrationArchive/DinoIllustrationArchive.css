@@ -91,14 +91,24 @@
   font-size: 1.2rem;
 }
 
-.archive-filter-heading button {
+.archive-filter-heading .archive-reset,
+.archive-network-controls .archive-network-reset {
   min-height: 36px;
-  border: 0;
-  background: transparent;
-  color: #17694e;
+  border: 1px solid #94b5a5;
+  border-radius: 7px;
+  background: #d6e6de;
+  color: #21483a;
   cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  transition: border-color 180ms ease, background 180ms ease, color 180ms ease;
+}
+
+.archive-filter-heading .archive-reset:hover,
+.archive-filter-heading .archive-reset:focus-visible,
+.archive-network-controls .archive-network-reset:hover,
+.archive-network-controls .archive-network-reset:focus-visible {
+  border-color: #477a67;
+  background: #4f8270;
+  color: #fff;
 }
 
 .archive-search,
@@ -459,6 +469,20 @@
   border-color: #258363;
   background: #d9ece4;
   color: #10372a;
+}
+
+.archive-network-controls .archive-network-reset {
+  border-color: #94b5a5;
+  border-radius: 7px;
+  background: #d6e6de;
+  color: #21483a;
+}
+
+.archive-network-controls .archive-network-reset:hover,
+.archive-network-controls .archive-network-reset:focus-visible {
+  border-color: #477a67;
+  background: #4f8270;
+  color: #fff;
 }
 
 .archive-network-canvas {
