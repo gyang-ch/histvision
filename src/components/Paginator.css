@@ -1,0 +1,92 @@
+.paginator {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: .9rem 1.1rem;
+  padding: 1.5rem 0;
+  color: #52635d;
+}
+
+.paginator-pages {
+  display: inline-flex;
+  overflow: hidden;
+  border: 1px solid #c7d3cc;
+  border-radius: 8px;
+  background: #eef2ee;
+  box-shadow: 0 5px 16px rgba(32, 58, 46, .08);
+}
+
+.paginator-control,
+.paginator-ellipsis {
+  display: inline-grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: 38px;
+  height: 38px;
+  margin-right: -1px;
+  border: 0;
+  border-right: 1px solid #c7d3cc;
+  background: transparent;
+  color: #52635d;
+  font: inherit;
+  font-size: .84rem;
+  font-weight: 650;
+  line-height: 1;
+}
+
+.paginator-control { cursor: pointer; }
+
+.paginator-control--previous,
+.paginator-control--next { background: #dce6e0; color: #36554a; }
+
+.paginator-control:hover:not(:disabled) {
+  position: relative;
+  z-index: 1;
+  background: #e2ebe5;
+  color: #215b47;
+}
+
+.paginator-control.is-active {
+  position: relative;
+  z-index: 1;
+  background: #d8e8df;
+  color: #215b47;
+  font-weight: 750;
+}
+
+.paginator-control:focus-visible,
+.paginator-input:focus-visible {
+  position: relative;
+  z-index: 2;
+  outline: 2px solid #4f8c72;
+  outline-offset: -2px;
+}
+
+.paginator-control:disabled { cursor: not-allowed; color: #a5b2ac; opacity: .7; }
+.paginator-ellipsis { color: #93a29b; cursor: default; }
+
+.paginator-jump { display: inline-flex; align-items: center; gap: .5rem; font-size: .84rem; }
+
+.paginator-input {
+  width: 3.8rem;
+  height: 38px;
+  box-sizing: border-box;
+  border: 1px solid #b8c9c0;
+  border-radius: 8px;
+  background: #f7faf7;
+  color: #215b47;
+  font: inherit;
+  font-size: .84rem;
+  font-weight: 700;
+  text-align: center;
+  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.paginator-input:hover { border-color: #8cad9b; background: #fff; }
+
+@media (max-width: 520px) {
+  .paginator { gap: .75rem; }
+  .paginator-control, .paginator-ellipsis { width: 35px; height: 35px; }
+  .paginator-input { height: 35px; }
+}

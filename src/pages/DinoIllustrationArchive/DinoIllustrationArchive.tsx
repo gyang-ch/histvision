@@ -79,6 +79,10 @@ function humanLabel(label: string) {
   return label.split('_').map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(' ')
 }
 
+function ArchiveLoading({ children }: { children: React.ReactNode }) {
+  return <div className="archive-loading-content" role="status"><div className="archive-spinner" aria-hidden="true" /><p>{children}</p></div>
+}
+
 function ClusterSelect({
   label,
   model,
@@ -681,7 +685,7 @@ export function DinoIllustrationArchivePage() {
   }
 
   if (error) return <section className="archive-page"><h1>Illustration Archive</h1><div className="archive-error" role="alert"><p>Could not load the archive. {error}</p><button type="button" onClick={() => setRetry(n => n + 1)}>Retry archive</button></div></section>
-  if (!index) return <div className="archive-loading" aria-live="polite">Loading Illustration Archive…</div>
+  if (!index) return <div className="archive-loading"><ArchiveLoading>Loading Illustration Archive…</ArchiveLoading></div>
 
   return (
     <div className="archive-page">
@@ -770,7 +774,7 @@ export function DinoIllustrationArchivePage() {
             <div><span>Page {page.toLocaleString()} of {totalPages.toLocaleString()}</span></div>
           </div>
 
-          {pageError ? <div className="archive-error" role="alert"><p>Could not load these illustrations. Your filters are still selected.</p><button type="button" onClick={() => { setPageError(null); setPageRetry(n => n + 1) }}>Retry illustrations</button></div> : pageLoading ? <div className="archive-grid-loading">Loading this group of illustrations…</div> : (
+          {pageError ? <div className="archive-error" role="alert"><p>Could not load these illustrations. Your filters are still selected.</p><button type="button" onClick={() => { setPageError(null); setPageRetry(n => n + 1) }}>Retry illustrations</button></div> : pageLoading ? <div className="archive-grid-loading"><ArchiveLoading>Loading this group of illustrations…</ArchiveLoading></div> : (
             <div className="archive-grid">
               {items.map((item) => {
                 const book = books.get(bookKey(item.source, item.item_id))

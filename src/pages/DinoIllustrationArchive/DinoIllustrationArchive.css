@@ -418,6 +418,28 @@
   text-align: center;
 }
 
+.archive-loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.archive-loading-content p { margin: 0; }
+
+.archive-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(16, 185, 129, .2);
+  border-top-color: var(--brand-mid, #287159);
+  border-radius: 50%;
+  animation: archive-spin .8s linear infinite;
+}
+
+@keyframes archive-spin {
+  to { transform: rotate(360deg); }
+}
+
 .archive-error {
   color: #9f2424;
 }
