@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react'
 import gsap from 'gsap'
 import OpenSeadragon from 'openseadragon'
 import { MasonryPhotoAlbum } from 'react-photo-album'
@@ -217,10 +217,28 @@ export function IllustrationPopup({
   // Track mount status so the exit-animation onComplete never calls onClose
   // after the popup has already been replaced by a neighbour selection.
   const isMountedRef = useRef(true)
+  const firstPhotoIdRef = useRef(photo.record.illustration_id)
   useEffect(() => {
     isMountedRef.current = true
     return () => { isMountedRef.current = false }
   }, [])
+
+  // Keep the popup frame stable while moving through similar illustrations.
+  // The viewer itself is keyed below so OpenSeadragon still gets a clean source.
+  useEffect(() => {
+    if (firstPhotoIdRef.current === photo.record.illustration_id) return
+    firstPhotoIdRef.current = photo.record.illustration_id
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const el = popupRef.current
+    if (!el) return
+    const viewer = el.querySelector('.illus-popup-viewer-col')
+    const meta = el.querySelector('.illus-popup-meta-col')
+    const targets = [viewer, meta].filter(Boolean)
+    const tl = gsap.timeline()
+    tl.to(targets, { opacity: 0.35, duration: 0.12, ease: 'power1.in' })
+      .fromTo(targets, { opacity: 0.35, y: 6 }, { opacity: 1, y: 0, duration: 0.28, stagger: 0.04, ease: 'power2.out', clearProps: 'transform' })
+    return () => { tl.kill() }
+  }, [photo.record.illustration_id, popupRef])
 
   // Animated close – plays exit tween, then unmounts.
   const animatedClose = useCallback(() => {
@@ -512,6 +530,7 @@ export function IllustrationsPage() {
   const allPhotosRef = useRef<IllustrationPhoto[]>([])
   const photoMapRef = useRef<Map<string, IllustrationPhoto>>(new Map())
   const popupRef = useRef<HTMLDivElement>(null)
+  const gridRef = useRef<HTMLDivElement>(null)
   const gridTopRef = useRef<HTMLDivElement>(null)
   // Holds the popup's animatedClose so outside-click / Escape animate out instead of snap-closing.
   const closeCallbackRef = useRef<(() => void) | null>(null)
@@ -599,6 +618,17 @@ export function IllustrationsPage() {
     currentPage * ILLUS_PER_PAGE,
   )
 
+  useLayoutEffect(() => {
+    if (!gridRef.current || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const cards = gridRef.current.querySelectorAll<HTMLElement>('.illus-photo-wrapper')
+    if (!cards.length) return
+    const tween = gsap.fromTo(cards,
+      { opacity: 0, y: 18 },
+      { opacity: 1, y: 0, duration: 0.38, stagger: 0.012, ease: 'power2.out', clearProps: 'transform' },
+    )
+    return () => { tween.kill() }
+  }, [currentPage, pagePhotos.length])
+
   if (dataLoading) {
     return (
       <div className="illus-loading">
@@ -631,24 +661,26 @@ export function IllustrationsPage() {
         </span>
       </div>
 
-      <MasonryPhotoAlbum<IllustrationPhoto>
-        photos={pagePhotos}
-        columns={(w) => (w < 500 ? 2 : w < 800 ? 3 : w < 1100 ? 4 : 5)}
-        spacing={6}
-        componentsProps={{
-          wrapper: ({ photo }) => ({
-            className: `illus-photo-wrapper${selectedPhoto?.key === photo.key ? ' illus-photo-selected' : ''}`,
-            onClick: (e: React.MouseEvent<HTMLDivElement>) => {
-              e.stopPropagation()
-              handleSelectPhoto(photo)
+      <div ref={gridRef} className="illus-photo-grid-motion">
+        <MasonryPhotoAlbum<IllustrationPhoto>
+          photos={pagePhotos}
+          columns={(w) => (w < 500 ? 2 : w < 800 ? 3 : w < 1100 ? 4 : 5)}
+          spacing={6}
+          componentsProps={{
+            wrapper: ({ photo }) => ({
+              className: `illus-photo-wrapper${selectedPhoto?.key === photo.key ? ' illus-photo-selected' : ''}`,
+              onClick: (e: React.MouseEvent<HTMLDivElement>) => {
+                e.stopPropagation()
+                handleSelectPhoto(photo)
+              },
+            }),
+            image: {
+              loading: 'lazy' as const,
+              className: 'illus-photo-img',
             },
-          }),
-          image: {
-            loading: 'lazy' as const,
-            className: 'illus-photo-img',
-          },
-        }}
-      />
+          }}
+        />
+      </div>
 
       <Paginator currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
 
@@ -656,7 +688,6 @@ export function IllustrationsPage() {
 
       {selectedPhoto && (
         <IllustrationPopup
-          key={selectedPhoto.record.illustration_id}
           photo={selectedPhoto}
           onClose={() => setSelectedPhoto(null)}
           popupRef={popupRef}

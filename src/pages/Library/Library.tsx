@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import gsap from 'gsap'
 import { ParentSize } from '@visx/responsive'
 import { useNavigate } from 'react-router-dom'
 import { useBrowseState } from '../../hooks/useBrowseState'
@@ -137,6 +138,17 @@ export function LibraryPage() {
     setSelectedSource('All')
     setSearchInput('')
   }
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const resultContext = document.querySelector<HTMLElement>('.library-result-context')
+    const activeControls = document.querySelectorAll<HTMLElement>('.source-filter button.active, .language-chip-list button.active')
+    const timeline = document.querySelector<HTMLElement>('.timeline-wrapper')
+    const targets = [resultContext, ...Array.from(activeControls), timeline].filter(Boolean)
+    if (!targets.length) return
+    const tween = gsap.fromTo(targets, { opacity: 0.45, y: 7 }, { opacity: 1, y: 0, duration: 0.28, stagger: 0.035, ease: 'power2.out', clearProps: 'transform' })
+    return () => { tween.kill() }
+  }, [selectedLanguage, selectedPeriod, selectedSource, searchQuery, displayedBooks.length])
 
   if (loadError) {
     return <section className="library-status" role="alert"><h2>Books</h2><p>{loadError}</p><button type="button" onClick={() => setRetry(n => n + 1)}>Retry catalogue</button></section>

@@ -328,10 +328,24 @@ function ArchiveInspector({
   // after the component has already been unmounted (e.g. a neighbour click
   // swaps in a fresh, differently-keyed instance before the tween finishes).
   const isMountedRef = useRef(true)
+  const firstRowRef = useRef(row)
   useEffect(() => {
     isMountedRef.current = true
     return () => { isMountedRef.current = false }
   }, [])
+
+  useEffect(() => {
+    if (firstRowRef.current === row) return
+    firstRowRef.current = row
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const card = cardRef.current
+    if (!card) return
+    const source = card.querySelector('.archive-source-page')
+    const meta = card.querySelector('.archive-inspector-meta')
+    const targets = [source, meta].filter(Boolean)
+    const tween = gsap.fromTo(targets, { opacity: 0.35, y: 6 }, { opacity: 1, y: 0, duration: 0.3, stagger: 0.04, ease: 'power2.out', clearProps: 'transform' })
+    return () => { tween.kill() }
+  }, [row])
   // Guards so the content/neighbour stagger-ins each fire once per reveal
   // rather than replaying every time an unrelated state update re-renders.
   const contentAnimatedRef = useRef(false)
@@ -526,7 +540,7 @@ function ArchiveInspector({
 
             <section className="archive-neighbours">
               <div className="archive-neighbour-heading">
-                <div><p className="archive-kicker">Embedding retrieval</p><h3>Nearest illustrations</h3></div>
+                <div><p className="archive-kicker">Embedding retrieval</p><h3>Similar illustrations</h3></div>
                 <div role="group" aria-label="Nearest-neighbour model">
                   <button type="button" className={model === 'dinov2' ? 'active' : ''} onClick={() => { setNeighbours([]); setModel('dinov2') }}>DINOv2</button>
                   <button type="button" className={model === 'openclip' ? 'active' : ''} onClick={() => { setNeighbours([]); setModel('openclip') }}>OpenCLIP</button>
@@ -539,7 +553,7 @@ function ArchiveInspector({
                     <span>{score.toFixed(3)}</span>
                   </button>
                 ))}
-                {neighbourError ? <div className="archive-error" role="alert"><p>Similar illustrations could not be loaded.</p><button type="button" onClick={() => setRetry(n => n + 1)}>Retry similar illustrations</button></div> : !neighbours.length && <p>Loading neighbours…</p>}
+                {neighbourError ? <div className="archive-error" role="alert"><p>Similar illustrations could not be loaded.</p><button type="button" onClick={() => setRetry(n => n + 1)}>Retry similar illustrations</button></div> : !neighbours.length && <p>Loading illustrations…</p>}
               </div>
             </section>
           </>
@@ -797,7 +811,7 @@ export function DinoIllustrationArchivePage() {
 
       <DinoIllustrationNetwork onSelectRow={setSelectedRow} />
 
-      {selectedRow != null && <ArchiveInspector key={selectedRow} row={selectedRow} annotation={annotationsByRow.get(selectedRow)} onClose={() => setSelectedRow(null)} onSelectRow={setSelectedRow} />}
+      {selectedRow != null && <ArchiveInspector row={selectedRow} annotation={annotationsByRow.get(selectedRow)} onClose={() => setSelectedRow(null)} onSelectRow={setSelectedRow} />}
     </div>
   )
 }

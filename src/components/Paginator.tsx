@@ -46,7 +46,6 @@ export function Paginator({ currentPage, totalPages, onPageChange }: PaginatorPr
   const commitInput = () => {
     const n = parseInt(inputVal, 10)
     if (!isNaN(n)) goTo(n)
-    else setInputVal(String(currentPage))
   }
 
   const pages = buildPageRange(currentPage, totalPages)
@@ -110,7 +109,6 @@ export function Paginator({ currentPage, totalPages, onPageChange }: PaginatorPr
           max={totalPages}
           value={inputVal}
           onChange={(e) => setInputVal(e.target.value)}
-          onBlur={commitInput}
           onKeyDown={(e) => { if (e.key === 'Enter') commitInput() }}
           id="paginator-page-input"
           className="paginator-input"

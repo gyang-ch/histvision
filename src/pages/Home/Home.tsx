@@ -1,7 +1,10 @@
 import { NavLink } from 'react-router-dom'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import './Home.css'
+
+gsap.registerPlugin(ScrollTrigger)
 
 const prefersReducedMotion = () =>
   typeof window !== 'undefined' &&
@@ -114,6 +117,8 @@ function CollectionDonut({
   play: boolean
 }) {
   const [hovered, setHovered] = useState<number | null>(null)
+  const chartRef = useRef<SVGSVGElement>(null)
+  const centerValueRef = useRef<SVGTextElement>(null)
   const centerX = 80
   const centerY = 80
   let angle = -Math.PI / 2
@@ -128,10 +133,40 @@ function CollectionDonut({
   const centerLabel = active?.shortLabel ?? totalLabel
   const glowId = `home-donut-glow-${title.toLocaleLowerCase().replace(/\W+/g, '-')}`
 
+  useLayoutEffect(() => {
+    if (!play || !chartRef.current || prefersReducedMotion()) return
+    const ctx = gsap.context(() => {
+      const slices = chartRef.current?.querySelectorAll<SVGGElement>('.home-donut-slice')
+      if (slices?.length) {
+        gsap.fromTo(slices,
+          { opacity: 0, scale: 0, transformOrigin: '80px 80px' },
+          { opacity: 1, scale: 1, duration: 0.5, stagger: 0.07, ease: 'back.out(1.35)', clearProps: 'transform' },
+        )
+      }
+    }, chartRef)
+    return () => ctx.revert()
+  }, [play])
+
+  useEffect(() => {
+    const node = centerValueRef.current
+    if (!node || prefersReducedMotion()) return
+    const target = active ? (active.count / total) * 100 : total
+    const state = { value: 0 }
+    const tween = gsap.to(state, {
+      value: target,
+      duration: 0.45,
+      ease: 'power2.out',
+      onUpdate: () => {
+        if (node) node.textContent = active ? `${state.value.toFixed(1)}%` : Math.round(state.value).toLocaleString()
+      },
+    })
+    return () => { tween.kill() }
+  }, [active, total])
+
   return (
     <div className="home-donut">
       <h3>{title}</h3>
-      <svg viewBox="0 0 160 160" aria-label={`${title}, distributed across eight source libraries`} onMouseLeave={() => setHovered(null)}>
+      <svg ref={chartRef} viewBox="0 0 160 160" aria-label={`${title}, distributed across eight source libraries`} onMouseLeave={() => setHovered(null)}>
         <defs>
           <filter id={glowId} x="-20%" y="-20%" width="140%" height="140%">
             <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur" />
@@ -167,7 +202,7 @@ function CollectionDonut({
             </g>
           )
         })}
-        <text x={centerX} y={centerY - 5} textAnchor="middle" className="home-donut-center-value">{centerValue}</text>
+        <text ref={centerValueRef} x={centerX} y={centerY - 5} textAnchor="middle" className="home-donut-center-value">{centerValue}</text>
         <text x={centerX} y={centerY + 10} textAnchor="middle" className="home-donut-center-label">{centerLabel}</text>
       </svg>
       <div className="home-donut-legend">
@@ -245,10 +280,13 @@ function CollectionComposition() {
 
 export function HomePage() {
   const titleRef = useRef<HTMLDivElement>(null)
+  const pageRef = useRef<HTMLElement>(null)
+  const introRef = useRef<HTMLDivElement>(null)
+  const entriesRef = useRef<HTMLDivElement>(null)
 
   useLayoutEffect(() => {
     if (prefersReducedMotion()) return
-    if (!titleRef.current) return
+    if (!titleRef.current || !pageRef.current) return
 
     const chars = Array.from(
       titleRef.current.querySelectorAll<HTMLElement>('.home-title-char'),
@@ -267,14 +305,27 @@ export function HomePage() {
     // The whole headline scatter-flies in as one tight, unified burst; the
     // per-char delay is scaled down so ~59 characters still fully settle in
     // about ~1.1s — a fast single wave, not a slow cascade down two lines.
-    gsap.fromTo(chars, scatterFrom, {
-      opacity: 1, x: 0, y: 0, rotation: 0, scale: 1,
-      duration: 0.65,
-      delay: 0.1,
-      stagger: { each: 0.008, from: 'start' },
-      ease: 'back.out(1.4)',
-      clearProps: 'transform',
-    })
+    const ctx = gsap.context(() => {
+      const intro = introRef.current
+      const entries = entriesRef.current?.querySelectorAll<HTMLElement>('.home-entry-card')
+      gsap.fromTo(chars, scatterFrom, {
+        opacity: 1, x: 0, y: 0, rotation: 0, scale: 1,
+        duration: 0.65,
+        delay: 0.1,
+        stagger: { each: 0.008, from: 'start' },
+        ease: 'back.out(1.4)',
+        clearProps: 'transform',
+      })
+      if (intro) gsap.fromTo(intro, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.6, delay: 0.7, ease: 'power2.out', clearProps: 'transform' })
+      if (entries?.length) {
+        gsap.fromTo(entries,
+          { opacity: 0, y: 28 },
+          { opacity: 1, y: 0, duration: 0.55, stagger: 0.08, ease: 'power3.out', clearProps: 'transform',
+            scrollTrigger: { trigger: entriesRef.current, start: 'top 88%', once: true } },
+        )
+      }
+    }, pageRef)
+    return () => ctx.revert()
   }, [])
 
   // Video temporarily disabled — presentation video to be re-recorded.
@@ -308,7 +359,7 @@ export function HomePage() {
   // }
 
   return (
-    <section className="home">
+    <section className="home" ref={pageRef}>
       <div className="home-hero">
         <div className="home-title" ref={titleRef}>
           <h1>
@@ -324,7 +375,7 @@ export function HomePage() {
           </h1>
         </div>
 
-        <div className="home-intro">
+        <div className="home-intro" ref={introRef}>
           <p>
             HistVision applies computer vision and multimodal methods to explore
             visual culture in digitised historical books at scale.
@@ -375,7 +426,7 @@ export function HomePage() {
       </div>
       */}
 
-      <div className="home-entries">
+      <div className="home-entries" ref={entriesRef}>
         {entries.map((entry) => (
           <NavLink key={entry.to} to={entry.to} className="home-entry-card">
             <h3 className="home-entry-card-title">{entry.title}</h3>

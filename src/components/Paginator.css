@@ -38,20 +38,20 @@
 .paginator-control { cursor: pointer; }
 
 .paginator-control--previous,
-.paginator-control--next { background: #dce6e0; color: #36554a; }
+.paginator-control--next { background: #ceded4; color: #2e5143; }
 
 .paginator-control:hover:not(:disabled) {
   position: relative;
   z-index: 1;
-  background: #e2ebe5;
+  background: #d6e4db;
   color: #215b47;
 }
 
 .paginator-control.is-active {
   position: relative;
   z-index: 1;
-  background: #d8e8df;
-  color: #215b47;
+  background: #c5dccd;
+  color: #174b38;
   font-weight: 750;
 }
 
@@ -74,8 +74,8 @@
   box-sizing: border-box;
   border: 1px solid #b8c9c0;
   border-radius: 8px;
-  background: #f7faf7;
-  color: #215b47;
+  background: #e7f0e9;
+  color: #174b38;
   font: inherit;
   font-size: .84rem;
   font-weight: 700;

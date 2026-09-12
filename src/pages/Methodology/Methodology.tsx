@@ -388,7 +388,22 @@ function ResearchFigure({ number, title, caption, children }: { number: string; 
 }
 
 export function MethodologyPage() {
-  return <article className="research-page">
+  const pageRef = useRef<HTMLElement>(null)
+
+  useLayoutEffect(() => {
+    if (!pageRef.current || prefersReducedMotion()) return
+    const ctx = gsap.context(() => {
+      const labels = pageRef.current?.querySelectorAll('.research-section-label')
+      const intros = pageRef.current?.querySelectorAll('.research-section-intro')
+      if (labels?.length) gsap.fromTo(labels, { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.55, stagger: 0.12, ease: 'power2.out', clearProps: 'transform', scrollTrigger: { trigger: labels[0], start: 'top 86%', once: true } })
+      if (intros?.length) gsap.fromTo(intros, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.45, stagger: 0.14, ease: 'power2.out', clearProps: 'transform', scrollTrigger: { trigger: intros[0], start: 'top 88%', once: true } })
+      const dividers = pageRef.current?.querySelectorAll('.research-header, .research-note')
+      if (dividers?.length) gsap.fromTo(dividers, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.5, stagger: 0.15, ease: 'power2.out', clearProps: 'transform', scrollTrigger: { trigger: pageRef.current, start: 'top 92%', once: true } })
+    }, pageRef)
+    return () => ctx.revert()
+  }, [])
+
+  return <article className="research-page" ref={pageRef}>
     <header className="research-header"><h1>Methods &amp; Findings</h1></header>
     <p className="research-intro">HistVision combines page-layout detection with image similarity analysis. These results show how model choice, training data, and archival provenance shape what becomes visible in the corpus.</p>
     <section className="research-section" aria-labelledby="layout-detection-heading">

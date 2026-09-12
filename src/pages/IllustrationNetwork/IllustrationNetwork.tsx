@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import gsap from 'gsap'
 import Graph from 'graphology'
 import Sigma from 'sigma'
 import forceAtlas2 from 'graphology-layout-forceatlas2'
@@ -105,6 +106,8 @@ export function IllustrationNetworkSection() {
   const containerRef = useRef<HTMLDivElement>(null)
   const sigmaRef = useRef<Sigma | null>(null)
   const popupRef = useRef<HTMLDivElement>(null)
+  const overlayRef = useRef<HTMLDivElement>(null)
+  const statsRef = useRef<HTMLDivElement>(null)
 
   const [dataLoading, setDataLoading] = useState(true)
   const [graphBuilding, setGraphBuilding] = useState(false)
@@ -239,6 +242,29 @@ export function IllustrationNetworkSection() {
 
   const isLoading = dataLoading || graphBuilding
 
+  useEffect(() => {
+    if (isLoading || error || !overlayRef.current) return
+    const tween = gsap.to(overlayRef.current, { opacity: 0, duration: 0.35, ease: 'power2.out', onComplete: () => {
+      if (overlayRef.current) overlayRef.current.style.pointerEvents = 'none'
+    } })
+    return () => { tween.kill() }
+  }, [error, isLoading])
+
+  useEffect(() => {
+    if (isLoading || error || !statsRef.current || !stats.nodes) return
+    const state = { nodes: 0, edges: 0 }
+    const tween = gsap.to(state, {
+      nodes: stats.nodes,
+      edges: stats.edges,
+      duration: 0.8,
+      ease: 'power2.out',
+      onUpdate: () => {
+        if (statsRef.current) statsRef.current.textContent = `${Math.round(state.nodes).toLocaleString()} nodes · ${Math.round(state.edges).toLocaleString()} edges`
+      },
+    })
+    return () => { tween.kill() }
+  }, [error, isLoading, stats])
+
   const legendEntries = [...clusterCounts.entries()]
     .sort(([a], [b]) => a - b)
     .map(([id, count]) => ({ id, label: clusterLabel(id), count }))
@@ -256,12 +282,12 @@ export function IllustrationNetworkSection() {
       <div className="illus-network-canvas-wrap">
         <div ref={containerRef} className="illus-network-sigma sigma-container" />
 
-        {isLoading && (
-          <div className="illus-network-overlay">
+        <div ref={overlayRef} className={`illus-network-overlay${isLoading ? '' : ' is-ready'}`}>
+          {isLoading ? (
             <div className="illus-spinner" />
-            <p>{dataLoading ? 'Loading illustrations…' : 'Building network layout…'}</p>
-          </div>
-        )}
+          ) : null}
+          <p>{dataLoading ? 'Loading illustrations…' : graphBuilding ? 'Building network layout…' : 'Network ready'}</p>
+        </div>
 
         {error && (
           <div className="illus-network-overlay illus-network-error">
@@ -272,7 +298,7 @@ export function IllustrationNetworkSection() {
         {!isLoading && !error && (
           <div className="illus-network-legend">
             <div className="illus-network-stats">
-              {stats.nodes.toLocaleString()} nodes · {stats.edges.toLocaleString()} edges
+              <span ref={statsRef}>{stats.nodes.toLocaleString()} nodes · {stats.edges.toLocaleString()} edges</span>
             </div>
             {legendEntries.map(({ id, label, count }) => (
               <div key={id} className="illus-network-legend-row">

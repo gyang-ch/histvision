@@ -253,7 +253,19 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
       }
     }
   }, [selectedPageIndex, showIllustratedPagesOnly, showTextBlockPagesOnly]);
-  
+
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const selectedThumb = thumbnailsRowRef.current?.querySelector<HTMLElement>(`[data-page-index="${selectedPageIndex}"]`);
+    if (selectedThumb) {
+      gsap.fromTo(selectedThumb, { scale: 0.94, filter: 'brightness(1.35)' }, { scale: 1, filter: 'brightness(1)', duration: 0.35, ease: 'back.out(1.5)', clearProps: 'transform,filter' });
+    }
+    const resultEls = document.querySelectorAll<HTMLElement>('.reader-results-heading, .side-results-container');
+    if (resultEls.length) {
+      gsap.fromTo(resultEls, { opacity: 0.35, y: 8 }, { opacity: 1, y: 0, duration: 0.28, stagger: 0.04, ease: 'power2.out', clearProps: 'transform' });
+    }
+  }, [selectedPageIndex]);
+
   // Resizing State
   const [sidePanelWidth, setSidePanelWidth] = useState(420);
   const [isResizing, setIsResizing] = useState(false);
@@ -323,6 +335,14 @@ export const BookReader: React.FC<BookReaderProps> = ({ book, onBack, initialTil
   const [highlightIndex, setHighlightIndex] = useState<number | null>(null);
   const [currentOcrUrl, setCurrentOcrUrl] = useState<string | null>(null);
   const [ocrDebug, setOcrDebug] = useState<OCRDebugInfo | null>(null);
+
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const resultEls = document.querySelectorAll<HTMLElement>('.side-results-container:not(.reader-results-empty) > *');
+    if (!resultEls.length) return;
+    const tween = gsap.fromTo(resultEls, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.32, stagger: 0.05, ease: 'power2.out', clearProps: 'transform' });
+    return () => { tween.kill() };
+  }, [ocrResults.length, qwenResults.length, plantDetections.length, translatedText]);
 
   useEffect(() => {
     // A new book or upload is loading — forget whatever the previous one
