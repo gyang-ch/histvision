@@ -136,26 +136,24 @@
 }
 
 .home-title-gradient {
-  background: linear-gradient(90deg, var(--blue) 0%, var(--brand-mid) 50%, var(--blue) 100%);
-  background-size: 200% auto;
-  background-position: 0% center;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
   display: inline-block;
   padding-bottom: 0.1em;
   margin-bottom: -0.1em;
-  animation: home-title-gradient-shift 6s ease-in-out infinite;
 }
 
-@keyframes home-title-gradient-shift {
-  0% { background-position: 0% center; }
-  50% { background-position: 100% center; }
-  100% { background-position: 0% center; }
+.home-title-gradient .home-title-char {
+  color: var(--home-title-char-base, var(--blue));
+  animation: home-title-gradient-wave 6s ease-in-out infinite;
+  animation-delay: var(--home-title-char-delay, 0s);
+}
+
+@keyframes home-title-gradient-wave {
+  0%, 100% { color: var(--blue); }
+  50% { color: var(--brand-mid); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .home-title-gradient {
+  .home-title-gradient .home-title-char {
     animation: none;
   }
 }

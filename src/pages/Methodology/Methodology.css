@@ -25,9 +25,10 @@
 .research-intro,
 .research-section-intro {
   max-width: 70ch;
-  color: var(--research-muted);
-  font-size: .94rem;
-  line-height: 1.7;
+  color: #43554d;
+  font-size: clamp(1.04rem, 1.2vw, 1.13rem);
+  font-weight: 460;
+  line-height: 1.72;
 }
 
 .research-intro {
@@ -107,20 +108,21 @@
 
 .research-figure figcaption {
   max-width: 88ch;
-  margin: .85rem auto 0;
-  color: var(--research-muted);
-  font-size: .78rem;
-  line-height: 1.6;
+  margin: 1rem auto 0;
+  color: var(--research-ink);
+  font-size: clamp(1.02rem, 1.16vw, 1.1rem);
+  font-weight: 500;
+  line-height: 1.68;
   text-align: center;
 }
 
 .research-note {
   display: grid;
   grid-template-columns: 1fr;
-  gap: .3rem;
-  max-width: 70ch;
-  margin: -.8rem 0 0 60px;
-  padding: 1.1rem 1.25rem;
+  gap: .45rem;
+  max-width: 76ch;
+  margin: -.8rem auto 0;
+  padding: 1.35rem 1.6rem;
   border-left: 3px solid #8cad9b;
   background: rgba(226, 235, 229, .52);
   text-align: center;
@@ -128,7 +130,7 @@
 
 .research-note-label {
   color: #287159;
-  font-size: .67rem;
+  font-size: .78rem;
   font-weight: 800;
   letter-spacing: .1em;
   line-height: 1.4;
@@ -137,9 +139,10 @@
 
 .research-note p {
   margin: 0;
-  color: #43554d;
-  font-size: .86rem;
-  line-height: 1.6;
+  color: var(--research-ink);
+  font-size: clamp(1.08rem, 1.24vw, 1.18rem);
+  font-weight: 500;
+  line-height: 1.68;
   text-align: center;
 }
 
@@ -161,16 +164,18 @@
   min-height: 28px;
   margin: 0 .4rem .25rem;
   color: #43554d;
-  font-size: .68rem;
+  font-size: .8rem;
+  font-weight: 650;
 }
 
 .research-legend span { display: inline-flex; gap: .38rem; align-items: center; }
-.research-legend i { width: 14px; height: 3px; border-radius: 4px; }
-.chart-grid line { stroke: #d7ddd9; stroke-width: 1; }
+.research-legend i { width: 16px; height: 4px; border-radius: 4px; }
+.chart-grid line { stroke: #cad3ce; stroke-width: 1.15; }
 
 .chart-grid text, .chart-tick {
-  fill: #69766f;
-  font-size: 12px;
+  fill: #4d5e56;
+  font-size: 14px;
+  font-weight: 560;
   text-anchor: end;
 }
 
@@ -185,8 +190,8 @@
 .chart-panel-title {
   fill: #23372f;
   font-family: "EB Garamond", Georgia, serif;
-  font-size: 15px;
-  font-weight: 650;
+  font-size: 17px;
+  font-weight: 700;
 }
 
 .chart-panel-title-centred { text-anchor: middle; }
@@ -236,9 +241,9 @@
 .shared-hover-line {
   pointer-events: none;
   stroke: #17231f;
-  stroke-width: 1;
+  stroke-width: 1.4;
   stroke-dasharray: 4 4;
-  opacity: .38;
+  opacity: .44;
 }
 
 .shared-tooltip { pointer-events: none; }
@@ -251,9 +256,9 @@
 
 .shared-tooltip text { font-family: "Inter", "Segoe UI", sans-serif; }
 .shared-tooltip-title { fill: #17231f; font-size: 11px; font-weight: 750; }
-.shared-tooltip-label { fill: #43554d; font-size: 10px; }
-.shared-tooltip-value { fill: #17231f; font-size: 10px; font-weight: 750; text-anchor: end; }
-.shared-tooltip-range { fill: #68766f; font-size: 8px; text-anchor: end; }
+.shared-tooltip-label { fill: #43554d; font-size: 11px; font-weight: 560; }
+.shared-tooltip-value { fill: #17231f; font-size: 11px; font-weight: 750; text-anchor: end; }
+.shared-tooltip-range { fill: #68766f; font-size: 9px; font-weight: 560; text-anchor: end; }
 
 .chart-bar:hover rect, .chart-bar:focus-visible rect {
   filter: saturate(1.18) drop-shadow(0 2px 3px rgba(16, 43, 33, .2));
@@ -264,7 +269,8 @@
 
 .chart-callout text {
   fill: #fff;
-  font-size: 10px;
+  font-size: 11px;
+  font-weight: 700;
   text-anchor: middle;
   dominant-baseline: middle;
   transform: translateY(-13px);
@@ -272,9 +278,10 @@
 
 .bar-value {
   fill: #475851;
-  font-size: 10px;
+  font-size: 12px;
+  font-weight: 650;
   text-anchor: middle;
-  opacity: .72;
+  opacity: .82;
   transition: opacity 180ms ease;
 }
 
@@ -296,8 +303,9 @@
   .research-figure { margin-bottom: 3.8rem; }
   .research-figure-canvas { margin-inline: -1rem; border-radius: 6px; padding: .45rem; }
   .research-legend { padding-right: .4rem; }
-  .chart-grid text, .chart-tick { font-size: 14px; }
+  .chart-grid text, .chart-tick { font-size: 15px; }
   .chart-axis-label { font-size: 15px; }
+  .research-figure figcaption { text-align: left; }
 }
 
 @media (prefers-reduced-motion: reduce) {

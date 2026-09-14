@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { type CSSProperties, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import './Home.css'
@@ -13,6 +13,31 @@ const prefersReducedMotion = () =>
 
 const TITLE_LINE_1 = 'Computational Analysis of '
 const TITLE_LINE_2 = 'Illustrations in Historical Books'
+
+const TITLE_GRADIENT_STOPS = ['#3b82f6', '#10b981', '#3b82f6'] as const
+
+function hexToRgb(hex: string) {
+  const value = hex.replace('#', '')
+  const parsed = Number.parseInt(value, 16)
+  return {
+    r: (parsed >> 16) & 255,
+    g: (parsed >> 8) & 255,
+    b: parsed & 255,
+  }
+}
+
+function titleCharColor(index: number, total: number) {
+  if (total <= 1) return TITLE_GRADIENT_STOPS[0]
+  const progress = index / (total - 1)
+  const scaled = progress * (TITLE_GRADIENT_STOPS.length - 1)
+  const stopIndex = Math.min(Math.floor(scaled), TITLE_GRADIENT_STOPS.length - 2)
+  const localProgress = scaled - stopIndex
+  const from = hexToRgb(TITLE_GRADIENT_STOPS[stopIndex])
+  const to = hexToRgb(TITLE_GRADIENT_STOPS[stopIndex + 1])
+  const mix = (start: number, end: number) => Math.round(start + (end - start) * localProgress)
+
+  return `rgb(${mix(from.r, to.r)}, ${mix(from.g, to.g)}, ${mix(from.b, to.b)})`
+}
 
 // Video temporarily disabled — presentation video to be re-recorded.
 // import { useRef, useState } from 'react'
@@ -281,7 +306,6 @@ function CollectionComposition() {
 export function HomePage() {
   const titleRef = useRef<HTMLDivElement>(null)
   const pageRef = useRef<HTMLElement>(null)
-  const introRef = useRef<HTMLDivElement>(null)
   const entriesRef = useRef<HTMLDivElement>(null)
 
   useLayoutEffect(() => {
@@ -289,7 +313,7 @@ export function HomePage() {
     if (!titleRef.current || !pageRef.current) return
 
     const chars = Array.from(
-      titleRef.current.querySelectorAll<HTMLElement>('.home-title-char'),
+      titleRef.current.querySelectorAll<HTMLElement>('.home-title-gradient .home-title-char'),
     )
 
     if (chars.length === 0) return
@@ -302,11 +326,8 @@ export function HomePage() {
       scale: 0.6,
     }
 
-    // The whole headline scatter-flies in as one tight, unified burst; the
-    // per-char delay is scaled down so ~59 characters still fully settle in
-    // about ~1.1s — a fast single wave, not a slow cascade down two lines.
+    // Only the second line scatters in; the first line remains a quiet anchor.
     const ctx = gsap.context(() => {
-      const intro = introRef.current
       const entries = entriesRef.current?.querySelectorAll<HTMLElement>('.home-entry-card')
       gsap.fromTo(chars, scatterFrom, {
         opacity: 1, x: 0, y: 0, rotation: 0, scale: 1,
@@ -316,7 +337,6 @@ export function HomePage() {
         ease: 'back.out(1.4)',
         clearProps: 'transform',
       })
-      if (intro) gsap.fromTo(intro, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.6, delay: 0.7, ease: 'power2.out', clearProps: 'transform' })
       if (entries?.length) {
         gsap.fromTo(entries,
           { opacity: 0, y: 28 },
@@ -362,20 +382,27 @@ export function HomePage() {
     <section className="home" ref={pageRef}>
       <div className="home-hero">
         <div className="home-title" ref={titleRef}>
-          <h1>
-            {TITLE_LINE_1.split('').map((char, i) => (
-              <span key={i} className="home-title-char">{char}</span>
-            ))}
+          <h1 aria-label={`${TITLE_LINE_1}${TITLE_LINE_2}`}>
+            <span>{TITLE_LINE_1.trimEnd()}</span>
             <br />
-            <span className="home-title-gradient">
+            <span className="home-title-gradient" aria-hidden="true">
               {TITLE_LINE_2.split('').map((char, i) => (
-                <span key={i} className="home-title-char">{char}</span>
+                <span
+                  key={`${char}-${i}`}
+                  className="home-title-char"
+                  style={{
+                    '--home-title-char-base': titleCharColor(i, TITLE_LINE_2.length),
+                    '--home-title-char-delay': `${-(i / TITLE_LINE_2.length) * 6}s`,
+                  } as CSSProperties}
+                >
+                  {char}
+                </span>
               ))}
             </span>
           </h1>
         </div>
 
-        <div className="home-intro" ref={introRef}>
+        <div className="home-intro">
           <p>
             HistVision applies computer vision and multimodal methods to explore
             visual culture in digitised historical books at scale.
