@@ -2,6 +2,11 @@
   box-sizing: border-box;
 }
 
+html {
+  min-height: 100%;
+  overscroll-behavior-y: none;
+}
+
 :root {
   /* ── Brand greens ──────────────────────────────────────── */
   --brand:       #34d399;   /* logo "Vision", active tab, highlights */
@@ -60,6 +65,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  overscroll-behavior-y: none;
   display: flex;
   flex-direction: column;
 }
